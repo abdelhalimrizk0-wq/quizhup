@@ -6,7 +6,43 @@
     "emoji": "🛏️",
     "color": "#3b82f6",
     "department": "adult",
-    "lectures": [
+    "lectures": [أداة استخراج كود الـ JSON للكويزات 🚀
+اكتب اسم الفولدر اللي هترفع فيه الكويزات (مثال: quizzes/adult): 
+quizzes
+ اختار ملفات الكويزات بتاعت المادة من جهازك: 6 files توليد الكود
+الكود الجاهز للنسخ:
+انسخ الكود ده وحطه جوه قائمة lectures للمادة في ملف subjects.json
+
+  {
+    "name": "Dialysis quiz",
+    "file": "quizzes/Dialysis quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "Lumber Disc Herniation",
+    "file": "quizzes/Lumber Disc Herniation.html",
+    "questions": 0
+  },
+  {
+    "name": "Musculoskeletal Injuries",
+    "file": "quizzes/Musculoskeletal Injuries.html",
+    "questions": 0
+  },
+  {
+    "name": "part 2",
+    "file": "quizzes/part 2.html",
+    "questions": 0
+  },
+  {
+    "name": "perioperative part 1 quiz",
+    "file": "quizzes/perioperative part 1 quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "renal 1 ",
+    "file": "quizzes/renal 1 .html",
+    "questions": 0
+  }
       { "name": "كويز 1", "file": "#", "questions": 20 }
     ]
   },
