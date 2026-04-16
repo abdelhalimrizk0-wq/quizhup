@@ -1,169 +1,224 @@
 [
   {
-    "id": "nursing",
-    "name": "Nursing",
-    "nameAr": "التمريض",
-    "emoji": "🏥",
+    "id": "adult-nursing-2-theory",
+    "name": "Adult Nursing II (Theory)",
+    "nameAr": "تمريض البالغين II (نظري)",
+    "emoji": "🛏️",
     "color": "#3b82f6",
+    "department": "adult",
     "lectures": [
-      {
-        "id": "dialysis",
-        "name": "Dialysis Quiz",
-        "nameAr": "كويز الغسيل الكلوي (Dialysis)",
-        "file": "quizzes/Dialysis_quiz.html",
-        "questions": 50
-      }
+      { "name": "كويز 1", "file": "#", "questions": 20 }
     ]
   },
   {
-    "id": "anatomy",
-    "name": "Anatomy",
-    "nameAr": "التشريح",
-    "emoji": "🦴",
+    "id": "pathology-adult",
+    "name": "Pathology",
+    "nameAr": "علم الباثولوجي",
+    "emoji": "🔬",
     "color": "#ef4444",
+    "department": "adult",
     "lectures": [
-      {
-        "id": "skeletal",
-        "name": "Skeletal System Quiz",
-        "nameAr": "كويز الهيكل العظمي",
-        "file": "quizzes/skeletal_quiz.html",
-        "questions": 30
-      },
-      {
-        "id": "muscular",
-        "name": "Muscular System Quiz",
-        "nameAr": "كويز الجهاز العضلي",
-        "file": "quizzes/muscular_quiz.html",
-        "questions": 25
-      }
+      { "name": "كويز 1", "file": "#", "questions": 20 }
     ]
   },
   {
-    "id": "physiology",
-    "name": "Physiology",
-    "nameAr": "الفسيولوجي",
-    "emoji": "🫀",
+    "id": "nutrition-adult",
+    "name": "Applied Nutrition",
+    "nameAr": "التغذية التطبيقية",
+    "emoji": "🍎",
     "color": "#10b981",
+    "department": "adult",
     "lectures": [
-      {
-        "id": "cardio",
-        "name": "Cardiovascular Quiz",
-        "nameAr": "كويز القلب والأوعية الدموية",
-        "file": "quizzes/cardio_quiz.html",
-        "questions": 40
-      }
+      { "name": "كويز 1", "file": "#", "questions": 20 }
     ]
   },
   {
-    "id": "pharma",
-    "name": "Pharmacology",
-    "nameAr": "الفارماكولوجي",
-    "emoji": "💊",
-    "color": "#8b5cf6",
-    "lectures": [
-      {
-        "id": "antibiotics",
-        "name": "Antibiotics Quiz",
-        "nameAr": "كويز المضادات الحيوية",
-        "file": "quizzes/antibiotics_quiz.html",
-        "questions": 25
-      }
-    ]
-  },
-  {
-    "id": "pediatrics",
-    "name": "Pediatric Nursing",
-    "nameAr": "تمريض الأطفال",
-    "emoji": "👶",
-    "color": "#f59e0b",
-    "lectures": [
-      {
-        "id": "neonatal",
-        "name": "Neonatal Care Quiz",
-        "nameAr": "كويز العناية بحديثي الولادة",
-        "file": "quizzes/neonatal_quiz.html",
-        "questions": 35
-      }
-    ]
-  },
-  {
-    "id": "maternity",
-    "name": "Maternity Nursing",
-    "nameAr": "تمريض النسا والتوليد",
-    "emoji": "🤰",
-    "color": "#ec4899",
-    "lectures": [
-      {
-        "id": "labor",
-        "name": "Labor & Delivery Quiz",
-        "nameAr": "كويز الولادة",
-        "file": "quizzes/labor_quiz.html",
-        "questions": 45
-      }
-    ]
-  },
-  {
-    "id": "psychiatric",
-    "name": "Psychiatric Nursing",
-    "nameAr": "التمريض النفسي",
-    "emoji": "🧠",
-    "color": "#6366f1",
-    "lectures": [
-      {
-        "id": "schizophrenia",
-        "name": "Schizophrenia Quiz",
-        "nameAr": "كويز الفصام",
-        "file": "quizzes/schizophrenia_quiz.html",
-        "questions": 20
-      }
-    ]
-  },
-  {
-    "id": "med_surg",
-    "name": "Medical-Surgical",
-    "nameAr": "باطنة وجراحة",
-    "emoji": "🩺",
-    "color": "#14b8a6",
-    "lectures": [
-      {
-        "id": "diabetes",
-        "name": "Diabetes Management Quiz",
-        "nameAr": "كويز السكري",
-        "file": "quizzes/diabetes_quiz.html",
-        "questions": 30
-      }
-    ]
-  },
-  {
-    "id": "microbiology",
+    "id": "microbiology-adult",
     "name": "Microbiology",
     "nameAr": "الميكروبيولوجي",
-    "emoji": "🔬",
-    "color": "#f43f5e",
+    "emoji": "🦠",
+    "color": "#8b5cf6",
+    "department": "adult",
     "lectures": [
-      {
-        "id": "viruses",
-        "name": "Virology Quiz",
-        "nameAr": "كويز الفيروسات",
-        "file": "quizzes/viruses_quiz.html",
-        "questions": 25
-      }
+      { "name": "كويز 1", "file": "#", "questions": 20 }
     ]
   },
   {
-    "id": "community",
-    "name": "Community Health",
-    "nameAr": "صحة المجتمع",
-    "emoji": "🌍",
-    "color": "#84cc16",
+    "id": "adult-nursing-2-practical",
+    "name": "Adult Nursing II (Practical)",
+    "nameAr": "تمريض البالغين II (عملي)",
+    "emoji": "🩺",
+    "color": "#0ea5e9",
+    "department": "adult",
     "lectures": [
-      {
-        "id": "epidemiology",
-        "name": "Epidemiology Quiz",
-        "nameAr": "كويز علم الأوبئة",
-        "file": "quizzes/epidemiology_quiz.html",
-        "questions": 40
-      }
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "quality-adult",
+    "name": "Quality & Safety",
+    "nameAr": "أساسيات الجودة والامان في الرعاية الصحية",
+    "emoji": "🛡️",
+    "color": "#f59e0b",
+    "department": "adult",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "it-theory-adult",
+    "name": "IT in Nursing (Theory)",
+    "nameAr": "تكنولوجيا المعلومات في التمريض نظري",
+    "emoji": "💻",
+    "color": "#6366f1",
+    "department": "adult",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "it-practical-adult",
+    "name": "IT in Nursing (Practical)",
+    "nameAr": "تكنولوجيا المعلومات في التمريض عملي",
+    "emoji": "⌨️",
+    "color": "#ec4899",
+    "department": "adult",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "english-4-adult",
+    "name": "English Language 4",
+    "nameAr": "اللغة الانجليزية (4)",
+    "emoji": "🇬🇧",
+    "color": "#14b8a6",
+    "department": "adult",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+
+
+  {
+    "id": "emergency-nursing-theory",
+    "name": "Emergency Nursing (Theory)",
+    "nameAr": "تمريض الطوارئ نظري",
+    "emoji": "🚑",
+    "color": "#ef4444",
+    "department": "emergency",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "critical-care-1-theory",
+    "name": "Critical Care 1 (Theory)",
+    "nameAr": "تمريض العناية الحرجة (1) ن",
+    "emoji": "🫀",
+    "color": "#f43f5e",
+    "department": "emergency",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "emergency-medicine",
+    "name": "Emergency Medicine",
+    "nameAr": "طب الطوارئ",
+    "emoji": "⚕️",
+    "color": "#10b981",
+    "department": "emergency",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "critical-medicine",
+    "name": "Critical Medicine",
+    "nameAr": "الطب الحرج",
+    "emoji": "🩺",
+    "color": "#3b82f6",
+    "department": "emergency",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "emergency-nursing-practical",
+    "name": "Emergency Nursing (Practical)",
+    "nameAr": "تمريض الطوارئ عملي",
+    "emoji": "🏥",
+    "color": "#f59e0b",
+    "department": "emergency",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "critical-care-1-practical",
+    "name": "Critical Care 1 (Practical)",
+    "nameAr": "تمريض العناية الحرجة (1) ع",
+    "emoji": "💉",
+    "color": "#8b5cf6",
+    "department": "emergency",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "emergency-first-aid",
+    "name": "Emergency First Aid",
+    "nameAr": "اسعاف الطوارئ",
+    "emoji": "🩹",
+    "color": "#ec4899",
+    "department": "emergency",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "quality-emergency",
+    "name": "Quality & Safety",
+    "nameAr": "أساسيات الجودة والامان في الرعاية الصحية",
+    "emoji": "🛡️",
+    "color": "#f59e0b",
+    "department": "emergency",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "it-theory-emergency",
+    "name": "IT in Nursing (Theory)",
+    "nameAr": "تكنولوجيا المعلومات في التمريض نظري",
+    "emoji": "💻",
+    "color": "#6366f1",
+    "department": "emergency",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "it-practical-emergency",
+    "name": "IT in Nursing (Practical)",
+    "nameAr": "تكنولوجيا المعلومات في التمريض عملي",
+    "emoji": "⌨️",
+    "color": "#ec4899",
+    "department": "emergency",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
+    ]
+  },
+  {
+    "id": "english-4-emergency",
+    "name": "English Language 4",
+    "nameAr": "اللغة الانجليزية (4)",
+    "emoji": "🇬🇧",
+    "color": "#14b8a6",
+    "department": "emergency",
+    "lectures": [
+      { "name": "كويز 1", "file": "#", "questions": 20 }
     ]
   }
 ]
