@@ -6,12 +6,7 @@
     "emoji": "🛏️",
     "color": "#3b82f6",
     "department": "adult",
-    "lectures": [أداة استخراج كود الـ JSON للكويزات 🚀
-اكتب اسم الفولدر اللي هترفع فيه الكويزات (مثال: quizzes/adult): 
-quizzes
- اختار ملفات الكويزات بتاعت المادة من جهازك: 6 files توليد الكود
-الكود الجاهز للنسخ:
-انسخ الكود ده وحطه جوه قائمة lectures للمادة في ملف subjects.json
+    "lectures": [
 
   {
     "name": "Dialysis quiz",
