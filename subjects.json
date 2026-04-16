@@ -1,16 +1,169 @@
-{
-  "id": "anatomy",
-  "name": "Anatomy",
-  "nameAr": "التشريح",
-  "emoji": "🦴",
-  "color": "#10b981",
-  "lectures": [
-    {
-      "id": "lecture1",
-      "name": "Lecture 1",
-      "nameAr": "المحاضرة الأولى",
-      "file": "quizzes/anatomy_lec1.html",
-      "questions": 40
-    }
-  ]
-}
+[
+  {
+    "id": "nursing",
+    "name": "Nursing",
+    "nameAr": "التمريض",
+    "emoji": "🏥",
+    "color": "#3b82f6",
+    "lectures": [
+      {
+        "id": "dialysis",
+        "name": "Dialysis Quiz",
+        "nameAr": "كويز الغسيل الكلوي (Dialysis)",
+        "file": "quizzes/Dialysis_quiz.html",
+        "questions": 50
+      }
+    ]
+  },
+  {
+    "id": "anatomy",
+    "name": "Anatomy",
+    "nameAr": "التشريح",
+    "emoji": "🦴",
+    "color": "#ef4444",
+    "lectures": [
+      {
+        "id": "skeletal",
+        "name": "Skeletal System Quiz",
+        "nameAr": "كويز الهيكل العظمي",
+        "file": "quizzes/skeletal_quiz.html",
+        "questions": 30
+      },
+      {
+        "id": "muscular",
+        "name": "Muscular System Quiz",
+        "nameAr": "كويز الجهاز العضلي",
+        "file": "quizzes/muscular_quiz.html",
+        "questions": 25
+      }
+    ]
+  },
+  {
+    "id": "physiology",
+    "name": "Physiology",
+    "nameAr": "الفسيولوجي",
+    "emoji": "🫀",
+    "color": "#10b981",
+    "lectures": [
+      {
+        "id": "cardio",
+        "name": "Cardiovascular Quiz",
+        "nameAr": "كويز القلب والأوعية الدموية",
+        "file": "quizzes/cardio_quiz.html",
+        "questions": 40
+      }
+    ]
+  },
+  {
+    "id": "pharma",
+    "name": "Pharmacology",
+    "nameAr": "الفارماكولوجي",
+    "emoji": "💊",
+    "color": "#8b5cf6",
+    "lectures": [
+      {
+        "id": "antibiotics",
+        "name": "Antibiotics Quiz",
+        "nameAr": "كويز المضادات الحيوية",
+        "file": "quizzes/antibiotics_quiz.html",
+        "questions": 25
+      }
+    ]
+  },
+  {
+    "id": "pediatrics",
+    "name": "Pediatric Nursing",
+    "nameAr": "تمريض الأطفال",
+    "emoji": "👶",
+    "color": "#f59e0b",
+    "lectures": [
+      {
+        "id": "neonatal",
+        "name": "Neonatal Care Quiz",
+        "nameAr": "كويز العناية بحديثي الولادة",
+        "file": "quizzes/neonatal_quiz.html",
+        "questions": 35
+      }
+    ]
+  },
+  {
+    "id": "maternity",
+    "name": "Maternity Nursing",
+    "nameAr": "تمريض النسا والتوليد",
+    "emoji": "🤰",
+    "color": "#ec4899",
+    "lectures": [
+      {
+        "id": "labor",
+        "name": "Labor & Delivery Quiz",
+        "nameAr": "كويز الولادة",
+        "file": "quizzes/labor_quiz.html",
+        "questions": 45
+      }
+    ]
+  },
+  {
+    "id": "psychiatric",
+    "name": "Psychiatric Nursing",
+    "nameAr": "التمريض النفسي",
+    "emoji": "🧠",
+    "color": "#6366f1",
+    "lectures": [
+      {
+        "id": "schizophrenia",
+        "name": "Schizophrenia Quiz",
+        "nameAr": "كويز الفصام",
+        "file": "quizzes/schizophrenia_quiz.html",
+        "questions": 20
+      }
+    ]
+  },
+  {
+    "id": "med_surg",
+    "name": "Medical-Surgical",
+    "nameAr": "باطنة وجراحة",
+    "emoji": "🩺",
+    "color": "#14b8a6",
+    "lectures": [
+      {
+        "id": "diabetes",
+        "name": "Diabetes Management Quiz",
+        "nameAr": "كويز السكري",
+        "file": "quizzes/diabetes_quiz.html",
+        "questions": 30
+      }
+    ]
+  },
+  {
+    "id": "microbiology",
+    "name": "Microbiology",
+    "nameAr": "الميكروبيولوجي",
+    "emoji": "🔬",
+    "color": "#f43f5e",
+    "lectures": [
+      {
+        "id": "viruses",
+        "name": "Virology Quiz",
+        "nameAr": "كويز الفيروسات",
+        "file": "quizzes/viruses_quiz.html",
+        "questions": 25
+      }
+    ]
+  },
+  {
+    "id": "community",
+    "name": "Community Health",
+    "nameAr": "صحة المجتمع",
+    "emoji": "🌍",
+    "color": "#84cc16",
+    "lectures": [
+      {
+        "id": "epidemiology",
+        "name": "Epidemiology Quiz",
+        "nameAr": "كويز علم الأوبئة",
+        "file": "quizzes/epidemiology_quiz.html",
+        "questions": 40
+      }
+    ]
+  }
+]
