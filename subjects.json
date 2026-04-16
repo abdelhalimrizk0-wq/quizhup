@@ -1,7 +1,7 @@
 [
   {
     "id": "nursing",
-    "name": "Nursing",
+    "name": "adult theory",
     "nameAr": "adult theory",
     "emoji": "🏥",
     "color": "#3b82f6",
@@ -12,7 +12,22 @@
         "nameAr": "كويز الديلاليز",
         "file": "quizzes/Dialysis_quiz.html",
         "questions": 50
-      }
+      }{
+  "id": "anatomy",
+  "name": "Anatomy",
+  "nameAr": "التشريح",
+  "emoji": "🦴",
+  "color": "#10b981",
+  "lectures": [
+    {
+      "id": "lecture1",
+      "name": "Lecture 1",
+      "nameAr": "المحاضرة الأولى",
+      "file": "quizzes/anatomy_lec1.html",
+      "questions": 40
+    }
+  ]
+}
     ]
   }
 ]
