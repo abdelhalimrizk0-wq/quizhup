@@ -1,0 +1,18 @@
+[
+  {
+    "id": "nursing",
+    "name": "Nursing",
+    "nameAr": "التمريض",
+    "emoji": "🏥",
+    "color": "#3b82f6",
+    "lectures": [
+      {
+        "id": "dialysis",
+        "name": "Dialysis Quiz",
+        "nameAr": "كويز الديلاليز",
+        "file": "quizzes/Dialysis_quiz.html",
+        "questions": 50
+      }
+    ]
+  }
+]
