@@ -8,11 +8,6 @@
     "department": "adult",
     "lectures": [
 
- {
-    "name": "Dialysis quiz",
-    "file": "quizzes/Dialysis quiz.html",
-    "questions": 0
-  },
   {
     "name": "Lumber Disc Herniation",
     "file": "quizzes/Lumber Disc Herniation.html",
@@ -24,18 +19,23 @@
     "questions": 0
   },
   {
-    "name": "part 2",
-    "file": "quizzes/part 2.html",
+    "name": "Dialysis quiz",
+    "file": "quizzes/Dialysis quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "Renal faliure part 1",
+    "file": "quizzes/Renal faliure part 1.html",
+    "questions": 0
+  },
+  {
+    "name": "perioperative part 2 quiz",
+    "file": "quizzes/perioperative part 2 quiz.html",
     "questions": 0
   },
   {
     "name": "perioperative part 1 quiz",
     "file": "quizzes/perioperative part 1 quiz.html",
-    "questions": 0
-  },
-  {
-    "name": "renal 1 ",
-    "file": "quizzes/renal 1 .html",
     "questions": 0
   }
     ]
