@@ -1,8 +1,8 @@
 [
   {
     "id": "nursing",
-    "name": "adult theory",
-    "nameAr": "adult theory",
+    "name": "Nursing",
+    "nameAr": "التمريض",
     "emoji": "🏥",
     "color": "#3b82f6",
     "lectures": [
@@ -12,7 +12,8 @@
         "nameAr": "كويز الديلاليز",
         "file": "quizzes/Dialysis_quiz.html",
         "questions": 50
-      }{
+      }
+      {
   "id": "anatomy",
   "name": "Anatomy",
   "nameAr": "التشريح",
