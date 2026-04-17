@@ -137,7 +137,8 @@
     "emoji": "🚑",
     "color": "#ef4444",
     "department": "emergency",
-    "lectures": [ {
+    "lectures": [ 
+      {
     "name": "stroke quiz",
     "file": "quizzes/stroke quiz.html",
     "questions": 0
@@ -207,7 +208,6 @@
     "file": "quizzes/شامل 230 طوارئ نظري.html",
     "questions": 0
   }
-      { "name": "كويز 1", "file": "#", "questions": 20 }
     ]
   },
   {
