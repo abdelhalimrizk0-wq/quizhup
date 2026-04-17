@@ -298,7 +298,41 @@
     "color": "#10b981",
     "department": "emergency",
     "lectures": [
-      { "name": "كويز 1", "file": "#", "questions": 20 }
+        {
+    "name": "Abdominal Trauma",
+    "file": "quizzes/Abdominal Trauma.html",
+    "questions": 0
+  },
+  {
+    "name": "Acute Abdomen",
+    "file": "quizzes/Acute Abdomen.html",
+    "questions": 0
+  },
+  {
+    "name": "Chest Trauma",
+    "file": "quizzes/Chest Trauma.html",
+    "questions": 0
+  },
+  {
+    "name": "Hypertensive Crisis",
+    "file": "quizzes/Hypertensive Crisis.html",
+    "questions": 0
+  },
+  {
+    "name": "Principles of Emergency Care",
+    "file": "quizzes/Principles of Emergency Care.html",
+    "questions": 0
+  },
+  {
+    "name": "Shock",
+    "file": "quizzes/Shock.html",
+    "questions": 0
+  },
+  {
+    "name": "شامل طب طوارئ",
+    "file": "quizzes/شامل طب طوارئ.html",
+    "questions": 0
+  }
     ]
   },
   {
@@ -309,7 +343,21 @@
     "color": "#3b82f6",
     "department": "emergency",
     "lectures": [
-      { "name": "كويز 1", "file": "#", "questions": 20 }
+       {
+    "name": "جميع المحاضرات",
+    "file": "quizzes/جميع المحاضرات.html",
+    "questions": 0
+  },
+  {
+    "name": "ميد طب حرج",
+    "file": "quizzes/ميد طب حرج.html",
+    "questions": 0
+  },
+  {
+    "name": "شامل 200 طب حرج",
+    "file": "quizzes/شامل 200 طب حرج.html",
+    "questions": 0
+  }
     ]
   },
   {
