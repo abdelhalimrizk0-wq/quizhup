@@ -137,7 +137,76 @@
     "emoji": "🚑",
     "color": "#ef4444",
     "department": "emergency",
-    "lectures": [
+    "lectures": [ {
+    "name": "stroke quiz",
+    "file": "quizzes/stroke quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "triage quiz",
+    "file": "quizzes/triage quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "Diabetic emergency quiz",
+    "file": "quizzes/Diabetic emergency quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "Spinal Cord Injury Quiz.",
+    "file": "quizzes/Spinal Cord Injury Quiz..html",
+    "questions": 0
+  },
+  {
+    "name": "acute git bleeding quiz",
+    "file": "quizzes/acute git bleeding quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "Overdose quiz",
+    "file": "quizzes/Overdose quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "Acute Coronary Syndrome Quiz",
+    "file": "quizzes/Acute Coronary Syndrome Quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "Cardiac Dysrhythmias Exam",
+    "file": "quizzes/Cardiac Dysrhythmias Exam.html",
+    "questions": 0
+  },
+  {
+    "name": "acute git bleeding",
+    "file": "quizzes/acute git bleeding.html",
+    "questions": 0
+  },
+  {
+    "name": "Head Injury quiz",
+    "file": "quizzes/Head Injury quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "Respiratory Emergency quiz",
+    "file": "quizzes/Respiratory Emergency quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "Status Epilepticus quiz",
+    "file": "quizzes/Status Epilepticus quiz.html",
+    "questions": 0
+  },
+  {
+    "name": "فاينال طوارئ نظري 2024",
+    "file": "quizzes/فاينال طوارئ نظري 2024.html",
+    "questions": 0
+  },
+  {
+    "name": "شامل 230 طوارئ نظري",
+    "file": "quizzes/شامل 230 طوارئ نظري.html",
+    "questions": 0
+  }
       { "name": "كويز 1", "file": "#", "questions": 20 }
     ]
   },
