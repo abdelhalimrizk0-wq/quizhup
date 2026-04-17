@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Mechanical Ventilation & Nursing Care</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "Which ventilator alarm would most likely trigger if a patient bites down on their endotracheal tube?",
+                options: ["Low pressure alarm", "High pressure alarm", "Low minute volume alarm", "Apnea alarm"],
+                correct: 1,
+                rationale: "Biting the tube creates an obstruction, which increases resistance to airflow. This triggers the high pressure alarm, similar to secretions or kinked tubing."
+            },
+            {
+                id: 2,
+                question: "A patient on PEEP therapy develops hypotension and tachycardia. What is the most likely physiological cause?",
+                options: ["Increased venous return to the heart", "Decreased intrathoracic pressure", "Decreased cardiac output due to reduced venous return", "Oxygen toxicity causing myocardial depression"],
+                correct: 2,
+                rationale: "Positive pressure ventilation, especially PEEP, increases intrathoracic pressure. This compresses the great vessels, reducing venous return to the heart and subsequently decreasing cardiac output and blood pressure."
+            },
+            {
+                id: 3,
+                question: "Which mode of ventilation delivers a preset tidal volume for every breath, regardless of whether it is triggered by the machine or the patient?",
+                options: ["Synchronized Intermittent Mandatory Ventilation (SIMV)", "Pressure Support Ventilation (PSV)", "Assist Control Ventilation (AC)", "Continuous Positive Airway Pressure (CPAP)"],
+                correct: 2,
+                rationale: "In Assist Control (AC) mode, the ventilator delivers the full preset tidal volume for every breath, whether it is a time-triggered mandatory breath or a patient-triggered assisted breath."
+            },
+            {
+                id: 4,
+                question: "The nurse is preparing to suction a mechanically ventilated patient. What is the maximum recommended duration for each suction pass?",
+                options: ["5 seconds", "10 seconds", "15 seconds", "20 seconds"],
+                correct: 1,
+                rationale: "Suctioning should be limited to less than 10 seconds per pass to prevent hypoxemia, trauma, and cardiac arrhythmias."
+            },
+            {
+                id: 5,
+                question: "Which criterion indicates a patient may be failing a weaning trial?",
+                options: ["Respiratory rate of 24 breaths per minute", "Systolic blood pressure of 130 mmHg", "Heart rate increase of more than 20% from baseline", "Oxygen saturation of 94%"],
+                correct: 2,
+                rationale: "Signs of weaning failure (intolerance) include a sustained heart rate increase of >20%, HR >140, RR >35, or significant changes in blood pressure (systolic >180 or <90)."
+            },
+            {
+                id: 6,
+                question: "What is the primary function of the pilot balloon on an endotracheal tube?",
+                options: ["To measure tidal volume delivery", "To monitor cuff inflation status", "To administer nebulized medications", "To suction subglottic secretions"],
+                correct: 1,
+                rationale: "The pilot balloon provides an external indication of the inflation status of the internal cuff, which seals the airway."
+            },
+            {
+                id: 7,
+                question: "A patient's low pressure alarm sounds. Upon assessment, the nurse finds the patient disconnected from the ventilator circuit. What is the priority action?",
+                options: ["Silence the alarm immediately", "Reconnect the patient to the ventilator", "Call the respiratory therapist", "Check the patient's blood pressure"],
+                correct: 1,
+                rationale: "The priority is to restore ventilation. Reconnecting the patient addresses the immediate life-threatening cause of the alarm (disconnection)."
+            },
+            {
+                id: 8,
+                question: "Which setting determines the amount of effort a patient must exert to trigger a ventilator breath?",
+                options: ["Sensitivity", "Flow rate", "I:E Ratio", "PEEP"],
+                correct: 0,
+                rationale: "Sensitivity controls the amount of negative inspiratory effort (pressure or flow) the patient must generate to trigger the ventilator to deliver a breath."
+            },
+            {
+                id: 9,
+                question: "Which complication is most closely associated with the use of high tidal volumes in mechanical ventilation?",
+                options: ["Oxygen toxicity", "Volutrauma", "Ventilator-associated pneumonia", "Gastrointestinal bleeding"],
+                correct: 1,
+                rationale: "Volutrauma is lung injury caused by over-distention of alveoli from high tidal volumes. Protective lung strategies now recommend lower tidal volumes (5-8 mL/kg)."
+            },
+            {
+                id: 10,
+                question: "In Synchronized Intermittent Mandatory Ventilation (SIMV), what happens when a patient breathes spontaneously between mandatory breaths?",
+                options: ["The machine delivers a full preset tidal volume", "The patient pulls their own tidal volume without assistance", "The ventilator suppresses the spontaneous breath", "The machine triggers a high pressure alarm"],
+                correct: 1,
+                rationale: "In SIMV, the patient can breathe spontaneously between mandatory machine breaths. These spontaneous breaths have a tidal volume and rate determined entirely by the patient's own effort."
+            },
+            {
+                id: 11,
+                question: "What is the recommended range for endotracheal tube cuff pressure?",
+                options: ["10 to 15 cmH2O", "25 to 35 cmH2O", "40 to 50 cmH2O", "55 to 60 cmH2O"],
+                correct: 1,
+                rationale: "The recommended cuff pressure is 25-35 cmH2O to ensure an adequate seal without causing tracheal mucosal ischemia or necrosis."
+            },
+            {
+                id: 12,
+                question: "A patient has an FiO2 setting of 100%. To prevent oxygen toxicity, the care team should aim to reduce this value below 60% within what timeframe?",
+                options: ["6 hours", "12 hours", "24 hours", "48 hours"],
+                correct: 2,
+                rationale: "Oxygen toxicity is a major concern if FiO2 >60% is maintained for more than 24 hours. Clinicians attempt to wean FiO2 once the patient is stable."
+            },
+            {
+                id: 13,
+                question: "Which electrolyte imbalances must be corrected to optimize respiratory muscle function before weaning?",
+                options: ["Sodium and Chloride", "Calcium, Magnesium, and Phosphorus", "Potassium and Glucose", "BUN and Creatinine"],
+                correct: 1,
+                rationale: "The diaphragm and respiratory muscles require sufficient Calcium, Magnesium, and Phosphorus to function effectively. Deficiencies can lead to muscle weakness and weaning failure."
+            },
+            {
+                id: 14,
+                question: "Which ventilator mode is primarily used to overcome the resistance of the endotracheal tube during spontaneous breathing?",
+                options: ["Control Ventilation (CV)", "Pressure Support Ventilation (PSV)", "High Frequency Oscillatory Ventilation", "Assist Control (AC)"],
+                correct: 1,
+                rationale: "Pressure Support Ventilation (PSV) provides a set level of positive pressure during spontaneous inspiration to overcome the resistance of the artificial airway and circuit, decreasing the work of breathing."
+            },
+            {
+                id: 15,
+                question: "The nurse notes a patient is fighting the ventilator. Which acid-base imbalance is a risk if the patient is over-ventilated due to anxiety?",
+                options: ["Respiratory acidosis", "Respiratory alkalosis", "Metabolic acidosis", "Metabolic alkalosis"],
+                correct: 1,
+                rationale: "Over-ventilation (hyperventilation) blows off excessive CO2, leading to a decrease in PaCO2 and an increase in pH, causing respiratory alkalosis."
+            },
+            {
+                id: 16,
+                question: "Which intervention is appropriate for preventing Ventilator-Associated Pneumonia (VAP)?",
+                options: ["Keeping the patient supine at all times", "Routine instillation of saline during suctioning", "Performing oral care every 8 hours", "Changing ventilator circuits daily"],
+                correct: 2,
+                rationale: "Regular oral care (at least every 8 hours) reduces the bacterial burden in the mouth, preventing micro-aspiration of bacteria into the lungs. Routine saline is discouraged."
+            },
+            {
+                id: 17,
+                question: "What is the main physiological benefit of placing a patient with ARDS in the prone position?",
+                options: ["It facilitates easier suctioning of secretions", "It improves V/Q matching and recruits dorsal alveoli", "It decreases the risk of pressure ulcers", "It allows for higher tidal volume delivery"],
+                correct: 1,
+                rationale: "Prone positioning improves Ventilation/Perfusion (V/Q) matching and helps recruit collapsed alveoli in the dorsal lung regions, which improves oxygenation in ARDS patients."
+            },
+            {
+                id: 18,
+                question: "When assessing a patient for weaning readiness, which PaO2/FiO2 ratio suggests adequate oxygenation?",
+                options: ["Less than 100", "Between 100 and 150", "Greater than 150-200", "Exactly 50"],
+                correct: 2,
+                rationale: "A PaO2/FiO2 ratio greater than 150-200 is a standard criterion indicating that oxygenation is adequate for a weaning trial."
+            },
+            {
+                id: 19,
+                question: "The high pressure alarm sounds, and the nurse notes absent breath sounds on the left side with tracheal deviation to the right. What condition should be suspected?",
+                options: ["Right mainstem intubation", "Left-sided pneumothorax", "Mucus plug obstruction", "Patient disconnection"],
+                correct: 1,
+                rationale: "Absent breath sounds on one side combined with tracheal deviation away from that side and high pressure alarms are classic signs of a tension pneumothorax."
+            },
+            {
+                id: 20,
+                question: "Which nursing action is essential immediately before performing endotracheal suctioning?",
+                options: ["Instilling 5mL of normal saline", "Hyperoxygenating the patient", "Turning off the PEEP", "Decreasing the suction pressure to zero"],
+                correct: 1,
+                rationale: "Hyperoxygenation (often with 100% O2) is critical before suctioning to prevent suction-induced hypoxemia and associated arrhythmias."
+            },
+            {
+                id: 21,
+                question: "A patient on mechanical ventilation has a respiratory rate of 8 breaths/min set on the machine but is breathing at 28 breaths/min total. Which cause should the nurse investigate first?",
+                options: ["Excessive sedation", "Pain or anxiety", "High tidal volume setting", "alkalosis"],
+                correct: 1,
+                rationale: "Tachypnea while on a ventilator is often caused by pain, anxiety, hypoxia, or fever. The nurse should assess the patient for these underlying causes."
+            },
+            {
+                id: 22,
+                question: "Which assessment finding indicates a potential complication of positive pressure ventilation on the gastrointestinal system?",
+                options: ["Hyperactive bowel sounds", "Gastric distention", "Diarrhea", "Increased appetite"],
+                correct: 1,
+                rationale: "Air swallowing and the effects of immobility/narcotics can lead to gastric distention, hypomotility, and ileus in mechanically ventilated patients."
+            },
+            {
+                id: 23,
+                question: "What is the purpose of the 'sensitivity' setting on a mechanical ventilator?",
+                options: ["To set the maximum pressure limit", "To determine the ratio of inspiration to expiration", "To adjust the effort required by the patient to trigger a breath", "To control the background respiratory rate"],
+                correct: 2,
+                rationale: "Sensitivity determines how much negative pressure or flow the patient must generate to trigger the machine. Incorrect settings can increase the work of breathing."
+            },
+            {
+                id: 24,
+                question: "Why is the use of 'actual body weight' avoided when calculating tidal volume?",
+                options: ["It underestimates the required volume", "It may lead to excessively large tidal volumes and lung injury", "It has no correlation with lung size", "It complicates the calculation formula"],
+                correct: 1,
+                rationale: "Lung size is determined by height and gender, not fat mass. Using actual body weight for obese patients would result in dangerously high tidal volumes. Predicted body weight is used instead."
+            },
+            {
+                id: 25,
+                question: "Which ventilator alarm indicates a potential leak in the circuit or cuff?",
+                options: ["High pressure alarm", "Low pressure alarm", "High frequency alarm", "Oxygen toxicity alarm"],
+                correct: 1,
+                rationale: "A low pressure alarm typically signifies a loss of resistance in the system, commonly caused by a disconnection, a circuit leak, or a deflated/leaking cuff."
+            },
+            {
+                id: 26,
+                question: "Which mode provides two distinct levels of airway pressure (IPAP and EPAP) and is often used non-invasively?",
+                options: ["CPAP", "BiPAP", "CMV", "SIMV"],
+                correct: 1,
+                rationale: "BiPAP (Bi-level Positive Airway Pressure) provides a higher pressure during inspiration (IPAP) and a lower pressure during expiration (EPAP)."
+            },
+            {
+                id: 27,
+                question: "If a ventilator malfunctions and the problem cannot be immediately identified, what is the nurse's first action?",
+                options: ["Call the physician", "Check the power source", "Ventilate the patient manually with a resuscitation bag", "Change the ventilator mode"],
+                correct: 2,
+                rationale: "Patient safety is the priority. If the equipment fails or the alarm cause is unknown, the nurse must manually ventilate the patient (Ambu bag) while calling for help."
+            },
+            {
+                id: 28,
+                question: "What is the primary disadvantage of the Control Mode (CMV) if the patient is not paralyzed or sedated?",
+                options: ["It causes apnea", "It delivers too little oxygen", "The patient may fight the ventilator (asynchrony)", "It causes rapid weaning"],
+                correct: 2,
+                rationale: "CMV ignores patient effort. If an awake patient tries to breathe, the machine will not respond, causing severe asynchrony ('fighting the vent') and anxiety."
+            },
+            {
+                id: 29,
+                question: "During a T-piece weaning trial, the nurse monitors the patient for which sign of muscle fatigue?",
+                options: ["Paradoxical chest movement", "Increased urinary output", "Decreased respiratory rate", "Flushed skin"],
+                correct: 0,
+                rationale: "Paradoxical movement (chest moving in during inspiration) and use of accessory muscles are classic signs of respiratory muscle fatigue and weaning intolerance."
+            },
+            {
+                id: 30,
+                question: "What is the standard I:E (Inspiratory:Expiratory) ratio used for most adult patients?",
+                options: ["2:1", "1:1", "1:2", "1:4"],
+                correct: 2,
+                rationale: "The normal physiological ratio is 1:2, allowing twice as much time for exhalation as inspiration. This mimics the normal respiratory cycle."
+            },
+            {
+                id: 31,
+                question: "Routine instillation of normal saline into the endotracheal tube before suctioning is recommended to thin secretions.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Routine saline instillation is not recommended as it causes hypoxia, dislodges bacteria, and does not effectively thin secretions."
+            },
+            {
+                id: 32,
+                question: "Positive pressure ventilation generally decreases cardiac output by reducing venous return.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. The increased intrathoracic pressure compresses the heart and great vessels, reducing the amount of blood returning to the heart (preload)."
+            },
+            {
+                id: 33,
+                question: "CPAP mode delivers a set number of mandatory breaths per minute.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. CPAP (Continuous Positive Airway Pressure) provides constant pressure but no mandatory breaths. The patient must initiate all breaths and control the rate."
+            },
+            {
+                id: 34,
+                question: "A systolic blood pressure greater than 180 mmHg is considered an objective index of weaning failure.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Severe hypertension (systolic > 180 mmHg) indicates hemodynamic instability and is a criterion to stop the weaning trial."
+            },
+            {
+                id: 35,
+                question: "Exhalation during mechanical ventilation is typically an active process driven by the machine.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Exhalation remains a passive process caused by the elastic recoil of the lungs, just as in spontaneous breathing."
+            },
+            {
+                id: 36,
+                question: "Ventilator-associated pneumonia (VAP) is a complication that can result from aspiration of oral secretions.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Micro-aspiration of bacteria-colonized secretions from the oropharynx is a leading cause of VAP."
+            },
+            {
+                id: 37,
+                question: "The Assist-Control (AC) mode guarantees a minimum respiratory rate even if the patient stops breathing.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. AC mode has a backup rate set. If the patient fails to trigger a breath within a specific time, the machine delivers a mandatory breath."
+            },
+            {
+                id: 38,
+                question: "Endotracheal cuff pressure should be checked every 24 hours.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Cuff pressure should be monitored at least every 8 hours to ensure safety and prevent complications."
+            },
+            {
+                id: 39,
+                question: "Oxygen toxicity can lead to structural changes in the alveolar-capillary membrane similar to ARDS.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Prolonged exposure to high FiO2 causes oxidative damage, atelectasis, and pulmonary edema resembling ARDS."
+            },
+            {
+                id: 40,
+                question: "Negative pressure ventilators, like the iron lung, require an artificial airway (intubation).",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Negative pressure ventilators work by creating a vacuum around the chest externally and do not require an endotracheal tube."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

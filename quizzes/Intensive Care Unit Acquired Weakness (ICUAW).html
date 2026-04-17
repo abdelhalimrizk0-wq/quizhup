@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Intensive Care Unit Acquired Weakness (ICUAW)</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "Which clinical feature helps distinguish Critical Illness Myopathy (CIM) from Critical Illness Polyneuropathy (CIP)?",
+                options: [
+                    "Sensory function is retained in CIM",
+                    "Deep tendon reflexes are hyperactive in CIM",
+                    "Weakness is strictly asymmetric in CIM",
+                    "Cranial nerves are heavily involved in CIM"
+                ],
+                correct: 0,
+                rationale: "CIM is characterized by limb and respiratory muscle weakness with retained sensory function, whereas CIP involves distal sensory loss."
+            },
+            {
+                id: 2,
+                question: "A nurse is assessing a patient for ICU-acquired weakness using the Medical Research Council (MRC) scale. Which sum score indicates clinically detectable weakness?",
+                options: [
+                    "Less than 48",
+                    "Less than 55",
+                    "Greater than 50",
+                    "Exactly 60"
+                ],
+                correct: 0,
+                rationale: "Clinically detectable muscle weakness is defined as an MRC sum score of less than 48 out of a total score of 60."
+            },
+            {
+                id: 3,
+                question: "Which nutritional intervention is recommended during the first week of critical illness to reduce the incidence of ICUAW?",
+                options: [
+                    "Avoid parenteral nutrition",
+                    "Initiate high-calorie parenteral nutrition",
+                    "Withhold all enteral feeding",
+                    "Administer high-dose protein supplements"
+                ],
+                correct: 0,
+                rationale: "Avoiding parenteral nutrition during the first week in the ICU, compared with early supplementation, reduces the incidence of ICUAW."
+            },
+            {
+                id: 4,
+                question: "Which muscle groups are typically spared in patients with ICU-acquired weakness?",
+                options: [
+                    "Facial and ocular muscles",
+                    "Proximal limb muscles",
+                    "Respiratory muscles",
+                    "Distal limb muscles"
+                ],
+                correct: 0,
+                rationale: "ICUAW affects limb and respiratory muscles, whereas facial and ocular muscles are typically spared."
+            },
+            {
+                id: 5,
+                question: "What is considered the gold standard diagnostic test for confirming muscle involvement in ICU-acquired weakness?",
+                options: [
+                    "Muscle biopsy",
+                    "Serum creatine kinase",
+                    "Electromyography",
+                    "Handgrip dynamometry"
+                ],
+                correct: 0,
+                rationale: "Muscle biopsy is considered the gold standard for confirming muscle involvement despite its invasiveness."
+            },
+            {
+                id: 6,
+                question: "True or False: Levosimendan promotes skeletal muscle relaxation by significantly raising intracellular calcium levels.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "Levosimendan is a calcium sensitizer that increases contraction and promotes relaxation without raising calcium levels."
+            },
+            {
+                id: 7,
+                question: "According to the ABCDEF bundle, which class of medication should be avoided to minimize delirium and weakness?",
+                options: [
+                    "Benzodiazepines",
+                    "Alpha-2 agonists",
+                    "Non-opioid analgesics",
+                    "Antipsychotics"
+                ],
+                correct: 0,
+                rationale: "The 'C' in the ABCDEF bundle suggests avoidance of benzodiazepines and the use of targeted light sedation."
+            },
+            {
+                id: 8,
+                question: "What is the recommended target blood glucose range to minimize the risk of polyneuromyopathy in critically ill patients?",
+                options: [
+                    "80 to 110 mg/dL",
+                    "60 to 90 mg/dL",
+                    "140 to 180 mg/dL",
+                    "100 to 150 mg/dL"
+                ],
+                correct: 0,
+                rationale: "Strict glycemic control with a blood glucose level of 80 to 110 mg/dL is recommended to avoid hyperglycemia associated with polyneuromyopathy."
+            },
+            {
+                id: 9,
+                question: "Which clinical sign is often the earliest indicator of ICU-acquired weakness in a patient responding to painful stimuli?",
+                options: [
+                    "Facial grimacing without limb movement",
+                    "Asymmetric weakness of the lower limbs",
+                    "Loss of deep tendon reflexes",
+                    "Paradoxical abdominal movement"
+                ],
+                correct: 0,
+                rationale: "One of the earliest signs elicited is facial grimacing without limb movement in response to painful stimuli."
+            },
+            {
+                id: 10,
+                question: "Corticosteroids are considered a significant risk factor for ICUAW when the dose exceeds which threshold?",
+                options: [
+                    "10 grams over 1 to 2 weeks",
+                    "5 grams over 3 days",
+                    "1 gram daily for a month",
+                    "20 grams over 4 weeks"
+                ],
+                correct: 0,
+                rationale: "Corticosteroids are a risk factor particularly when the dose exceeds 10 g over 1 to 2 weeks."
+            },
+            {
+                id: 11,
+                question: "True or False: ICU-acquired weakness typically involves significant asymmetry in limb weakness.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "ICUAW is typically generalized and symmetrical, affecting proximal muscles more than distal ones."
+            },
+            {
+                id: 12,
+                question: "Which component of the ABCDEF bundle focuses on preventing weakness through physical activity?",
+                options: [
+                    "E",
+                    "B",
+                    "C",
+                    "D"
+                ],
+                correct: 0,
+                rationale: "The 'E' in the ABCDEF bundle stands for Early mobility & exercise."
+            },
+            {
+                id: 13,
+                question: "Which electrolyte disturbance is explicitly mentioned as a metabolic risk factor for ICU-acquired weakness?",
+                options: [
+                    "Hyperglycemia",
+                    "Hyperkalemia",
+                    "Hypocalcemia",
+                    "Hypernatremia"
+                ],
+                correct: 0,
+                rationale: "Hyperglycemia over 3 to 5 days is a metabolic/endocrine risk factor associated with polyneuromyopathy."
+            },
+            {
+                id: 14,
+                question: "A patient exhibits paradoxical abdominal movement during inspiration. What does this likely indicate?",
+                options: [
+                    "Diaphragmatic weakness",
+                    "Intercostal muscle spasm",
+                    "Improved respiratory mechanics",
+                    "Abdominal distension"
+                ],
+                correct: 0,
+                rationale: "Paradoxical abdominal movement on inspiration is suggestive of diaphragmatic weakness."
+            },
+            {
+                id: 15,
+                question: "Neuromuscular blocking agents are linked to weakness particularly when used for which duration?",
+                options: [
+                    "Over 3 to 5 days",
+                    "Less than 24 hours",
+                    "During induction only",
+                    "Intermittently for 1 day"
+                ],
+                correct: 0,
+                rationale: "Neuromuscular blocking agents are a risk factor when used over 3 to 5 days."
+            },
+            {
+                id: 16,
+                question: "True or False: The onset of ICU-acquired weakness usually occurs immediately upon admission to the critical care unit.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "The commencement of weakness usually occurs at least 1 week after the onset of the critical illness."
+            },
+            {
+                id: 17,
+                question: "Which diagnostic tool measures the speed and strength of nerve conduction?",
+                options: [
+                    "Nerve conduction studies",
+                    "Electromyography",
+                    "Muscle biopsy",
+                    "Ultrasound"
+                ],
+                correct: 0,
+                rationale: "Nerve conduction studies measure the speed and strength of nerve conduction."
+            },
+            {
+                id: 18,
+                question: "In the context of sepsis treatment to prevent ICUAW, what is the initial rapid administration volume for crystalloids?",
+                options: [
+                    "30 ml/kg",
+                    "10 ml/kg",
+                    "50 ml/kg",
+                    "20 ml/kg"
+                ],
+                correct: 0,
+                rationale: "The sepsis bundle recommends rapid administration of 30 ml/kg crystalloid for hypotension or lactate levels >= 4 mmol/L."
+            },
+            {
+                id: 19,
+                question: "Which of the following is an environmental risk factor for developing ICU-acquired weakness?",
+                options: [
+                    "Sleep disturbance",
+                    "Hyperglycemia",
+                    "Sepsis",
+                    "Corticosteroid use"
+                ],
+                correct: 0,
+                rationale: "Environmental risk factors include delirium, sleep disturbance, and immobility."
+            },
+            {
+                id: 20,
+                question: "True or False: Handgrip dynamometry cannot be used as a diagnostic test for ICU-acquired weakness.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "Handgrip dynamometry measures isometric muscle strength and can be used as a quick diagnostic test."
+            },
+            {
+                id: 21,
+                question: "Which demographic factor is associated with a higher risk of developing ICU-acquired weakness?",
+                options: [
+                    "Female gender",
+                    "Male gender",
+                    "Younger age",
+                    "Lower BMI"
+                ],
+                correct: 0,
+                rationale: "Female gender and older age are listed as patient-related risk factors."
+            },
+            {
+                id: 22,
+                question: "What is the primary effect of administering growth hormones as a therapeutic measure for ICUAW?",
+                options: [
+                    "Increased lean body mass",
+                    "Reduced oxidative stress",
+                    "Improved nerve conduction velocity",
+                    "Decreased lactate levels"
+                ],
+                correct: 0,
+                rationale: "Growth hormones help improve body composition, decrease total body fat, and increase lean body mass."
+            },
+            {
+                id: 23,
+                question: "True or False: Critical Illness Polyneuropathy (CIP) is characterized by distal sensory motor axonal polyneuropathy.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "CIP is defined as a symmetric, distal sensory motor axonal polyneuropathy affecting limb and respiratory muscles."
+            },
+            {
+                id: 24,
+                question: "Which pain assessment tool is recommended in the ABCDEF bundle for monitoring pain in ICU patients?",
+                options: [
+                    "CPOT or BPS",
+                    "GCS score",
+                    "SOFA score",
+                    "Braden scale"
+                ],
+                correct: 0,
+                rationale: "The 'A' in the ABCDEF bundle recommends using CPOT (Critical-Care Pain Observation Tool) or BPS (Behavioral Pain Scale) to assess pain."
+            },
+            {
+                id: 25,
+                question: "What is the mechanism of action for Vitamin E in the treatment of ICU-acquired weakness?",
+                options: [
+                    "Antioxidant activity",
+                    "Muscle protein synthesis",
+                    "Neuromuscular blockade reversal",
+                    "Glycemic control enhancement"
+                ],
+                correct: 0,
+                rationale: "Vitamin E acts as an antioxidant to decrease inactivity-induced muscle atrophy."
+            },
+            {
+                id: 26,
+                question: "True or False: An MRC score of 0 indicates active movement against gravity.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "An MRC score of 0 indicates no visible muscle contraction. A score of 3 indicates active movement against gravity."
+            },
+            {
+                id: 27,
+                question: "Which respiratory manifestation is common in non-intubated patients with ICUAW?",
+                options: [
+                    "Rapid shallow breathing",
+                    "Deep slow breathing",
+                    "Prolonged expiration",
+                    "Kussmaul breathing"
+                ],
+                correct: 0,
+                rationale: "Respiratory manifestations include rapid shallow breathing, use of accessory muscles, and ineffective cough."
+            },
+            {
+                id: 28,
+                question: "What is the specific timeframe recommended for early prevention and intervention to be most effective?",
+                options: [
+                    "Initial 48-72 hours",
+                    "First 12 hours",
+                    "After 1 week",
+                    "Upon discharge"
+                ],
+                correct: 0,
+                rationale: "Early prevention and intervention in the initial 48-72 hours of the disease may be more effective."
+            },
+            {
+                id: 29,
+                question: "True or False: Hypoalbuminemia is considered a metabolic risk factor for ICU-acquired weakness.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "Hypoalbuminemia is listed under Metabolic/Endocrine risk factors."
+            },
+            {
+                id: 30,
+                question: "Which sedative is preferred for patients with a high risk of delirium or during cardiac surgery?",
+                options: [
+                    "Dexmedetomidine",
+                    "Lorazepam",
+                    "Midazolam",
+                    "Propofol"
+                ],
+                correct: 0,
+                rationale: "Dexmedetomidine is recommended if there is a high delirium risk, cardiac surgery, or during MV weaning."
+            },
+            {
+                id: 31,
+                question: "Pathophysiologically, what happens to muscle protein synthesis during the acute phase of critical illness?",
+                options: [
+                    "It is depressed",
+                    "It is significantly increased",
+                    "It remains unchanged",
+                    "It fluctuates rapidly"
+                ],
+                correct: 0,
+                rationale: "The acute phase response is demonstrated by reduced protein and depressed muscle protein synthesis."
+            },
+            {
+                id: 32,
+                question: "True or False: Systemic inflammation and oxidative stress are associated with reduced muscle strength in ICUAW.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "Systemic inflammation and oxidative stress are noted as pathophysiological mechanisms associated with reduced muscle strength."
+            },
+            {
+                id: 33,
+                question: "Which complication is a direct consequence of respiratory muscle weakness in ICUAW?",
+                options: [
+                    "Extubation failure",
+                    "Pneumothorax",
+                    "Pulmonary embolism",
+                    "Bronchospasm"
+                ],
+                correct: 0,
+                rationale: "Respiratory muscle weakness often impedes ventilator weaning and leads to extubation failure."
+            },
+            {
+                id: 34,
+                question: "How is the 'D' component of the ABCDEF bundle managed in the ICU?",
+                options: [
+                    "Routine CAM-ICU assessments",
+                    "Daily chest physiotherapy",
+                    "Dietary restriction",
+                    "Deep vein thrombosis prophylaxis"
+                ],
+                correct: 0,
+                rationale: "The 'D' component involves Delirium monitoring and management using routine CAM-ICU or ICDSC assessments."
+            },
+            {
+                id: 35,
+                question: "True or False: A patient with Critical Illness Myopathy (CIM) will typically have loss of pain and temperature sensation.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "In CIM, peripheral nerve sensation remains intact; loss of pain and temperature sensation is characteristic of CIP."
+            },
+            {
+                id: 36,
+                question: "Which laboratory marker is often mildly elevated and indicates muscle damage in ICUAW?",
+                options: [
+                    "Creatine phosphokinase (CPK)",
+                    "Alanine aminotransferase (ALT)",
+                    "Blood urea nitrogen (BUN)",
+                    "C-reactive protein (CRP)"
+                ],
+                correct: 0,
+                rationale: "Serum creatine phosphokinase (CPK) can be mildly elevated and is a good marker for muscle damage."
+            },
+            {
+                id: 37,
+                question: "What is the recommended lactate threshold for initiating rapid crystalloid administration in the sepsis bundle?",
+                options: [
+                    "4 mmol/L",
+                    "2 mmol/L",
+                    "1 mmol/L",
+                    "6 mmol/L"
+                ],
+                correct: 0,
+                rationale: "Rapid administration of crystalloids is indicated for hypotension or a lactate level of 4 mmol/L or greater."
+            },
+            {
+                id: 38,
+                question: "True or False: Muscle wasting in ICUAW is always immediately apparent upon physical examination.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "Muscle wasting may not be immediately apparent as it may be concealed by dependent limb edema."
+            },
+            {
+                id: 39,
+                question: "Which type of non-invasive marker is mentioned as a potential diagnostic tool for ICUAW?",
+                options: [
+                    "Muscle and nerve ultrasound",
+                    "Magnetic resonance imaging",
+                    "Computed tomography",
+                    "Positron emission tomography"
+                ],
+                correct: 0,
+                rationale: "Muscle and nerve ultrasounds are identified as a potential non-invasive marker of ICUAW."
+            },
+            {
+                id: 40,
+                question: "What does the 'F' in the ABCDEF bundle stand for?",
+                options: [
+                    "Family engagement & empowerment",
+                    "Fluid resuscitation management",
+                    "Feeding and nutrition",
+                    "Frequent repositioning"
+                ],
+                correct: 0,
+                rationale: "The 'F' in the ABCDEF bundle stands for Family engagement & empowerment."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

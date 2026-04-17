@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">First Aid in Wounds & Bleeding</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "What is the very first priority for a rescuer before providing care to a bleeding victim?",
+                options: ["Assessing the victim for shock", "Ensuring the scene is safe", "Applying pressure to wounds", "Calling for an ambulance"],
+                correct: 1,
+                rationale: "Safety is the first priority. If you become injured, you will not be able to help the victim."
+            },
+            {
+                id: 2,
+                question: "Which type of wound involves a clean cut caused by a sharp object like a knife?",
+                options: ["Laceration", "Abrasion", "Incision", "Contusion"],
+                correct: 2,
+                rationale: "Incisions are clean cuts caused by something sharp such as a knife."
+            },
+            {
+                id: 3,
+                question: "How should a first aider handle a dressing that has become soaked with blood?",
+                options: ["Remove it and replace it with a fresh one", "Add more dressings on top of the soaked one", "Wash the dressing with water and reapply", "Remove it to checking if bleeding stopped"],
+                correct: 1,
+                rationale: "Do not remove soaked dressings as this may disturb blood clots. Add more dressings and continue pressure."
+            },
+            {
+                id: 4,
+                question: "What is a characteristic sign of arterial bleeding?",
+                options: ["Dark red blood flowing steadily", "Blood oozing slowly from the skin", "Bright red blood spurting with heartbeats", "Blood that looks like coffee grounds"],
+                correct: 2,
+                rationale: "In arterial bleeding, the blood is bright red and spurts with each heartbeat."
+            },
+            {
+                id: 5,
+                question: "True or False: You should apply hot water bottles to the abdomen to treat internal bleeding.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Do not apply hot water bottles or ice bags to the chest or the abdomen for internal bleeding."
+            },
+            {
+                id: 6,
+                question: "What is the correct procedure for preserving an amputated body part?",
+                options: ["Place it directly into a container of crushed ice", "Wrap it in a dry cloth and keep it warm", "Submerge it completely in a bowl of water", "Wrap in moist dressing and place in a sealed bag on ice"],
+                correct: 3,
+                rationale: "Wrap the part in a clean, moist dressing, seal it in a plastic bag, and place that bag in a container with crushed ice."
+            },
+            {
+                id: 7,
+                question: "Which symptom specifically suggests internal bleeding into the lungs?",
+                options: ["Vomiting material looking like coffee grounds", "Coughing up bright red and frothy blood", "Passing urine that looks smoky or brown", "Passing black and tarry stools"],
+                correct: 1,
+                rationale: "Coughing up blood that looks bright red and frothy indicates bleeding into the lungs."
+            },
+            {
+                id: 8,
+                question: "Where should a tourniquet be placed when controlling catastrophic limb bleeding?",
+                options: ["Directly over the bleeding wound", "Two to three inches above the wound", "Directly over the nearest joint", "As close to the wrist or ankle as possible"],
+                correct: 1,
+                rationale: "Place the tourniquet 2 to 3 inches above the bleeding wound, higher on the arm or leg, and never over a joint."
+            },
+            {
+                id: 9,
+                question: "What is the primary method to control bleeding for torso junctional wounds?",
+                options: ["Direct pressure and wound packing", "Application of a tourniquet", "Elevation of the legs", "Application of ice packs"],
+                correct: 0,
+                rationale: "Bleeding from junctional wounds (neck, shoulder, groin) can be controlled by direct pressure and wound packing."
+            },
+            {
+                id: 10,
+                question: "Which type of wound is characterized by jagged and irregular edges?",
+                options: ["Incision", "Laceration", "Puncture", "Avulsion"],
+                correct: 1,
+                rationale: "Lacerations are tears in the skin and underlying tissue with jagged and irregular edges."
+            },
+            {
+                id: 11,
+                question: "True or False: Abrasions are closed wounds where the skin remains intact.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Abrasions are open wounds where the outer protective layer of skin is damaged."
+            },
+            {
+                id: 12,
+                question: "Why should jewelry be removed from the area of a wound?",
+                options: ["To prevent theft of the items", "To allow for better cleaning", "To prevent restriction due to swelling", "To keep the jewelry from getting stained"],
+                correct: 2,
+                rationale: "Jewelry should be removed as it may cut off blood flow if swelling occurs."
+            },
+            {
+                id: 13,
+                question: "What is a sign of shock associated with severe blood loss?",
+                options: ["Warm and dry skin", "Slow and strong pulse", "Pale cold and clammy skin", "Deep and rhythmic breathing"],
+                correct: 2,
+                rationale: "Signs of shock include pale, cold, and clammy skin, rapid pulse, and shallow breathing."
+            },
+            {
+                id: 14,
+                question: "Which injury involves a piece of skin or tissue being partially or completely torn away?",
+                options: ["Avulsion", "Contusion", "Abrasion", "Puncture"],
+                correct: 0,
+                rationale: "Avulsions are injuries that leave a piece of skin or other tissue either partially or completely torn away."
+            },
+            {
+                id: 15,
+                question: "When applying a bandage, when should circulation be checked?",
+                options: ["Only before applying the bandage", "Only after applying the bandage", "Before and after applying the bandage", "Circulation checks are not necessary"],
+                correct: 2,
+                rationale: "Check circulation below the injury before bandaging and compare it with the other side after bandaging."
+            },
+            {
+                id: 16,
+                question: "True or False: Venous bleeding is characterized by dark red blood flowing steadily.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "In venous bleeding, the blood is dark red and flows more steadily compared to arterial bleeding."
+            },
+            {
+                id: 17,
+                question: "What is the correct intervention for a partly amputated body part?",
+                options: ["Cut the remaining skin to detach it fully", "Reposition it to normal and bandage", "Leave it hanging and cover loosely", "Apply ice directly to the tissue"],
+                correct: 1,
+                rationale: "Reposition a partly amputated part to its normal position and bandage it."
+            },
+            {
+                id: 18,
+                question: "Which of the following suggests internal bleeding in the stomach?",
+                options: ["Coughing up frothy blood", "Bleeding from the ear canal", "Vomiting material like coffee grounds", "Bright red spurting blood"],
+                correct: 2,
+                rationale: "Vomiting bright red blood or brown blood that looks like coffee grounds is a sign of internal bleeding."
+            },
+            {
+                id: 19,
+                question: "What is the main aim in the care of wounds?",
+                options: ["To minimize pain immediately", "To stop bleeding and prevent infection", "To diagnose the cause of injury", "To apply aesthetic dressing"],
+                correct: 1,
+                rationale: "The aim in the care of wounds is to stop the bleeding and prevent infection."
+            },
+            {
+                id: 20,
+                question: "Which wound type often has a small opening but penetrates deep into the tissue?",
+                options: ["Puncture wound", "Abrasion", "Avulsion", "Incision"],
+                correct: 0,
+                rationale: "Puncture wounds are caused by blunt or pointed instruments and often penetrate deep into the tissue."
+            },
+            {
+                id: 21,
+                question: "True or False: Internal bleeding in the chest can usually be stopped by first aid measures alone.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Bleeding inside the chest or abdomen CAN NOT be stopped outside the hospital; rapid transport is needed."
+            },
+            {
+                id: 22,
+                question: "What action should be taken if a victim with internal bleeding becomes cold?",
+                options: ["Place hot water bottles on the chest", "Cover with a blanket to prevent overheating", "Apply direct heat to the extremities", "Give the victim a hot drink"],
+                correct: 1,
+                rationale: "Keep the injured person warm by covering them with a blanket, taking care not to overheat them."
+            },
+            {
+                id: 23,
+                question: "Which of the following is considered life-threatening bleeding?",
+                options: ["Blood oozing from a minor scrape", "Blood pooling on the ground", "A bruise that is changing color", "A shallow cut that stops bleeding quickly"],
+                correct: 1,
+                rationale: "Life-threatening bleeding includes blood pooling on the ground, spurting blood, or blood-soaked clothing."
+            },
+            {
+                id: 24,
+                question: "What is a contusion?",
+                options: ["A clean cut made by a knife", "A tear with jagged edges", "A closed wound with discoloration", "A scrape on the outer skin"],
+                correct: 2,
+                rationale: "Contusions or bruises are closed wounds where tissues under the skin are damaged causing discoloration."
+            },
+            {
+                id: 25,
+                question: "True or False: A tourniquet should be applied directly over a joint like the knee or elbow.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Do NOT apply a tourniquet directly over the knee or elbow joints."
+            },
+            {
+                id: 26,
+                question: "What is the recommended position for a casualty with severe internal bleeding?",
+                options: ["Sitting upright in a chair", "Lying flat on their back", "Standing with support", "Lying face down"],
+                correct: 1,
+                rationale: "Have the casualty lie flat on their back as part of the first aid for severe internal bleeding."
+            },
+            {
+                id: 27,
+                question: "How should pressure be applied to a severe external wound?",
+                options: ["Intermittently with one finger", "Continuously with both hands", "Lightly to avoid causing pain", "Around the edges of the wound only"],
+                correct: 1,
+                rationale: "Apply continuous pressure with both hands directly on top of the bleeding wound."
+            },
+            {
+                id: 28,
+                question: "What does black and tarry stool indicate?",
+                options: ["External bleeding from the leg", "Internal bleeding in the digestive tract", "Bleeding into the lungs", "A superficial abrasion"],
+                correct: 1,
+                rationale: "Blood in the stool that looks red or black and tarry is a sign of internal bleeding."
+            },
+            {
+                id: 29,
+                question: "Which of these requires rapid transport to a trauma center as the primary intervention?",
+                options: ["A minor finger laceration", "A scraped knee", "Chest and abdominal injuries", "A bruised forearm"],
+                correct: 2,
+                rationale: "Chest and abdominal injuries usually cause internal bleeding that cannot be stopped outside a hospital."
+            },
+            {
+                id: 30,
+                question: "When is a tourniquet considered appropriate?",
+                options: ["For all minor cuts and scrapes", "Only for catastrophic limb bleeding", "For head and neck injuries", "Whenever a bandage is not available"],
+                correct: 1,
+                rationale: "Tourniquets are used for catastrophic wounds where it is difficult to control bleeding, to stop all blood flow to a limb."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

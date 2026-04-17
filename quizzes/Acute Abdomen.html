@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Acute Abdomen</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "Which of the following describes visceral pain?",
+                options: ["Sharp and well localized", "Dull and vague", "Tearing and intense", "Burning and superficial"],
+                correct: 1,
+                rationale: "Visceral pain is typically vague, dull, and nauseating. It arises from abdominal viscera innervated by autonomic nerve fibers."
+            },
+            {
+                id: 2,
+                question: "What is the primary characteristic of somatic pain?",
+                options: ["It is vague and nauseating", "It is caused by distention", "It is sharp and well localized", "It is referred to distant sites"],
+                correct: 2,
+                rationale: "Somatic pain comes from the parietal peritoneum and is sharp and well localized."
+            },
+            {
+                id: 3,
+                question: "Shoulder pain is a common referred pain for which condition?",
+                options: ["Renal colic", "Diaphragmatic irritation", "Appendicitis", "Sigmoid volvulus"],
+                correct: 1,
+                rationale: "Common examples of referred pain include shoulder pain due to blood or infection irritating the diaphragm."
+            },
+            {
+                id: 4,
+                question: "Groin pain is often a referred pain from which source?",
+                options: ["Biliary colic", "Renal colic", "Pancreatitis", "Gastric ulcer"],
+                correct: 1,
+                rationale: "Groin pain is a common example of referred pain due to renal colic."
+            },
+            {
+                id: 5,
+                question: "Scapular pain is typically referred from which condition?",
+                options: ["Biliary colic", "Renal colic", "Appendicitis", "Diverticulitis"],
+                correct: 0,
+                rationale: "Scapular pain is a common example of referred pain due to biliary colic."
+            },
+            {
+                id: 6,
+                question: "Which of the following is an extra-abdominal metabolic cause of abdominal pain?",
+                options: ["Pneumonia", "Myocardial infarction", "Diabetic ketoacidosis", "Herpes zoster"],
+                correct: 2,
+                rationale: "Diabetic ketoacidosis is listed as a metabolic extra-abdominal cause of abdominal pain."
+            },
+            {
+                id: 7,
+                question: "Which condition is considered a neurogenic cause of abdominal pain?",
+                options: ["Herpes zoster", "Uremia", "Lead poisoning", "Pneumonia"],
+                correct: 0,
+                rationale: "Herpes zoster is listed under neurogenic extra-abdominal causes."
+            },
+            {
+                id: 8,
+                question: "What does feculent vomiting typically suggest?",
+                options: ["Upper GI pathology", "Lower GI obstruction", "Biliary colic", "Gastritis"],
+                correct: 1,
+                rationale: "Vomiting and the nature of vomitus: feculent vomiting suggests lower GI obstruction."
+            },
+            {
+                id: 9,
+                question: "Undigested food in vomitus suggests pathology in which area?",
+                options: ["Lower GI tract", "Upper GI tract", "Colon", "Rectum"],
+                correct: 1,
+                rationale: "Vomiting undigested food or bile suggests upper GI pathology or obstruction."
+            },
+            {
+                id: 10,
+                question: "Which sign suggests active peritonitis during assessment?",
+                options: ["Pain relieved by movement", "Pain worsened by movement", "Pain relieved by eating", "Pain worsened by sitting forward"],
+                correct: 1,
+                rationale: "If pain is worsened by movement or coughing, suspect active peritonitis."
+            },
+            {
+                id: 11,
+                question: "How is pancreatitis pain typically relieved?",
+                options: ["By coughing", "By lying flat", "By sitting forward", "By walking"],
+                correct: 2,
+                rationale: "Pancreatitis pain is often relieved by sitting forward."
+            },
+            {
+                id: 12,
+                question: "Which condition generally causes pain in the upper right abdomen?",
+                options: ["Splenomegaly", "Diverticulitis", "Gallstones", "Sigmoid volvulus"],
+                correct: 2,
+                rationale: "Upper right abdominal pain is associated with the gallbladder and biliary tract, such as gallstones."
+            },
+            {
+                id: 13,
+                question: "Where does pain from appendicitis typically start before moving?",
+                options: ["Lower right abdomen", "Upper middle abdomen", "Lower left abdomen", "Pelvic region"],
+                correct: 1,
+                rationale: "Appendicitis starts in the upper middle or middle abdomen before moving to the lower right abdomen."
+            },
+            {
+                id: 14,
+                question: "Which structure is a source of upper left abdominal pain?",
+                options: ["Gallbladder", "Spleen", "Appendix", "Cecum"],
+                correct: 1,
+                rationale: "Upper left abdominal pain can be caused by the spleen, such as in splenomegaly."
+            },
+            {
+                id: 15,
+                question: "Which condition is a cause of lower left abdominal pain?",
+                options: ["Cholecystitis", "Sigmoid volvulus", "Hepatitis", "Duodenal ulcer"],
+                correct: 1,
+                rationale: "Lower left abdominal pain causes include sigmoid colon issues like sigmoid volvulus."
+            },
+            {
+                id: 16,
+                question: "Pain radiating to the left side of the waist and back suggests which pathology?",
+                options: ["Appendicitis", "Hepatitis", "Pancreatitis", "Cystitis"],
+                correct: 2,
+                rationale: "Pancreas pain (pancreatitis) can radiate to the left side of the waist, back, and even shoulder."
+            },
+            {
+                id: 17,
+                question: "Which symptom suggests upper GI pathology?",
+                options: ["Feculent vomiting", "Bile in vomitus", "Diarrhea", "Urinary retention"],
+                correct: 1,
+                rationale: "Vomiting of bile suggests upper GI pathology or obstruction."
+            },
+            {
+                id: 18,
+                question: "What is the immediate priority in assessing a patient with acute abdomen?",
+                options: ["Administering analgesia", "Detailed history taking", "ABC assessment", "Ordering a CT scan"],
+                correct: 2,
+                rationale: "Assess and manage Airway, Breathing and Circulation (ABC) as a priority."
+            },
+            {
+                id: 19,
+                question: "Which behavior is typical of a patient with renal colic?",
+                options: ["Lying perfectly still", "Rolling around in agony", "Sleeping peacefully", "Sitting in a tripod position"],
+                correct: 1,
+                rationale: "Note whether they are lying still (think peritonitis) or rolling around in agony (think intestinal, biliary or renal colic)."
+            },
+            {
+                id: 20,
+                question: "What behavior is typical of a patient with peritonitis?",
+                options: ["Rolling around in agony", "Walking continuously", "Lying still", "Bending backward"],
+                correct: 2,
+                rationale: "Patients with peritonitis like to stay immobile."
+            },
+            {
+                id: 21,
+                question: "Which medication combination is commonly used if peritonitis is suspected?",
+                options: ["Penicillin and Aspirin", "Cephalosporin and Metronidazole", "Amoxicillin and Ibuprofen", "Vancomycin and Paracetamol"],
+                correct: 1,
+                rationale: "If systemic sepsis or peritonitis is suspected, IV cephalosporin plus metronidazole are commonly used."
+            },
+            {
+                id: 22,
+                question: "Why should antiemetics be used with caution in a community setting?",
+                options: ["They cause severe pain", "They mask the diagnosis", "They induce vomiting", "They lower blood pressure"],
+                correct: 1,
+                rationale: "Avoid using antiemetics as a symptomatic treatment without considering a diagnosis in a community setting."
+            },
+            {
+                id: 23,
+                question: "What is a recommended intervention if severe vomiting occurs?",
+                options: ["Immediate oral feeding", "Passing a nasogastric tube", "Administering oral analgesia", "Encouraging ambulation"],
+                correct: 1,
+                rationale: "Consider passing a nasogastric (NG) tube if severe vomiting occurs or there are signs of intestinal obstruction."
+            },
+            {
+                id: 24,
+                question: "Which type of pain is perceived as more severe?",
+                options: ["Inflammatory pain", "Ischemic pain", "Dull pain", "Somatic pain"],
+                correct: 1,
+                rationale: "Colicky pain or ischemic pain of the intestine is perceived more severe than inflammatory pain."
+            },
+            {
+                id: 25,
+                question: "Which condition can mimic a myocardial infarction?",
+                options: ["Acute cholecystitis", "Appendicitis", "Cystitis", "Inguinal hernia"],
+                correct: 0,
+                rationale: "Upper abdominal pain or chest pressure in acute cholecystitis sometimes mimics a myocardial infarction."
+            },
+            {
+                id: 26,
+                question: "What is the definition of acute abdomen regarding time duration?",
+                options: ["Less than 24 hours", "More than 48 hours", "Exactly one week", "Approximately one month"],
+                correct: 0,
+                rationale: "Acute abdomen refers to a sudden, severe abdominal pain of unclear etiology that is less than 24 hours in duration."
+            },
+            {
+                id: 27,
+                question: "Which of the following is a toxic cause of abdominal pain?",
+                options: ["Lead poisoning", "Uremia", "Pneumonia", "Adrenal insufficiency"],
+                correct: 0,
+                rationale: "Lead poisoning is listed under toxic causes of abdominal pain."
+            },
+            {
+                id: 28,
+                question: "Which diagnostic procedure involves visualization of the bile ducts?",
+                options: ["ECG", "ERCP", "IVS", "Paracentesis"],
+                correct: 1,
+                rationale: "ERCP (Endoscopic Retrograde Pancreatography) is a diagnostic procedure listed."
+            },
+            {
+                id: 29,
+                question: "What physical examination technique involves listening to bowel sounds?",
+                options: ["Inspection", "Palpation", "Percussion", "Auscultation"],
+                correct: 3,
+                rationale: "Auscultate for hyperactive, obstructive, absent, or normal bowel sounds."
+            },
+            {
+                id: 30,
+                question: "Which investigation is prioritized if a medical cause like MI is suspected?",
+                options: ["Laparoscopy", "ECG", "Colonoscopy", "Barium swallow"],
+                correct: 1,
+                rationale: "Arrange investigations such as ECG if a medical cause is likely."
+            },
+            {
+                id: 31,
+                question: "Visceral pain responds mainly to cutting and tearing.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Visceral pain responds mainly to distention and muscular contraction, not to cutting or tearing."
+            },
+            {
+                id: 32,
+                question: "Somatic pain arises from the autonomic nerve fibers.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Somatic pain comes from the parietal peritoneum which is innervated by somatic nerves; visceral pain is autonomic."
+            },
+            {
+                id: 33,
+                question: "Myocardial infarction can be an extra-abdominal cause of abdominal pain.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Myocardial infarction is listed as a cardiopulmonary extra-abdominal cause."
+            },
+            {
+                id: 34,
+                question: "Intussusception is a cause of lower right abdominal pain.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Lower right abdominal pain causes include Cecum (intussusception, bowel obstruction)."
+            },
+            {
+                id: 35,
+                question: "Pneumonia is considered an intra-abdominal cause of pain.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Pneumonia is classified as an extra-abdominal (cardiopulmonary) cause."
+            },
+            {
+                id: 36,
+                question: "The current practice is to withhold analgesia until surgical review.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The text states the *previous* practice was to withhold analgesia, but now it is likely to be relieved by parenteral opiates."
+            },
+            {
+                id: 37,
+                question: "Diverticulitis is a potential cause of lower left abdominal pain.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Although often associated with the left, the text mentions diverticulitis under upper middle and general lists, but standard medical knowledge and the text imply colon issues in the lower left."
+            },
+            {
+                id: 38,
+                question: "Patients should be kept nil by mouth (NPO) if acute abdomen is suspected.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Emergency department care includes keeping the patient nil by mouth."
+            },
+            {
+                id: 39,
+                question: "Visceral pain is well localized.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Visceral pain is typically vague and dull; somatic pain is well localized."
+            },
+            {
+                id: 40,
+                question: "IV fluids should be set up immediately if the patient is shocked.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Intravenous (IV) fluids: set up immediately if the patient is shocked."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

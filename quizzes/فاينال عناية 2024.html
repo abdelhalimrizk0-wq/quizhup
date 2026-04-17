@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critical Care Nursing Final Exam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f1f5f9; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-left: 5px solid transparent; }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; opacity: 0.8; }
+        .essay-btn { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .essay-btn:hover { background-color: #dbeafe; }
+        
+        /* Image Placeholder Style */
+        .image-placeholder {
+            background-color: #f3f4f6;
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Height removed to allow image natural height */
+            margin-bottom: 1.5rem;
+            color: #94a3b8;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            padding: 1rem; /* Added padding */
+        }
+        
+        .image-placeholder img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            display: block; /* Ensures no extra space below image */
+        }
+
+        /* Section Headers */
+        .section-header {
+            background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Scenario Box */
+        .scenario-box {
+            background-color: #fff7ed;
+            border: 2px solid #fdba74;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            color: #9a3412;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-24">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Main Title -->
+        <div class="bg-white rounded-3xl shadow-sm p-8 mb-10 text-center border-t-8 border-blue-800 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-6 opacity-5"><i class="fas fa-heartbeat text-9xl text-blue-800"></i></div>
+            <h1 class="text-4xl font-bold text-gray-800 mb-3 font-cairo" dir="auto">فاينال عناية نظري 2024</h1>
+            <p class="text-gray-500 font-medium">ادعيلي بالله عليك والله فاضلي كتير في المنهج</p>
+            <div class="mt-6 inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold border border-green-100">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+
+        <div id="quiz-content"></div>
+
+        <!-- Result Section -->
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-xl p-10 text-center mt-12 border border-gray-100 max-w-2xl mx-auto">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-trophy text-3xl text-blue-600"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800 font-cairo">Exam Completed</h2>
+            <div class="mt-6 mb-8">
+                <span class="text-6xl font-bold text-blue-600" id="score-display">0</span>
+                <span class="text-2xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-600 text-lg mb-8 font-medium"></p>
+            <p class="text-sm text-gray-400 mb-8 italic">* Essay questions are self-evaluated and not included in the score.</p>
+            <button onclick="location.reload()" class="bg-gray-900 text-white px-8 py-4 rounded-xl hover:bg-gray-800 transition shadow-lg flex items-center justify-center gap-2 mx-auto w-full sm:w-auto">
+                <i class="fas fa-redo"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizStructure = [
+            {
+                idPrefix: "tf",
+                title: "Question I: True / False",
+                subtitle: "Mark (True) or (False). (10 Marks)",
+                questions: [
+                    {
+                        id: 1, type: 'tf',
+                        question: "During the oliguric phase GFR is greatly reduced, which leads to hyperkalemia and hypercalcemia.",
+                        options: ["True", "False"],
+                        correct: 1,
+                        rationale: "False. It leads to Hyperkalemia but typically Hypocalcemia (low calcium) due to hyperphosphatemia and decreased Vit D activation."
+                    },
+                    {
+                        id: 2, type: 'tf',
+                        question: "Type II respiratory failure is mainly caused by a direct defect in carbon dioxide level.",
+                        options: ["True", "False"],
+                        correct: 1,
+                        rationale: "False. Type II is a direct defect in 'Ventilation' (Pump failure) leading to CO2 retention, not a primary defect in CO2 itself."
+                    },
+                    {
+                        id: 3, type: 'tf',
+                        question: "Acidosis pH less than 7.35 is one of the trademarks of severe AKI.",
+                        options: ["True", "False"],
+                        correct: 0,
+                        rationale: "True. Metabolic acidosis is a hallmark of severe kidney injury."
+                    },
+                    {
+                        id: 4, type: 'tf',
+                        question: "Assisted breathing during mechanical ventilation is a positive pressure breath that is triggered and cycled by the patient but controlled by the ventilator.",
+                        options: ["True", "False"],
+                        correct: 1,
+                        rationale: "False. This definition ('triggered and cycled by patient') describes a 'Supported' breath. An 'Assisted' breath is triggered by the patient but cycled by the ventilator."
+                    },
+                    {
+                        id: 5, type: 'tf',
+                        question: "Pressure support ventilator mode is used in spontaneously breathing patients.",
+                        options: ["True", "False"],
+                        correct: 0,
+                        rationale: "True. PSV requires the patient to initiate every breath."
+                    },
+                    {
+                        id: 6, type: 'tf',
+                        question: "The level of pain reported by the patient is the standard for assessment of pain.",
+                        options: ["True", "False"],
+                        correct: 0,
+                        rationale: "True. Patient self-report is the gold standard."
+                    },
+                    {
+                        id: 7, type: 'tf',
+                        question: "Sedation of agitated patient should be started before providing adequate analgesia.",
+                        options: ["True", "False"],
+                        correct: 1,
+                        rationale: "False. Analgesia should be provided *before* sedation ('Analgesia-first' approach)."
+                    },
+                    {
+                        id: 8, type: 'tf',
+                        question: "Respiratory and limb muscles are the most commonly spared in ICU-acquired weakness.",
+                        options: ["True", "False"],
+                        correct: 1,
+                        rationale: "False. They are commonly *affected*. Cranial/facial muscles are typically spared."
+                    },
+                    {
+                        id: 9, type: 'tf',
+                        question: "The intrinsic pressure hidden within the abdominal cavity should exceed 7 mmHg.",
+                        options: ["True", "False"],
+                        correct: 1,
+                        rationale: "False. Normal IAP is 0-5 mmHg. In critically ill patients, 5-7 mmHg is expected, but it should not exceed this normally."
+                    },
+                    {
+                        id: 10, type: 'tf',
+                        question: "SIMV is a mode used for patients who can not initiate a breath.",
+                        options: ["True", "False"],
+                        correct: 1,
+                        rationale: "False. SIMV is used for patients who CAN breathe spontaneously. For patients unable to initiate, CMV/AC is used."
+                    }
+                ]
+            },
+            {
+                idPrefix: "mcq",
+                title: "Question II (A): Multiple Choice Questions",
+                subtitle: "Choose the correct answer. (30 Marks)",
+                questions: [
+                    {
+                        id: 1, type: 'mcq',
+                        hasImage: true,
+                        imageLabel: "Image 1: Mechanical Ventilator",
+                        imgSrc: "https://i.ibb.co/K1NVXqT/image.png",
+                        question: "According to the ventilator figure, what type of mechanical ventilator is this patient receiving?",
+                        options: ["Positive pressure mechanical ventilator.", "Negative pressure mechanical ventilator.", "Volume cycled mechanical ventilator.", "Pressure cycled mechanical ventilator."],
+                        correct: 1,
+                        rationale: "Correct as per your key: Negative pressure mechanical ventilator."
+                    },
+                    {
+                        id: 2, type: 'mcq',
+                        question: "The most recent blood gas report shows that a patient is hypoventilating (PaCO2 = 65 mmHg). The physician asks the nurse to improve the patient's alveolar ventilation by making changes to the ventilator settings. The nurse should:",
+                        options: ["decrease tidal volume (VT).", "increase PEEP.", "increase frequency (F).", "increase FIO2."],
+                        correct: 2,
+                        rationale: "To decrease PaCO2 (improve ventilation), you must increase Minute Volume (VE = VT x Rate). Increasing Frequency (F) increases Minute Volume."
+                    },
+                    {
+                        id: 3, type: 'mcq',
+                        question: "One of the most common disadvantages of Synchronized Intermittent Mandatory Ventilation (SIMV) mode is that:",
+                        options: ["it makes ventilator breaths to be not synchronized.", "it increases the work of breathing and respiratory muscle fatigue.", "it may produce respiratory alkalosis.", "it does not allow the patient to participate in respiration."],
+                        correct: 1,
+                        rationale: "The disadvantage of SIMV is that it may increase the work of breathing and cause respiratory muscle fatigue due to the resistance of the circuit during spontaneous breaths."
+                    },
+                    {
+                        id: 4, type: 'mcq',
+                        hasImage: true,
+                        imageLabel: "Image 4: Ventilator Graph",
+                        imgSrc: "https://i.ibb.co/mMSmWQK/image.png",
+                        question: "According to the ventilator graph, which mode of mechanical ventilation is the patient receiving?",
+                        options: ["Controlled Mandatory Ventilation (CMV).", "Assisted Control (AC).", "Synchronized Mandatory Ventilation (SIMV).", "Pressure Support Ventilation (PSV)."],
+                        correct: 1,
+                        rationale: "Correct as per your key: Assisted Control (AC) mode."
+                    },
+                    {
+                        id: 5, type: 'mcq',
+                        question: "Most commonly the inspiratory to expiratory (I: E) ratio is maintained at:",
+                        options: ["1:1", "1:2", "1:5", "1:8"],
+                        correct: 1,
+                        rationale: "The normal I:E ratio is typically set at 1:2 to mimic normal physiology."
+                    },
+                    {
+                        id: 6, type: 'mcq',
+                        question: "Which one of the following nursing interventions does stimulate nerve fibers and reduce intensity of pain by releasing the endorphins?",
+                        options: ["Minimizing strange noises.", "Bringing a snack.", "Applying heat or cold compresses.", "Spending less time talking about pain."],
+                        correct: 2,
+                        rationale: "Cutaneous stimulation (Heat/Cold, TENS, massage) stimulates nerve fibers and may release endorphins (Gate Control Theory)."
+                    },
+                    {
+                        id: 7, type: 'mcq',
+                        question: "Which one of the following signs would the nurse expect to see in a patient with pain?",
+                        options: ["Tachycardia.", "Cyanosis.", "Dry skin.", "Constricted pupils."],
+                        correct: 0,
+                        rationale: "Acute pain stimulates the sympathetic nervous system, leading to Tachycardia (Increased HR) and Hypertension."
+                    },
+                    {
+                        id: 8, type: 'mcq',
+                        question: "Nurses can assess pain using the mnemonic OLD CART which means:",
+                        options: ["Onset, Location, Duration, Category, Accompanying factors, Radiation & Treatment.", "Onset, Location, Duration, Characteristics, Accompanying factors, Radiation & Tensity.", "Onset, Location, Duration, Characteristics, Accompanying factors, Radiation & Treatment.", "Onset, Location, Duration, Capacity, Accompanying factors, Radiation & Treatment."],
+                        correct: 2,
+                        rationale: "OLD CART: Onset, Location, Duration, Characteristics, Accompanying factors, Radiation, Treatment."
+                    },
+                    {
+                        id: 9, type: 'mcq',
+                        question: "Which one of the following is a harmful physiologic effect of pain on the hematological system of patient?",
+                        options: ["Increased cortisol level.", "Hypoalbuminemia.", "Increased vascular resistance.", "Diminished venous return."],
+                        correct: 3,
+                        rationale: "Pain/Immobility can lead to 'Diminished venous return' and 'Increased platelet aggregation' (Hematologic effects), increasing DVT risk."
+                    },
+                    {
+                        id: 10, type: 'mcq',
+                        question: "Which of the following is the normal glomerular filtration rate?",
+                        options: ["115ml/min.", "125ml/min.", "135ml/min.", "145ml/min."],
+                        correct: 1,
+                        rationale: "Normal GFR is approximately 125 ml/min."
+                    },
+                    {
+                        id: 11, type: 'mcq',
+                        question: "Which of the following is the MOST explanatory alteration to develop respiratory failure for post-operative patient on benzodiazepine who becomes somnolent, and subsequent ABG reveals a PaCO2 of 75 mm Hg with pH of 7.25?",
+                        options: ["CO2 retention due to decreased ventilatory drive.", "CO2 retention due to Respiratory muscle fatigue.", "CO2 retention due to increased dead space.", "CO2 retention due to abnormal gas transport."],
+                        correct: 0,
+                        rationale: "Benzodiazepines cause CNS depression, leading to 'Decreased ventilatory drive', hypoventilation, and CO2 retention (Type II Failure)."
+                    },
+                    {
+                        id: 12, type: 'mcq',
+                        question: "In a patient admitted with left-sided lower lobe pneumonia, which one of the following positioning strategies would be the MOST preferred to optimize gas exchange?",
+                        options: ["Lying flat on back.", "Trendelenburg position.", "Lateral decubitus with left lung down.", "Lateral decubitus with right lung down."],
+                        correct: 3,
+                        rationale: "Good lung down rule: The right lung is healthy, so positioning 'Right lung down' improves V/Q matching."
+                    },
+                    {
+                        id: 13, type: 'mcq',
+                        question: "Minute ventilation is equal to...",
+                        options: ["FIO2 X PEEP.", "FiO2/PEEP.", "Tidal Volume X Respiratory Rate.", "Tidal Volume/Respiratory Rate."],
+                        correct: 2,
+                        rationale: "Minute Ventilation (VE) = Tidal Volume (VT) x Respiratory Rate (RR)."
+                    },
+                    {
+                        id: 14, type: 'mcq',
+                        question: "Which one of the following physical signs is NOT associated with sleep deprivation?",
+                        options: ["Increased sensitivity to pain.", "Decreased leukocyte function.", "Increased muscle endurance.", "Increased risk of cancer."],
+                        correct: 2,
+                        rationale: "Sleep deprivation leads to 'Decreased' inspiratory muscle endurance, not increased."
+                    },
+                    {
+                        id: 15, type: 'mcq',
+                        question: "How do episodes of wakefulness typically change throughout the night?",
+                        options: ["They increase gradually", "They decrease gradually", "They peak in the middle of the night", "They peak towards the end of the night"],
+                        correct: 3,
+                        rationale: "In ICU patients, wakefulness and sleep fragmentation often peak towards the end of the sleep cycle (morning)."
+                    },
+                    {
+                        id: 16, type: 'mcq',
+                        question: "How many cycles of NREM-REM sleep does a person usually experience in 7 to 8 hours of sleep?",
+                        options: ["2 to 3 cycles", "3 to 4 cycles", "4 to 6 cycles", "6 to 8 cycles"],
+                        correct: 2,
+                        rationale: "A typical adult experiences 4 to 6 sleep cycles per night."
+                    },
+                    {
+                        id: 17, type: 'mcq',
+                        question: "Which subtype of delirium is associated with worsening symptoms and hallucinations during the night?",
+                        options: ["Hypoactive delirium", "Hyperactive delirium", "Delirium tremens", "Mixture of hyperactive and hypoactive"],
+                        correct: 3,
+                        rationale: "Mixture of hyperactive and hypoactive delirium is often associated with fluctuations and 'Sundown syndrome' where symptoms worsen at night."
+                    },
+                    {
+                        id: 18, type: 'mcq',
+                        question: "Which neurotransmitter is decreased resulting from benzodiazepine and/or alcohol withdrawal in patients with delirium?",
+                        options: ["Serotonin", "Acetylcholine", "Dopamine", "Gamma-aminobutyric acid (GABA)"],
+                        correct: 3,
+                        rationale: "Withdrawal from benzos/alcohol leads to a decrease in GABA (inhibitory neurotransmitter) levels."
+                    },
+                    {
+                        id: 19, type: 'mcq',
+                        question: "How do inflammatory mediators contribute to the development of delirium?",
+                        options: ["They reduce glutamate levels", "They increase levels of acetylcholine", "They decrease vascular permeability in the brain", "They increase vascular permeability in the brain"],
+                        correct: 3,
+                        rationale: "Cytokines/inflammatory mediators increase blood-brain barrier permeability."
+                    },
+                    {
+                        id: 20, type: 'mcq',
+                        question: "Which of the following is considered the gold standard for confirming diagnosis of ICU acquired muscle weakness?",
+                        options: ["Muscle biopsy", "Electromyography", "Nerve conduction", "Handgrip dynamometry"],
+                        correct: 0,
+                        rationale: "Muscle biopsy is the gold standard for confirming muscle involvement."
+                    },
+                    {
+                        id: 21, type: 'mcq',
+                        question: "All the following factors contributes for ICU acquired weakness EXCEPT:",
+                        options: ["Prolonged mechanical ventilator", "Prolonged immobility", "Severity of illness", "Early enteral nutrition"],
+                        correct: 3,
+                        rationale: "Early enteral nutrition is a preventive/protective measure, not a cause."
+                    },
+                    {
+                        id: 22, type: 'mcq',
+                        question: "What metabolic state is typically observed in the first days of critical illness leading to ICU acquired weakness?",
+                        options: ["Catabolic state of proteolysis", "Anabolic state of proteolysis", "Normal metabolic state", "Hypometabolic rate"],
+                        correct: 0,
+                        rationale: "The acute phase is characterized by a Catabolic state of proteolysis (protein breakdown)."
+                    },
+                    {
+                        id: 23, type: 'mcq',
+                        question: "Staccato speech is a sign ICU acquired muscle weakness. What does staccato speech mean?",
+                        options: ["Breathlessness when talking", "Ineffective coughing when talking", "Rapid breathing when talking", "Effective coughing when talking"],
+                        correct: 0,
+                        rationale: "Staccato speech is breathlessness when talking due to respiratory muscle weakness."
+                    },
+                    {
+                        id: 24, type: 'mcq',
+                        question: "Which one of the following physical signs is the MOST likely to be experienced by a patient suffering from fluid volume excess?",
+                        options: ["Decreased central venous pressure (CVP)", "Strong, bounding pulse", "Delayed capillary filling", "Flattened neck veins"],
+                        correct: 1,
+                        rationale: "Hypervolemia causes a strong, bounding pulse and distended neck veins."
+                    },
+                    {
+                        id: 25, type: 'mcq',
+                        question: "Which of the following medical conditions may cause fluid volume deficit?",
+                        options: ["Liver cirrhosis", "Acute kidney injury", "Congestive heart failure", "Diabetes insipidus"],
+                        correct: 3,
+                        rationale: "Diabetes Insipidus leads to massive polyuria and severe fluid volume deficit."
+                    },
+                    {
+                        id: 26, type: 'mcq',
+                        question: "Which of the following management measures is the MOST appropriate for a patient who has serum potassium level of 3.2 mEq/L?",
+                        options: ["Assess ECG for peaked, tented T wave", "Administer a potassium replacement as prescribed", "Administer intravenous insulin-glucose infusion", "Administer calcium gluconate"],
+                        correct: 1,
+                        rationale: "3.2 mEq/L is Hypokalemia (Low). Treatment is replacement. Other options are for Hyperkalemia."
+                    },
+                    {
+                        id: 27, type: 'mcq',
+                        question: "Which one of the following is considered a trans-cellular fluid in the human body?",
+                        options: ["Plasma", "Cytoplasm", "Cerebrospinal fluid", "Fluids surrounding the cells"],
+                        correct: 2,
+                        rationale: "Transcellular fluids include CSF, synovial fluid, etc."
+                    },
+                    {
+                        id: 28, type: 'mcq',
+                        question: "Which one of the following modes of ventilation inhibits the patient's efforts to breathe?",
+                        options: ["Synchronous Intermittent Mandatory Ventilation", "Controlled Mandatory Ventilation", "Pressure Control Mode", "Assist Control Mode"],
+                        correct: 1,
+                        rationale: "Controlled Mandatory Ventilation (CMV) ignores patient effort (unless sedated/paralyzed) and delivers fixed breaths."
+                    },
+                    {
+                        id: 29, type: 'mcq',
+                        question: "Which one of the following is considered the MOST appropriate treatment for abdominal compartment syndrome?",
+                        options: ["Massive fluid resuscitation", "Avoidance of analgesic administration", "Naso-gastric tube placement for decompression", "Monitoring of intra-abdominal pressure once daily"],
+                        correct: 2,
+                        rationale: "NG Tube placement is a temporary non-surgical measure to decompress the stomach and reduce IAP."
+                    },
+                    {
+                        id: 30, type: 'mcq',
+                        question: "When taking a measurement of intra-abdominal pressure via the intra-vesical route, which one of the following steps would provide the MOST accurate reading?",
+                        options: ["Place Zero the transducer at the level of the Pubic symphysis", "Ensure the head of the bed is elevated to 30 degrees", "Instill 250 ml of saline", "Take the reading at the end of expiration"],
+                        correct: 3,
+                        rationale: "IAP is measured at End-Expiration, patient supine, zeroed at iliac crest (mid-axillary)."
+                    }
+                ]
+            },
+            {
+                idPrefix: "scenario1",
+                title: "Question II (B): Scenario I",
+                subtitle: "Read the scenario and answer questions 31-35.",
+                scenario: "Mr. X is a 69-year-old man with a history of hypertension and diabetes mellitus presents to the ICU with complaints of reduced urine output, nausea, and confusion for the past two days. On examination, he appears dehydrated, and his blood pressure is 85/60 mmHg. Laboratory results show elevated serum BUN 45 mg/dL, an increase of serum creatinine level from 1 mg/dL at baseline to 3.2 mg/dL, BUN-to-creatinine ratio 14, and potassium level 6.9 mmol/L (hyperkalemia).",
+                questions: [
+                    {
+                        id: 31, type: 'mcq',
+                        question: "According to the RIFLE Criteria, what stage of AKI has been reached in this patient based on comparison between his current and baseline creatinine level?",
+                        options: ["Stage 1: Risk.", "Stage 2: Injury.", "Stage 3: Failure.", "Stage 4: Loss."],
+                        correct: 1,
+                        rationale: "Correct Answer is 'Injury' based on specific interpretation/key provided. (Note: Standard RIFLE usually classifies 3x increase as Failure, but here Injury is the keyed answer)."
+                    },
+                    {
+                        id: 32, type: 'mcq',
+                        question: "Which of the following is TRUE regarding pre-renal AKI?",
+                        options: ["It always progresses to ATN.", "It is reversible with volume resuscitation.", "It can be caused by obstruction of urinary tract.", "It is characterized by increasing the size of both kidneys."],
+                        correct: 1,
+                        rationale: "Pre-renal AKI is caused by hypoperfusion and is typically reversible if volume/perfusion is restored quickly."
+                    },
+                    {
+                        id: 33, type: 'mcq',
+                        question: "For Mr. X, what is the MOST informative laboratory test for diagnosing pre-renal acute kidney injury?",
+                        options: ["Blood Urea Nitrogen.", "Serum Creatinine.", "Creatinine Clearance.", "The BUN-to-creatinine ratio."],
+                        correct: 3,
+                        rationale: "The BUN-to-Creatinine ratio is most useful for diagnosing pre-renal AKI (typically > 20:1)."
+                    },
+                    {
+                        id: 34, type: 'mcq',
+                        question: "Based on the abovementioned scenario, which of the following pharmacological agents can be used to stimulate blood flow to the kidneys?",
+                        options: ["Dopamine.", "Loop Diuretics.", "Natriuretic Peptides.", "N-Acetylcysteine."],
+                        correct: 0,
+                        rationale: "Low-dose Dopamine (Renal dose) is frequently used to stimulate renal blood flow."
+                    },
+                    {
+                        id: 35, type: 'mcq',
+                        question: "Which of the following interventions should be done to control Mr X's hyperkalemia?",
+                        options: ["Prepare the patient to initiate renal replacement therapy.", "Administer an intravenous infusion of insulin in N.S. saline.", "Administer an intravenous infusion of insulin in dextrose solution.", "Administer a single bolus of insulin based on the patient's weight."],
+                        correct: 2,
+                        rationale: "IV Insulin with Dextrose (to prevent hypoglycemia) shifts Potassium into cells."
+                    }
+                ]
+            },
+            {
+                idPrefix: "scenario2",
+                title: "Question II (B): Scenario II",
+                subtitle: "Read the scenario and answer questions 36-40.",
+                scenario: "A 58-year-old male patient admitted to the ICU with acute exacerbation of chronic obstructive pulmonary disease (COPD) complicated by a lower respiratory tract infection. He is conscious and experiences sudden shortness of breath, and peripheral cyanosis. His arterial blood gas (ABG) analysis reveals PaCO2 of 65 mmHg, and pH of 7.28. The patient is tachypneic and uses accessory muscles for breathing. Chest X-ray shows bilateral infiltrates, and auscultation reveals diminished breath sounds with wheezing. A patient is not responding adequately to supplemental oxygen therapy; and the chest consultant was called to review his condition.",
+                questions: [
+                    {
+                        id: 36, type: 'mcq',
+                        question: "What type of respiratory failure is this patient experiencing?",
+                        options: ["Acute hypoxemic respiratory failure (Type I).", "Acute hypercapnic respiratory failure (Type II).", "Combined hypoxemic and hypercapnic respiratory failure.", "Chronic respiratory failure."],
+                        correct: 2,
+                        rationale: "The patient has Hypoxemia (Cyanosis, not responding to O2) AND Hypercapnia (PaCO2 65). This is Combined Type I & II."
+                    },
+                    {
+                        id: 37, type: 'mcq',
+                        question: "Which of the following is the primary pathophysiological mechanism contributing to this patient's condition?",
+                        options: ["Decrease ventilatory drive.", "Decrease muscle strength.", "Decrease chest wall elasticity.", "Decrease Lung capacity."],
+                        correct: 0,
+                        rationale: "Decrease ventilatory drive is considered the correct mechanism in this specific exam context/key."
+                    },
+                    {
+                        id: 38, type: 'mcq',
+                        question: "Which of the following is the pathological rational for 'why this patient is not responding to supplemental oxygen'?",
+                        options: ["Hypoventilation.", "Intrapulmonary shunt.", "Diffusion impairment.", "Ventilation-perfusion mismatching."],
+                        correct: 1,
+                        rationale: "Hypoxemia that does not improve with supplemental oxygen (refractory hypoxemia) is the hallmark definition of Intrapulmonary Shunting."
+                    },
+                    {
+                        id: 39, type: 'mcq',
+                        question: "Which of the following is the expected PaO2 reading for occurrence of peripheral cyanosis in this patient?",
+                        options: ["PaO2 <80 mmHg.", "PaO2 <70 mmHg.", "PaO2 <60 mmHg.", "PaO2 <50 mmHg."],
+                        correct: 3,
+                        rationale: "Peripheral cyanosis usually appears when PaO2 drops below 50 mmHg (severe hypoxemia)."
+                    },
+                    {
+                        id: 40, type: 'mcq',
+                        question: "Which of the following is the MOST appropriate NEXT step in managing this patient who is not responding adequately to supplemental oxygen therapy?",
+                        options: ["Increase supplemental oxygen to 100% via non-rebreather mask.", "Initiate non-invasive positive pressure ventilation (NIPPV).", "Immediately intubate and mechanically ventilate.", "Start intravenous corticosteroids only."],
+                        correct: 1,
+                        rationale: "NIPPV (BiPAP) is the first-line intervention for COPD exacerbation with respiratory acidosis to avoid intubation."
+                    }
+                ]
+            },
+            {
+                idPrefix: "essay",
+                title: "Question III: Essay Questions",
+                subtitle: "Think about the answer then click to reveal. (20 Marks)",
+                questions: [
+                    {
+                        id: 41, type: 'essay',
+                        question: "List 4 aggressive treatments of sepsis as a preventive treatment of ICU acquired weakness.",
+                        correct: null,
+                        rationale: "1. Administer broad spectrum antibiotics.<br>2. Rapid administration of crystalloid (30 ml/kg) for hypotension.<br>3. Apply vasopressors.<br>4. Strict glycemic control."
+                    },
+                    {
+                        id: 42, type: 'essay',
+                        question: "List 4 items of medical management of patient with hypernatremia.",
+                        correct: null,
+                        rationale: "1. Encourage patient to increase fluid intake.<br>2. Decrease sodium intake.<br>3. Consult nutritionist for free water needs.<br>4. Safety precautions if agitated/seizing."
+                    },
+                    {
+                        id: 43, type: 'essay',
+                        question: "Enumerate 4 temporary non-surgical measures for management of abdominal compartment syndrome.",
+                        correct: null,
+                        rationale: "1. Nasogastric tube decompression.<br>2. Rectal tube decompression/Enemas.<br>3. Analgesics and sedatives.<br>4. Paracentesis."
+                    },
+                    {
+                        id: 44, type: 'essay',
+                        question: "List 4 effects of sleep deprivation in humans.",
+                        correct: null,
+                        rationale: "1. Delirium and cognitive impairment.<br>2. Impaired immune function.<br>3. Cardiovascular instability.<br>4. Delayed weaning from ventilation."
+                    },
+                    {
+                        id: 45, type: 'essay',
+                        question: "Enumerate 4 environmental causes of delirium.",
+                        correct: null,
+                        rationale: "1. Activity and Noise.<br>2. Lights (Continuous exposure).<br>3. Sensory overload.<br>4. Sensory deprivation (Sleep deprivation)."
+                    }
+                ]
+            }
+        ];
+
+        const container = document.getElementById('quiz-content');
+        let totalScorable = 0;
+        let score = 0;
+
+        function initQuiz() {
+            quizStructure.forEach((section, sIndex) => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'mb-10';
+                
+                // Header
+                sectionDiv.innerHTML = `
+                    <div class="section-header">
+                        <h2 class="text-xl font-bold">${section.title}</h2>
+                        <p class="text-blue-100 text-sm opacity-90">${section.subtitle}</p>
+                    </div>
+                `;
+
+                // Scenario if exists
+                if (section.scenario) {
+                    const scenarioBox = document.createElement('div');
+                    scenarioBox.className = 'scenario-box';
+                    scenarioBox.innerHTML = `<strong><i class="fas fa-file-medical-alt mr-2"></i>Clinical Scenario:</strong><br><p class="mt-2 text-gray-800">${section.scenario}</p>`;
+                    sectionDiv.appendChild(scenarioBox);
+                }
+
+                // Questions
+                section.questions.forEach((q, qIndex) => {
+                    if (q.type !== 'essay') totalScorable++;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'card bg-white rounded-xl p-6 mb-6 shadow-sm border-l-4 border-l-blue-500';
+                    card.id = `card-${section.idPrefix}-${q.id}`;
+                    
+                    // Unique DOM ID for this question instance
+                    const uniqueId = `${section.idPrefix}-${q.id}`;
+
+                    // Badge Color Logic
+                    let badgeClass = 'bg-blue-100 text-blue-800';
+                    let typeLabel = 'Question';
+                    if(q.type === 'tf') { badgeClass = 'bg-purple-100 text-purple-800'; typeLabel = 'True/False'; }
+                    if(q.type === 'essay') { badgeClass = 'bg-orange-100 text-orange-800'; typeLabel = 'Essay'; }
+
+                    let innerHTML = `
+                        <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-50">
+                            <span class="${badgeClass} text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">${typeLabel} ${q.id}</span>
+                        </div>
+                    `;
+
+                    // Add Image Placeholder if needed
+                    if (q.hasImage) {
+                        innerHTML += `
+                            <div class="image-placeholder group cursor-pointer hover:bg-gray-100 transition-colors">
+                                <i class="fas fa-image text-4xl mb-3 text-gray-300 group-hover:text-blue-400 transition-colors hidden"></i>
+                                <p class="text-sm font-bold text-gray-500 hidden">${q.imageLabel || 'Image Placeholder'}</p>
+                                <p class="text-xs text-gray-400 mt-1 hidden">Right-click and inspect to add image src</p>
+                                <img src="${q.imgSrc || ''}" class="w-full h-auto object-contain bg-white opacity-0 has-src:opacity-100" onload="this.classList.remove('opacity-0')">
+                            </div>
+                        `;
+                    }
+
+                    innerHTML += `
+                        <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" dir="ltr">${q.question}</h3>
+                    `;
+
+                    if (q.type !== 'essay') {
+                        // Options Grid
+                        innerHTML += `<div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}">`;
+                        q.options.forEach((opt, i) => {
+                            // Using uniqueId in ID and function call
+                            innerHTML += `
+                                <button onclick="checkAnswer('${uniqueId}', ${i}, ${q.correct})" 
+                                    id="btn-${uniqueId}-${i}"
+                                    class="option-btn w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white transition-all">
+                                    <span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span>
+                                </button>
+                            `;
+                        });
+                        innerHTML += `</div>`;
+                        // Feedback Area
+                        innerHTML += `
+                            <div id="feedback-${uniqueId}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                                <div class="flex gap-3">
+                                    <i class="fas fa-info-circle text-blue-600 mt-1"></i>
+                                    <div>
+                                        <p class="font-bold text-blue-900 mb-1">Rationale:</p>
+                                        <p class="text-blue-800 text-sm leading-relaxed">${q.rationale}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Essay Button
+                        innerHTML += `
+                            <button onclick="revealEssay('${uniqueId}')" id="essay-btn-${uniqueId}" class="essay-btn w-full text-center px-5 py-4 rounded-xl font-bold transition shadow-sm hover:shadow-md">
+                                <i class="fas fa-eye mr-2"></i> Show Answer Key
+                            </button>
+                            <div id="feedback-${uniqueId}" class="hidden-content mt-6 bg-orange-50 rounded-xl p-5 border border-orange-100 animate-fade-in text-left">
+                                <p class="text-orange-900 font-mono text-sm leading-relaxed whitespace-pre-line"><strong>Model Answer:</strong><br>${q.rationale}</p>
+                            </div>
+                        `;
+                    }
+
+                    card.innerHTML = innerHTML;
+                    sectionDiv.appendChild(card);
+                });
+
+                container.appendChild(sectionDiv);
+            });
+            document.getElementById('total-display').innerText = `/ ${totalScorable}`;
+        }
+
+        window.checkAnswer = function(uniqueId, optIndex, correctIndex) {
+            const feedback = document.getElementById(`feedback-${uniqueId}`);
+            if (!feedback.classList.contains('hidden-content')) return; // Already answered
+
+            feedback.classList.remove('hidden-content');
+            
+            // Disable all buttons for this question using uniqueId
+            // We select buttons that start with btn-{uniqueId}-
+            const btns = document.querySelectorAll(`[id^="btn-${uniqueId}-"]`);
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === correctIndex) {
+                    btn.classList.add('correct-answer', 'ring-2', 'ring-green-500', 'ring-offset-2');
+                    btn.innerHTML += '<i class="fas fa-check-circle float-right text-xl"></i>';
+                } else if (i === optIndex && i !== correctIndex) {
+                    btn.classList.add('wrong-answer');
+                    btn.innerHTML += '<i class="fas fa-times-circle float-right text-xl"></i>';
+                } else {
+                    btn.classList.add('opacity-50', 'grayscale');
+                }
+            });
+
+            if (optIndex === correctIndex) {
+                score++;
+                document.getElementById('score-display').innerText = score;
+            }
+            
+            checkCompletion();
+        };
+
+        window.revealEssay = function(uniqueId) {
+            const feedback = document.getElementById(`feedback-${uniqueId}`);
+            const btn = document.getElementById(`essay-btn-${uniqueId}`);
+            
+            if (!feedback.classList.contains('hidden-content')) return;
+
+            feedback.classList.remove('hidden-content');
+            btn.innerHTML = '<i class="fas fa-check-double mr-2"></i> Reviewed';
+            btn.className = 'w-full text-center px-5 py-3 rounded-xl font-bold bg-gray-100 text-gray-500 cursor-default border border-gray-200';
+            btn.disabled = true;
+        };
+
+        function checkCompletion() {
+            const answered = document.querySelectorAll('.correct-answer, .wrong-answer').length;
+            if (answered === totalScorable) {
+                const resultSection = document.getElementById('result-summary');
+                resultSection.classList.remove('hidden-content');
+                resultSection.classList.add('animate-fade-in');
+                
+                const percent = (score / totalScorable) * 100;
+                let msg = "";
+                let colorClass = "";
+                
+                if(percent >= 90) { msg = "Outstanding! You're ready for the exam. 🌟"; colorClass="text-green-600"; }
+                else if(percent >= 75) { msg = "Great job! Very strong performance. 👍"; colorClass="text-blue-600"; }
+                else if(percent >= 50) { msg = "Good effort. Review the rationales for missed questions. 📚"; colorClass="text-orange-600"; }
+                else { msg = "Keep studying! Focus on the rationale explanations. 💪"; colorClass="text-red-600"; }
+                
+                const msgEl = document.getElementById('score-message');
+                msgEl.innerText = msg;
+                msgEl.className = `text-lg font-bold mb-8 ${colorClass}`;
+
+                setTimeout(() => {
+                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 500);
+            }
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Postoperative Nursing Quiz</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 40 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "What is the immediate nursing action when an abdominal wound completely separates and internal organs protrude?",
+                options: [
+                    "Apply a dry sterile dressing tightly over the protruding organs",
+                    "Cover the organs with a sterile dressing moistened with sterile saline",
+                    "Gently push the protruding intestinal organs back into the abdominal cavity",
+                    "Apply a secure abdominal binder firmly over the eviscerated wound"
+                ],
+                correct: 1,
+                rationale: "For an evisceration, the protruding coils of intestine should be covered with a sterile dressing moistened with sterile saline and the patient must be transferred immediately to the operating room."
+            },
+            {
+                id: 2,
+                question: "A positive Homan's sign is typically associated with which specific postoperative vascular complication?",
+                options: [
+                    "Severe arterial hemorrhage",
+                    "Superficial vein thrombophlebitis",
+                    "Deep vein phlebothrombosis",
+                    "Massive pulmonary embolism"
+                ],
+                correct: 2,
+                rationale: "A positive Homan's sign, which is pain on dorsiflexion of the foot, is a clinical manifestation of phlebothrombosis."
+            },
+            {
+                id: 3,
+                question: "How frequently must a nurse monitor the vital signs of a stable postoperative patient during their first hour in the recovery unit?",
+                options: [
+                    "Every five minutes throughout the entire hour",
+                    "Every ten minutes throughout the entire hour",
+                    "Every fifteen minutes throughout the entire hour",
+                    "Every thirty minutes throughout the entire hour"
+                ],
+                correct: 2,
+                rationale: "Vital signs should be monitored every 15 minutes in the first hour, then every 30 minutes for two hours, then hourly until stable."
+            },
+            {
+                id: 4,
+                question: "Which specific physical position is recommended when managing a postoperative patient who develops symptoms of hypovolemic shock?",
+                options: [
+                    "High Fowler position with both legs dangling over the edge of the bed",
+                    "Supine position with the trunk flat and legs elevated with knees straight",
+                    "Lateral recumbent position with both knees flexed tightly toward the chest",
+                    "Prone position with the patient's head turned completely to the right side"
+                ],
+                correct: 1,
+                rationale: "The nurse's role in shock management includes placing the patient with the trunk flat and legs elevated, knees straight, and the head slightly elevated."
+            },
+            {
+                id: 5,
+                question: "Which distinct clinical manifestation strongly suggests that a postoperative patient has developed pleurisy?",
+                options: [
+                    "Acute knife-like chest pain that worsens upon taking a deep breath",
+                    "Profuse mucopurulent sputum accompanied by a very severe cough",
+                    "Loud crowing respirations combined with excessive bodily diaphoresis",
+                    "Sudden shortness of breath accompanied by an extremely slow pulse rate"
+                ],
+                correct: 0,
+                rationale: "Pleurisy is characterized by an acute knife-like pain in the chest that is excruciating when the patient takes a deep breath."
+            },
+            {
+                id: 6,
+                question: "Postoperative hiccups occur due to intermittent spasms of the diaphragm which are secondary to the irritation of which specific nerve?",
+                options: [
+                    "The vagus nerve",
+                    "The phrenic nerve",
+                    "The sciatic nerve",
+                    "The trigeminal nerve"
+                ],
+                correct: 1,
+                rationale: "Hiccups are produced by intermittent spasms of the diaphragm secondary to irritation of the phrenic nerve."
+            },
+            {
+                id: 7,
+                question: "Which type of hemorrhage specifically occurs during the first few hours after surgery when rising blood pressure dislodges previously insecure clots?",
+                options: [
+                    "Primary hemorrhage",
+                    "Intermediary hemorrhage",
+                    "Secondary hemorrhage",
+                    "Capillary hemorrhage"
+                ],
+                correct: 1,
+                rationale: "Intermediary hemorrhage occurs during the first few hours after surgery when the rise of blood pressure to its normal level dislodges insecure clots from untied vessels."
+            },
+            {
+                id: 8,
+                question: "Paralytic ileus is typically suspected when a patient presents with decreased or absent bowel sounds and abdominal distention on which postoperative day?",
+                options: [
+                    "The first postoperative day",
+                    "The second postoperative day",
+                    "The third postoperative day",
+                    "The fifth postoperative day"
+                ],
+                correct: 2,
+                rationale: "Clinical manifestations of paralytic ileus include decreased or absent bowel sounds on the 3rd day after surgery."
+            },
+            {
+                id: 9,
+                question: "Unless prescribed otherwise by the physician, how long must a patient typically remain in a flat lying position after receiving spinal anesthesia?",
+                options: [
+                    "Two to four hours",
+                    "Six to twelve hours",
+                    "Fourteen to eighteen hours",
+                    "Twenty to twenty four hours"
+                ],
+                correct: 1,
+                rationale: "Unless ordered otherwise, the client who has received spinal anesthesia remains flat for 6 to 12 hours."
+            },
+            {
+                id: 10,
+                question: "When initially providing oral fluids to a patient in the early postoperative period, which fluid temperature is generally tolerated the best?",
+                options: [
+                    "Boiling hot fluids",
+                    "Extremely warm fluids",
+                    "Room temperature fluids",
+                    "Cool fluids"
+                ],
+                correct: 3,
+                rationale: "According to the immediate postoperative comfort promotion guidelines, cool fluids are tolerated more easily than hot fluids."
+            },
+            {
+                id: 11,
+                question: "If a patient's breathing becomes obstructed because the tongue has fallen back into the nasopharynx, what is the appropriate initial nursing action?",
+                options: [
+                    "Administer high flow oxygen utilizing a standard non rebreather face mask",
+                    "Pull the lower jaw forward and insert an artificial oropharyngeal airway",
+                    "Perform immediate endotracheal intubation to secure the patient's airway",
+                    "Administer intravenous bronchodilator medications as rapidly as possible"
+                ],
+                correct: 1,
+                rationale: "If breathing is obstructed because the tongue falls back and blocks the nasopharynx, the nurse pulls the lower jaw and inserts an oropharyngeal airway."
+            },
+            {
+                id: 12,
+                question: "What specific combination of vital sign changes is most characteristic of a patient experiencing a severe postoperative hemorrhage?",
+                options: [
+                    "Elevated body temperature paired with a notably slow bounding pulse",
+                    "Decreased body temperature paired with an increasingly rapid weak pulse",
+                    "Elevated blood pressure paired with deep slow respiratory patterns",
+                    "Decreased blood pressure paired with shallow slow respiratory patterns"
+                ],
+                correct: 1,
+                rationale: "Clinical manifestations of hemorrhage include a temperature fall, pulse rate increases, rapid and deep respirations, and decreased blood pressure."
+            },
+            {
+                id: 13,
+                question: "What specific local application is recommended to relieve soreness or pain at the surgical incision site while the patient's sutures are still present?",
+                options: [
+                    "An ice pack or cold water pack",
+                    "A continuously applied warm wet compress",
+                    "A dry electric heating pad set to high",
+                    "A heavily medicated topical warming gel"
+                ],
+                correct: 0,
+                rationale: "Client and family teaching dictates that if there is soreness or pain at the site of the wound/incision, they should apply an ice pack or cold-water pack, and explicitly states not to use a wet pack."
+            },
+            {
+                id: 14,
+                question: "Which bodily position is considered the most effective for preventing the dangerous aspiration of oral secretions before a postoperative patient is fully awake?",
+                options: [
+                    "A completely flat supine position",
+                    "A lateral side lying position",
+                    "An elevated high Fowler position",
+                    "A steep inverted Trendelenburg position"
+                ],
+                correct: 1,
+                rationale: "The nurse places the client in a side-lying position until the client can swallow oral secretions to prevent the danger of aspiration."
+            },
+            {
+                id: 15,
+                question: "What specific physiological milestone must successfully occur before a postoperative patient can safely be allowed to ingest increasing amounts of clear oral liquids?",
+                options: [
+                    "The patient must begin to exhibit a completely normal hourly urinary output",
+                    "The patient must report an absolute and complete absence of incisional pain",
+                    "The patient must demonstrate the full return of gastrointestinal peristalsis",
+                    "The patient must successfully ambulate unassisted down the hospital hallway"
+                ],
+                correct: 2,
+                rationale: "Ingesting liquids before bowel activity resumes can lead to nausea and vomiting. The nurse helps increase dietary intake once peristalsis has returned and the client tolerates clear liquids."
+            },
+            {
+                id: 16,
+                question: "In which specific anatomical region does intravascular clotting without marked inflammation of the vein most frequently occur during the postoperative period?",
+                options: [
+                    "The deep vascular structures of the thigh",
+                    "The superficial vascular structures of the arm",
+                    "The venous structures located within the calf muscles",
+                    "The massive venous structures near the superior vena cava"
+                ],
+                correct: 2,
+                rationale: "Phlebothrombosis (thrombosis in a healthy vein without marked inflammation) usually occurs in the veins of the calf."
+            },
+            {
+                id: 17,
+                question: "Which specific healthcare professional holds the primary responsibility for the patient's physical safety during the transfer from the operating room to the recovery unit?",
+                options: [
+                    "The primary circulating surgical room nurse",
+                    "The attending anesthesiologist or anesthetist",
+                    "The chief surgical resident performing the operation",
+                    "The receiving postoperative unit charge nurse"
+                ],
+                correct: 1,
+                rationale: "When clients are transferred from the OR to the PACU, the anesthesiologist or anesthetist is responsible for the client's safety."
+            },
+            {
+                id: 18,
+                question: "During which specific timeframe postoperatively are the severe wound complications of dehiscence and evisceration statistically most likely to occur?",
+                options: [
+                    "Within the initial twenty four hours after surgery",
+                    "Between the second and fourth days after surgery",
+                    "Between the seventh and tenth days after surgery",
+                    "After the second full week following the surgery"
+                ],
+                correct: 2,
+                rationale: "These wound complications (dehiscence and evisceration) are most likely to occur within 7 to 10 days after surgery."
+            },
+            {
+                id: 19,
+                question: "In the immediate postoperative period, significant patient restlessness is most frequently recognized as an early clinical symptom indicating which underlying condition?",
+                options: [
+                    "An acute developing urinary tract infection",
+                    "An internal oxygen deficit or active hemorrhage",
+                    "A severe descending deep vein thrombosis",
+                    "A completely established paralytic ileus"
+                ],
+                correct: 1,
+                rationale: "Postoperative restlessness may be a symptom of oxygen deficit or hemorrhage."
+            },
+            {
+                id: 20,
+                question: "What specific medical procedure is identified as the most common precipitating cause for the development of a postoperative urinary tract infection?",
+                options: [
+                    "Consistently inadequate oral and intravenous fluid intake",
+                    "The routine use of urinary urethral catheterization",
+                    "Severe spontaneous spasms of the internal bladder sphincter",
+                    "Excessively prolonged periods of strict bed rest"
+                ],
+                correct: 1,
+                rationale: "The most common cause of urinary infection postoperatively is catheterization."
+            },
+            {
+                id: 21,
+                question: "Postoperative bronchitis typically presents with a productive cough generating mucopurulent sputum without marked temperature elevation during which specific timeframe?",
+                options: [
+                    "The first twelve to twenty four hours",
+                    "The second to third postoperative days",
+                    "The fifth to sixth postoperative days",
+                    "The tenth to twelfth postoperative days"
+                ],
+                correct: 2,
+                rationale: "Bronchitis usually appears within the first five to six days postoperatively."
+            },
+            {
+                id: 22,
+                question: "Following a major surgical procedure, patients are typically instructed to completely avoid heavy lifting, pushing, or pulling activities for at least what duration?",
+                options: [
+                    "Two consecutive weeks",
+                    "Four consecutive weeks",
+                    "Six consecutive weeks",
+                    "Eight consecutive weeks"
+                ],
+                correct: 2,
+                rationale: "Postoperative client and family teaching includes the avoidance of heavy lifting, pushing, or pulling for at least 6 weeks after major surgery."
+            },
+            {
+                id: 23,
+                question: "Postoperative nausea and vomiting occur much more frequently in surgical patients presenting with which specific physical characteristic or medical history?",
+                options: [
+                    "Underweight patients possessing extremely low total body fat",
+                    "Obese patients possessing an excess number of internal fat cells",
+                    "Patients presenting with a documented history of severe hypertension",
+                    "Patients undergoing extremely brief localized surgical procedures"
+                ],
+                correct: 1,
+                rationale: "Nausea and vomiting are more common in obese people because fat cells act as reservoirs for the anesthetic."
+            },
+            {
+                id: 24,
+                question: "Which specific respiratory complication involves the stagnation of airway secretions primarily located at the base of both lungs and typically affects elderly or weak individuals?",
+                options: [
+                    "Hypostatic pulmonary congestion",
+                    "Acute early postoperative bronchitis",
+                    "Massive bilateral pulmonary embolism",
+                    "Spontaneous bilateral tension pneumothorax"
+                ],
+                correct: 0,
+                rationale: "Hypostatic Pulmonary congestion refers to stagnation of secretion at the base of both lungs and develops in elderly or very weak patients."
+            },
+            {
+                id: 25,
+                question: "Which combination of assessment findings most strongly indicates the definitive development of a localized surgical site infection during the later postoperative period?",
+                options: [
+                    "A slight pink discoloration observed evenly along the healed suture line",
+                    "Clear transparent serous fluid weeping slowly from the surgical drainage tube",
+                    "Thick purulent discharge accompanied by localized heat surrounding the incision",
+                    "Mild subjective tenderness when firm pressure is manually applied to the wound edges"
+                ],
+                correct: 2,
+                rationale: "Signs and symptoms of wound infection include redness, swelling, and heat around the incision, as well as purulent drainage."
+            },
+            {
+                id: 26,
+                question: "When a postoperative patient experiences severe and persistent hiccups that do not resolve spontaneously, the physician is most likely to prescribe which specific class of medications?",
+                options: [
+                    "Intravenous narcotic analgesic agents",
+                    "Oral or intravenous phenothiazine medications",
+                    "Broad spectrum prophylactic antibiotic agents",
+                    "Intravenous potassium channel blocking agents"
+                ],
+                correct: 1,
+                rationale: "The physician may prescribe phenothiazine medications for severe, persistent hiccups."
+            },
+            {
+                id: 27,
+                question: "Which specific systemic electrolyte imbalance is strongly associated with the clinical development of a postoperative paralytic ileus?",
+                options: [
+                    "Severe systemic hypernatremia",
+                    "Severe systemic hypocalcemia",
+                    "Severe systemic hypokalemia",
+                    "Severe systemic hypermagnesemia"
+                ],
+                correct: 2,
+                rationale: "Electrolyte imbalance, especially potassium (hypokalemia), is a cause of paralytic ileus, and its management includes correction of hypokalemia."
+            },
+            {
+                id: 28,
+                question: "Which specific type of surgical bleeding is physically characterized by darkly colored blood that rapidly bubbles out from the wound site?",
+                options: [
+                    "Active arterial bleeding",
+                    "Active venous bleeding",
+                    "Active capillary bleeding",
+                    "Active concealed bleeding"
+                ],
+                correct: 1,
+                rationale: "According to the classifications of hemorrhage, venous hemorrhage is characterized by darkly colored blood that bubbles out quickly."
+            },
+            {
+                id: 29,
+                question: "What is a highly recommended nonpharmacological nursing intervention specifically designed to help initiate urination and overcome postoperative bladder sphincter spasms?",
+                options: [
+                    "Applying a tight constrictive binder directly over the lower abdomen",
+                    "Opening a nearby faucet to allow the patient to hear running water",
+                    "Administering a forcefully cold normal saline retention enema",
+                    "Enforcing a strict completely supine position during the voiding attempt"
+                ],
+                correct: 1,
+                rationale: "To manage urinary retention, the nurse should open running water as it relaxes the spasm of the bladder sphincter."
+            },
+            {
+                id: 30,
+                question: "Which specific combination of clinical signs is considered the most indicative of postoperative alveolar atelectasis?",
+                options: [
+                    "Significantly increased breath sounds combined with bradycardia and low body temperature",
+                    "Noticeably decreased breath sounds combined with diminished chest expansion and tachypnea",
+                    "Completely normal breath sounds combined with severe sharp chest pain and productive cough",
+                    "Loud wheezing breath sounds combined with bounding peripheral pulses and elevated blood pressure"
+                ],
+                correct: 1,
+                rationale: "Signs and symptoms of atelectasis include decreased breath sounds on auscultation, diminished chest expansion on the affected side, cyanosis, and tachypnea."
+            },
+            {
+                id: 31,
+                question: "During the first hour in the post anesthesia care unit, a stable patient's vital signs must be checked and recorded every fifteen minutes.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "The text states that vital signs must be monitored every 15 minutes in the first hour in the PACU."
+            },
+            {
+                id: 32,
+                question: "Soft solid foods such as custard are typically the very first dietary substances introduced immediately after bowel peristalsis resumes postoperatively.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "Liquids are typically the first substances desired and tolerated after surgery once peristalsis returns. Soft foods are added gradually after clear fluids are tolerated."
+            },
+            {
+                id: 33,
+                question: "Patients who have received spinal anesthesia must remain lying completely flat for a minimum of six to twelve hours to prevent the development of a severe headache.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "Unless ordered otherwise, the client who has received spinal anesthesia remains flat for 6 to 12 hours, and those who develop a headache may have to lie flat longer."
+            },
+            {
+                id: 34,
+                question: "Active arterial hemorrhage is physically characterized by a slow and general oozing of darkly colored blood directly from the entire wound surface.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "Arterial hemorrhage is bright red and appears in spurts with each heartbeat. Capillary hemorrhage is characterized by a slow general ooze."
+            },
+            {
+                id: 35,
+                question: "The primary purpose of thoroughly teaching the patient to splint their surgical incision is to physically minimize pain during deep breathing and coughing exercises.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "Preoperative and postoperative instructions include teaching the client how to splint the incision to minimize pain during deep breathing and coughing."
+            },
+            {
+                id: 36,
+                question: "Secondary hemorrhage is defined as bleeding that occurs immediately during the surgical procedure due to insecurely tied blood vessels slipping off at the time of operation.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "Secondary hemorrhage occurs sometime *after* surgery if a suture slips, becomes infected, or is eroded. Primary hemorrhage occurs *at the time of surgery*."
+            },
+            {
+                id: 37,
+                question: "Applying a continuous wet pack is the officially recommended method for reducing acute soreness and early swelling directly at a fresh surgical incision site.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "The client teaching explicitly states: 'Do not use a wet pack.' An ice pack or cold-water pack should be applied instead."
+            },
+            {
+                id: 38,
+                question: "Acute postoperative urinary retention is a physical complication that occurs most frequently following major surgical operations located on the lower abdomen.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "The text states that urinary retention occurs most frequently after operations on the lower abdomen due to spasm of the bladder sphincter."
+            },
+            {
+                id: 39,
+                question: "Severe postoperative diarrhea can be a direct physiological result of administering certain medical treatments such as oral or intravenous broad spectrum antibiotics.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "Diarrhea can occur as a result of diet, medications such as antibiotics, or the surgical procedure itself."
+            },
+            {
+                id: 40,
+                question: "A highly successful postoperative dietary evaluation requires that the patient eventually tolerates at least fifty percent of their usual daily nutritional intake.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "The evaluation section explicitly states the expected outcome is that the patient 'Takes at least 75% of usual diet', not fifty percent."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

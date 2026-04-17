@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport meta tag is essential for responsive design on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Drugs Quiz</title>
+    
+    <!-- All styles are inlined here to ensure the file works offline. No external CSS files. -->
+    <style>
+        /* Global resets and box-sizing */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* Basic body and typography styling */
+        html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            /* Applying the requested red-brown theme */
+            background-color: #3b0d0c;
+            color: #f9fafb;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Header and Title Styling */
+        header {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background-color: #4f0f0d;
+            border-bottom: 3px solid #6a1a17;
+        }
+
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+
+        /* Arabic credit line */
+        .credit {
+            font-size: 1rem;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+            direction: rtl; /* Ensures correct rendering of Arabic text */
+        }
+
+        /* Live Score Tracker Styling */
+        #score-tracker {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: rgba(79, 15, 13, 0.9);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid #6a1a17;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #f9fafb;
+        }
+
+        #score-value {
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            background: #3b0d0c;
+            border-radius: 8px;
+            border: 1px solid #6a1a17;
+        }
+
+        /* Main quiz container */
+        main {
+            max-width: 800px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Individual Question Card Styling */
+        .question-card {
+            background: #4f0f0d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border: 1px solid #6a1a17;
+            transition: all 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Keyword highlighting */
+        .highlight {
+            color: #facc15; /* Yellow */
+            font-weight: 800;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+
+        /* Options container */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        /* Individual Option Button Styling */
+        .option {
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 3rem; /* Padding to make room for the icon */
+            font-size: 1rem;
+            font-weight: 500;
+            color: #f9fafb;
+            text-align: left;
+            background: #3b0d0c;
+            border: 2px solid #6a1a17;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            -webkit-tap-highlight-color: transparent; /* Removes blue flash on tap (iOS) */
+        }
+
+        /* Hover state for non-disabled options */
+        .option:hover:not(:disabled) {
+            background: #6a1a17;
+            border-color: #a12b28;
+        }
+
+        /* Disabled state for all options after answering */
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 1; /* Keep opacity high to show colors */
+        }
+
+        /*
+         * Custom Checkmark (✓) and X (×) Icons
+         * These are hidden by default and shown with JS by adding classes.
+        */
+        .status-icon {
+            display: none;
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            line-height: 1; /* Ensures icon is centered */
+        }
+
+        /* Show the correct icon (✓) */
+        .option.answered.correct .correct-icon {
+            display: flex;
+            background: #22c55e; /* Bright Green */
+        }
+        
+        /* Show the incorrect icon (×) */
+        .option.answered.incorrect .incorrect-icon {
+            display: flex;
+            background: #ef4444; /* Bright Red */
+            font-size: 1.2rem; /* Make the '×' slightly larger */
+        }
+
+
+        /* Styling for the *chosen* correct answer */
+        .option.correct {
+            background: #22c55e; /* Bright Green */
+            border-color: #16a34a;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Styling for the *chosen* incorrect answer */
+        .option.incorrect {
+            background: #ef4444; /* Bright Red */
+            border-color: #dc2626;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Styling for unselected, disabled options */
+        .option.disabled:not(.correct):not(.incorrect) {
+            background: #4b5563; /* Muted Gray */
+            color: #d1d5db;
+            opacity: 0.7;
+            border-color: #4b5563;
+        }
+
+        /* Rationale Box Styling */
+        .rationale {
+            display: none; /* Hidden by default */
+            margin-top: 1.25rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        /* Rationale for a correct answer */
+        .rationale.correct {
+            display: block;
+            background: #dcfce7; /* Light Green */
+            color: #14532d;
+            border: 1px solid #22c55e;
+        }
+        
+        /* Rationale for an incorrect answer */
+        .rationale.incorrect {
+            display: block;
+            background: #fee2e2; /* Light Red */
+            color: #7f1d1d;
+            border: 1px solid #ef4444;
+        }
+
+        .rationale strong {
+            color: #1f2937;
+        }
+
+        /* Final Score Container */
+        #final-score-container {
+            text-align: center;
+            background: #4f0f0d;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem auto;
+            border: 1px solid #6a1a17;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        #final-score-container h2 {
+            margin-top: 0;
+            font-size: 1.75rem;
+            color: #facc15;
+        }
+
+        #final-score-message {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        /* Utility class to hide elements */
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive design for smaller screens (e.g., iPhones) */
+        @media (max-width: 600px) {
+            body {
+                font-size: 16px; /* Ensures readability on mobile */
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .credit {
+                font-size: 0.9rem;
+            }
+
+            main {
+                margin-top: 1rem;
+            }
+
+            .question-card {
+                padding: 1rem;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .option {
+                padding: 0.75rem 0.75rem 0.75rem 3rem; /* Adjust padding for mobile */
+                font-size: 0.95rem;
+            }
+
+            #final-score-container {
+                padding: 1.5rem;
+            }
+
+            #final-score-message {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Emergency Drugs Quiz</h1>
+        <div class="credit">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</div>
+    </header>
+
+    <!-- Live Score Tracker (Sticky) -->
+    <div id="score-tracker">
+        Score: <span id="score-value">0 / 30</span>
+    </div>
+
+    <!-- Main Quiz Content Area -->
+    <main id="quiz-container">
+
+        <!-- Question 1 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">1. What is the most common route for emergency drug administration in critically ill patients due to its rapid effect?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Intravenous (IV)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Intraosseous (IO)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Transdermal
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Endotracheal Tube (ETT)
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Intravenous: and it is the most common method of administration in critically ill patients because of its rapid effect."
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">2. The acronym NAVEL is used to remember drugs that can be given via which route?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Intravenous
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Intraosseous
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Endotracheal Tube (ETT)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Transdermal
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> NAVEL (Narcan, Atropine, Valium, Epinephrine, Lidocaine) are examples of drugs that can be administered "Through endotracheal tube (ETT)."
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">3. When giving a drug via ETT, the dose is typically how many times that of an IV dose?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The same dose as IV
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Half (0.5) the IV dose
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. 2 to 2.5 times the IV dose
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. 10 times the IV dose
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "The dose is 2 to 2.5 times that of an IV dose and is followed by 10 cm NS."
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">4. Which of the following drugs is listed as one that should <strong class="highlight">NOT</strong> be diluted, especially during CPR?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Morphine
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Sodium bicarbonate
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Calcium gluconate
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Cordarone
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Under "Drugs not to be diluted," the text lists "Sodium bicarbonate (especially in CPR)."
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">5. Which drug is listed as one that "may be diluted only in 10 ml NS"?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Neuril
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Dopamine
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Morphine
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Dobutamine
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The document states "Morphine diluted in NS" under the category "Drugs may be diluted only in 10 ml NS then given."
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">6. MONA therapy is used in Acute Coronary Syndrome (ACS). What does the 'M' stand for?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Magnesium Sulfate
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Metoprolol
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Morphine
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Monitoring
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "MONA therapy: M (morphine), O (oxygen), N (nitroglycerin), A (aspirin) are used in acute coronary syndrome (ACS)."
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">7. When administering oxygen to a patient with COPD, what is a key nursing consideration?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Use the highest flow rate possible.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Avoid high flow administration.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Do not use humidification.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Only use a transdermal patch.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A nursing consideration for Oxygen is to "Avoid high flow administration in patients with concurrent COPD."
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">8. What is the primary action of Aspirin when used to treat ACS?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. It slows platelet aggregation.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. It relieves pain immediately.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. It lowers body temperature.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. It dissolves existing clots.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The action of Aspirin in ACS is that it "Slows platelet aggregation, reducing the risk of further occlusion or reocclusion..."
+            </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">9. What is the standard recommended Aspirin dosage to treat ACS?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. 50 to 100 mg
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. 160 to 325 mg
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. 500 to 1000 mg
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. 81 mg only
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "The standard recommended aspirin dosage to treat ACS is 160 to 325 mg." Patients are often instructed to chew it to speed absorption.
+            </div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">10. Nitroglycerin is classified as an anti-angina, anti-hypertension, and a:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Vasoconstrictor
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Vasodilator
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Beta-blocker
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Anti-dysrhythmic
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Nitroglycerin is classified as an "Anti-angina - vasodilator - anti-hypertension."
+            </div>
+        </div>
+
+        <!-- Question 11 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">11. What effect does Nitroglycerin have on myocardial oxygen consumption?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. It increases oxygen consumption.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. It decreases oxygen consumption.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. It has no effect on oxygen consumption.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. It doubles oxygen consumption.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Decreases myocardial oxygen consumption, allowing the heart to work with a lower oxygen demand."
+            </div>
+        </div>
+
+        <!-- Question 12 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">12. Which drug is the analgesic of choice for pain in myocardial infarction and also helps relieve pulmonary congestion?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Aspirin
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Nitroglycerin
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Morphine
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Atropine
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Morphine... Analgesic of choice for pain in myocardial infarction... Relieves pulmonary congestion, lowers myocardial oxygen requirement and reduces anxiety."
+            </div>
+        </div>
+
+        <!-- Question 13 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">13. What is a critical nursing consideration before administering Morphine?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Obtain baseline respiratory rate, depth, and rhythm.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Check the patient's blood glucose level.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Ensure the patient has eaten a full meal.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Administer it as quickly as possible.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Obtain baseline respiratory rate, depth, and rhythm and size of pupils before administering the drug" due to its potential for respiratory depression.
+            </div>
+        </div>
+
+        <!-- Question 14 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">14. Amiodarone (Cordarone) is classified as what class of anti-dysrhythmic?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Class I
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Class II
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Class III
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Class IV
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The document lists Amiodarone as a "Class III Antiarrhythmic."
+            </div>
+        </div>
+
+        <!-- Question 15 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">15. What is the <strong class="highlight">FIRST</strong> choice drug for treating symptomatic bradycardia?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Epinephrine
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Amiodarone
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Atropine
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Dopamine
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Atropine is indicated for "Symptomatic bradycardia (first choice)."
+            </div>
+        </div>
+
+        <!-- Question 16 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">16. What is the standard IV push dose for Atropine?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. 0.5mg IV push, may repeat up to 2mg total.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. 1mg IV push, may repeat up to 3mg total.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. 2-10mg IV push, repeated as needed.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. 5mg/kg IV push.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The dosage for Atropine is "0.5mg IV push and may repeat up to a total dose of 2mg."
+            </div>
+        </div>
+
+        <!-- Question 17 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">17. The action of Dopamine is described as:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Only affecting beta1-receptors.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Dose-related (affecting different receptors at different rates).
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Only affecting alpha-receptors.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Only affecting dopaminergic receptors.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Dopamine's action is "dose-related," stimulating different receptors (dopaminergic, beta1, alpha) at different infusion rates.
+            </div>
+        </div>
+
+        <!-- Question 18 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">18. What is the effect of a <strong class="highlight">low dose</strong> (<5 mcg/kg/min) of Dopamine?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Vasoconstriction and a rise in blood pressure.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Improved myocardial contractility.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Vasodilation in the renal and mesenteric beds, increasing urine output.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Peripheral vasodilation (beta2 stimulation).
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "At low rates of infusion (<5 mcg/kg/min) (renal dose): Affects dopaminergic receptors, causing vasodilation in the renal, mesenteric, coronary, and intracerebral vascular beds... thus increasing urine output."
+            </div>
+        </div>
+
+        <!-- Question 19 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">19. At an <strong class="highlight">intermediate dose</strong> (5-10 mcg/kg/min), Dopamine primarily affects which receptors?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Beta1-adrenoceptors (improving contractility)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Alpha-adrenoceptors (causing vasoconstriction)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Dopaminergic receptors (increasing urine output)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Beta2-adrenoceptors (peripheral vasodilation)
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "At intermediate rates of infusion (5-10 mcg/kg/min) (cardiac dose): Affects the beta1-adrenoceptors, resulting in improved myocardial contractility..."
+            </div>
+        </div>
+
+        <!-- Question 20 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">20. What is the effect of a <strong class="highlight">high dose</strong> (>10 mcg/kg/min) of Dopamine?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Primarily renal vasodilation
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Primarily improved contractility
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Primarily vasoconstriction and a rise in blood pressure
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Primarily peripheral vasodilation
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "At higher rates of infusion (>10 mcg/kg/min) (pressor): Affects alpha-adrenoceptors, with consequent vasoconstrictor effects and a rise in blood pressure."
+            </div>
+        </div>
+
+        <!-- Question 21 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">21. Which drug is an inotrope of choice for heart failure, as it increases contractility without a significant change in blood pressure?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Dopamine
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Dobutamine (Dobutrex)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Epinephrine
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Noradrenaline
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Dobutamine "Increases myocardial contractility & cardiac output without significant change in blood pressure."
+            </div>
+        </div>
+
+        <!-- Question 22 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">22. What must be corrected before starting a Dobutamine or Dopamine infusion?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Hyperglycemia
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Tachycardia
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Hypovolemia (fluid deficit)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Hypertension
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> For both Dopamine ("Correct... hypovolemia") and Dobutamine ("Fluid deficit (Hypovolemia) should be corrected before infusion"), adequate fluid volume is required.
+            </div>
+        </div>
+
+        <!-- Question 23 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">23. What is the standard dose of Epinephrine for a patient in cardiac arrest?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. 0.5 mg IV every 3-5 minutes
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. 1 mg IV every 3-5 minutes
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. 2-10 mcg/min infusion
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. 5 mg/kg IV once
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "For patients in cardiac arrest: give 1 mg intravenously... every 3 to 5 minutes."
+            </div>
+        </div>
+
+        <!-- Question 24 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">24. Which drug is a vasopressor indicated for hypotension and shock that increases blood flow to vital organs without increasing the workload of the heart?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Dobutamine
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Epinephrine
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Noradrenaline (Levophed)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Nitroglycerin
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Noradrenaline (Nor-epinephrine, Levophed) "increases blood flow to all vital organs without increasing the workload or output of the heart."
+            </div>
+        </div>
+
+        <!-- Question 25 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">25. Calcium Chloride is an indicated treatment for all of the following <strong class="highlight">EXCEPT</strong>:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Acute hyperkalemia
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Acute hypocalcaemia
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Calcium channel blocker overdose
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Symptomatic bradycardia
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Calcium Chloride is indicated for hyperkalemia, hypocalcemia, and calcium channel overdose. Atropine is the first-line drug for symptomatic bradycardia.
+            </div>
+        </div>
+
+        <!-- Question 26 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">26. True or False: Calcium Chloride and Sodium Bicarbonate can be administered through the same IV line without flushing.</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. True
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. False
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> False. "IV line should be flushed between calcium chloride and sodium bicarbonate administration." They will precipitate (form a solid) if mixed.
+            </div>
+        </div>
+
+        <!-- Question 27 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">27. Which emergency drug is indicated for Torsade de pointes?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Magnesium Sulfate
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Sodium Bicarbonate
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Calcium Chloride
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Atropine
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Magnesium Sulfate is indicated for "torsade de pointes."
+            </div>
+        </div>
+
+        <!-- Question 28 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">28. What is the antidote for Magnesium Sulfate toxicity (e.g., respiratory depression or heart block)?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Sodium Bicarbonate
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Atropine
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Calcium (5 to 10 meq)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Narcan
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A nursing consideration for Magnesium Sulfate is: "*Calcium 5 to 10 meq can be given to reverse respiratory depression and heart block."
+            </div>
+        </div>
+
+        <!-- Question 29 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">29. Sodium Bicarbonate is indicated for the correction of:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Metabolic alkalosis
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Severe metabolic acidosis
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Respiratory acidosis
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Respiratory alkalosis
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Sodium Bicarbonate is an "electrolyte replenisher and systemic alkalizer" indicated for the "Correction of severe metabolic acidosis..."
+            </div>
+        </div>
+
+        <!-- Question 30 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">30. What is a key nursing consideration when administering Sodium Bicarbonate?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Administer it undiluted as quickly as possible.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Mix it with Calcium Chloride to save time.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Monitor for signs of acidosis and hyperkalemia.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Obtain arterial blood gas (ABG) levels before and throughout therapy.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Nursing considerations include: "Obtain arterial blood PH, PO2, PaCO2 serum calcium, sodium, potassium balance and renal function before and throughout the therapy."
+            </div>
+        </div>
+
+
+        <!-- Final Score Section -->
+        <div id="final-score-container" class="hidden">
+            <h2>Quiz Complete!</h2>
+            <p id="final-score-message">You answered 0 out of 0 correctly — 0%</p>
+        </div>
+
+    </main>
+
+    <!-- 
+      All JavaScript is inlined here to ensure the file works offline.
+      No external .js files or CDN links are used.
+    -->
+    <script>
+        // Wait for the DOM to be fully loaded before running scripts
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Enable :active pseudo-class on iOS Safari for touch feedback ---
+            // This is a common fix to make touch events feel more responsive on iOS
+            document.addEventListener("touchstart", function() {}, true);
+
+            // --- Element Selections ---
+            const quizContainer = document.getElementById('quiz-container');
+            const scoreTracker = document.getElementById('score-value');
+            const finalScoreContainer = document.getElementById('final-score-container');
+            const finalScoreMessage = document.getElementById('final-score-message');
+            const allQuestions = document.querySelectorAll('.question-card');
+
+            // --- State Variables ---
+            const totalQuestions = allQuestions.length; // This will correctly be 30
+            let score = 0;
+            let questionsAnswered = 0;
+
+            // --- Function to Highlight Keywords ---
+            // Wraps specified keywords in a <strong class="highlight"> tag
+            function highlightKeywords() {
+                const keywords = ['NOT', 'EXCEPT', 'FIRST', 'MAINLY'];
+                const questionTexts = document.querySelectorAll('.question-text');
+
+                questionTexts.forEach(element => {
+                    let html = element.innerHTML;
+                    // Use a RegExp to find whole words, case-insensitive, but replace with uppercase
+                    keywords.forEach(kw => {
+                        const regex = new RegExp(`\\b(${kw})\\b`, 'gi');
+                        html = html.replace(regex, `<strong class="highlight">${kw.toUpperCase()}</strong>`);
+                    });
+                    element.innerHTML = html;
+                });
+            }
+
+            // --- Function to Update Live Score ---
+            function updateScore() {
+                scoreTracker.textContent = `${score} / ${totalQuestions}`;
+            }
+
+            // --- Function to Show Final Score ---
+            function showFinalScore() {
+                const percentage = Math.round((score / totalQuestions) * 100);
+                finalScoreMessage.innerHTML = `You answered <strong>${score}</strong> out of <strong>${totalQuestions}</strong> correctly — <strong>${percentage}%</strong>`;
+                finalScoreContainer.classList.remove('hidden');
+                // Scroll to the final score box for a better user experience
+                finalScoreContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // --- Main Quiz Logic (Event Delegation) ---
+            // A single event listener on the main container is more efficient
+            // than adding one to every single button.
+            quizContainer.addEventListener('click', (e) => {
+                // Check if the clicked element is an option button
+                if (e.target.classList.contains('option')) {
+                    const selectedOption = e.target;
+                    const questionCard = selectedOption.closest('.question-card');
+
+                    // --- Prevent Re-answering ---
+                    // If the 'data-answered' attribute is 'true', do nothing.
+                    if (questionCard.dataset.answered === 'true') {
+                        return;
+                    }
+                    
+                    // Mark the question as answered
+                    questionCard.dataset.answered = 'true';
+                    questionsAnswered++;
+
+                    // --- Check Answer ---
+                    const isCorrect = selectedOption.dataset.answer === 'correct';
+                    const rationale = questionCard.querySelector('.rationale');
+                    const allOptions = questionCard.querySelectorAll('.option');
+
+                    // Add 'answered' class to the selected option to trigger icon display
+                    selectedOption.classList.add('answered');
+
+                    if (isCorrect) {
+                        score++;
+                        selectedOption.classList.add('correct');
+                        rationale.classList.add('correct');
+                    } else {
+                        selectedOption.classList.add('incorrect');
+                        rationale.classList.add('incorrect');
+                        
+                        // If wrong, find and highlight the correct answer
+                        const correctOption = questionCard.querySelector('[data-answer="correct"]');
+                        correctOption.classList.add('correct');
+                    }
+
+                    // --- Disable All Options for this Question ---
+                    allOptions.forEach(opt => {
+                        opt.disabled = true;
+                        // Add 'disabled' class to unselected options for graying out
+                        if (opt !== selectedOption && opt.dataset.answer !== 'correct') {
+                            opt.classList.add('disabled');
+                        }
+                    });
+
+                    // --- Update UI ---
+                    updateScore();
+
+                    // --- Check for Quiz Completion ---
+                    if (questionsAnswered === totalQuestions) {
+                        // Use a short delay to allow the user to see the last answer
+                        setTimeout(showFinalScore, 1000);
+                    }
+                }
+            });
+
+            // --- Initialization ---
+            // Run the keyword highlighter and set the initial score on load.
+            highlightKeywords();
+            updateScore(); // Sets the initial score to "0 / 30"
+        });
+    </script>
+
+</body>
+</html>

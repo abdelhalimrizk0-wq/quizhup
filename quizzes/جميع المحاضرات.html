@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damnhour Nursing Group Exams</title>
+    
+    <!-- 1. Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- 3. Babel (to compile JSX in browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 4. Lucide Icons (Development Version for Browser) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        
+        /* Custom Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- ICONS COMPONENT WRAPPER ---
+        // Since we are using Lucide from CDN script tag, we create wrapper components
+        // Lucide injects icons into <i> tags with data-lucide attributes.
+        // We need a useEffect to call lucide.createIcons() after render.
+
+        const Icon = ({ name, size = 24, className = "" }) => {
+            React.useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            });
+            return <i data-lucide={name} width={size} height={size} className={className}></i>;
+        };
+
+        // --- DATA SOURCE ---
+        const QUIZ_COLLECTIONS = [
+          {
+            id: 'aki',
+            title: 'Acute Kidney Injury (AKI)',
+            iconName: 'activity', // Lucide icon name
+            color: 'blue',
+            description: 'Renal Replacement Therapy & Kidney Function',
+            data: [
+              { id: 1, question: "What is the primary target Mean Arterial Pressure (MAP) for patients with Acute Kidney Injury?", options: ["At least 55 mm Hg", "At least 60 mm Hg", "At least 65 mm Hg", "At least 75 mm Hg"], correct: 2, rationale: "A generally accepted target remains a MAP of greater than or equal to 65 mm Hg to maintain renal perfusion." },
+              { id: 2, question: "Which specific finding in urinalysis is most indicative of Acute Interstitial Nephritis?", options: ["Red blood cell casts", "White blood cell casts", "Eosinophilic casts", "Granular casts"], correct: 2, rationale: "Eosinophilic casts are a specific finding associated with interstitial nephritis, often due to drugs or electrolyte disturbances." },
+              { id: 3, question: "True or False: Low-dose dopamine is recommended to prevent the course of ischemic Acute Kidney Injury.", options: ["True", "False"], correct: 1, rationale: "Dopamine is unable to prevent or alter the course of ischemic or nephrotoxic AKI and is no longer justified for prevention." },
+              { id: 4, question: "According to the RIFLE criteria, what defines the 'Loss' of kidney function category?", options: ["Persistent acute renal failure for more than 1 week", "Persistent acute renal failure for more than 2 weeks", "Persistent acute renal failure for more than 4 weeks", "Persistent renal failure for more than 3 months"], correct: 2, rationale: "The 'Loss' category in RIFLE is defined as persistent acute renal failure for more than 4 weeks." },
+              { id: 5, question: "Which of the following is a recognized cause of postrenal azotemia?", options: ["Benign prostatic hyperplasia", "Renal artery stenosis", "Glomerulonephritis", "Hypovolemic shock"], correct: 0, rationale: "Benign prostatic hyperplasia (BPH) causes obstruction to urine flow, leading to postrenal azotemia." },
+              { id: 6, question: "What is the recommended daily protein intake for patients with AKI?", options: ["0.5 g/kg/day", "0.8 g/kg/day", "1.2 g/kg/day", "1.5 g/kg/day"], correct: 1, rationale: "Oral and IV amino acids should be provided at a rate of 0.8 g/kg/day." },
+              { id: 7, question: "Which AKIN stage is defined by a serum creatinine increase of 3 times baseline?", options: ["Stage 1", "Stage 2", "Stage 3", "Stage 4"], correct: 2, rationale: "AKIN Stage 3 is defined by a creatinine increase of 3 times baseline or an increase of 0.5 mg/dl if baseline is >4 mg/dl." },
+              { id: 8, question: "True or False: Loop diuretics improve survival rates in patients with Acute Kidney Injury.", options: ["True", "False"], correct: 1, rationale: "Loop diuretics are neither associated with improved survival nor with better recovery of renal function in AKI." },
+              { id: 9, question: "Which condition is an absolute indication for initiating Renal Replacement Therapy?", options: ["Mild metabolic acidosis", "Controlled hypertension", "Refractory hyperkalemia", "Asymptomatic azotemia"], correct: 2, rationale: "Hyperkalemia, especially when refractory to medical management, is a key indication for RRT." },
+              { id: 10, question: "What is the estimated mortality rate for patients with AKI requiring Renal Replacement Therapy?", options: ["10-20%", "25-40%", "50-70%", "80-90%"], correct: 2, rationale: "Mortality in patients with AKI requiring RRT is estimated to be between 50-70%." },
+              { id: 11, question: "Which technique is considered a hybrid form of Renal Replacement Therapy?", options: ["Intermittent hemodialysis", "Continuous venovenous hemofiltration", "Sustained low efficiency daily dialysis", "Peritoneal dialysis"], correct: 2, rationale: "SLEDD (Sustained low efficiency daily dialysis) is classified as a hybrid technique." },
+              { id: 12, question: "What clinical finding is associated with the polyuric phase of Acute Tubular Necrosis?", options: ["Severe fluid overload", "Hyperkalemia and acidosis", "Volume deficits and electrolyte imbalance", "Rapid normalization of creatinine"], correct: 2, rationale: "The polyuric phase involves a gradual increase in urine output which may lead to volume deficits and electrolyte imbalance." },
+              { id: 13, question: "True or False: Anuria is defined as urine output less than 50 ml per 24 hours.", options: ["True", "False"], correct: 0, rationale: "The text defines Anuria specifically as urine output less than 50 ml per 24 hours." },
+              { id: 14, question: "Which intervention has been shown to reduce AKI incidence in patients with cirrhosis?", options: ["Intravenous dopamine", "Intravenous albumin", "Loop diuretics", "High dose steroids"], correct: 1, rationale: "Intravenous albumin significantly reduces the incidence of AKI and mortality in patients with cirrhosis." },
+              { id: 15, question: "What type of casts are typically associated with ischemic damage in Acute Tubular Necrosis?", options: ["Hyaline casts", "Granular casts", "Red blood cell casts", "White blood cell casts"], correct: 1, rationale: "Epithelial cells and granular casts are found in urinalysis in cases of ischemic damage." },
+              { id: 16, question: "What is the urine output criterion for the 'Risk' category in RIFLE criteria?", options: ["Less than 0.3 ml/kg/h for 24 hours", "Less than 0.5 ml/kg/h for 6 hours", "Less than 0.5 ml/kg/h for 12 hours", "Less than 1.0 ml/kg/h for 2 hours"], correct: 1, rationale: "The 'Risk' category is defined by urine output less than 0.5 ml/kg/h for greater than 6 hours." },
+              { id: 17, question: "Which of the following is an example of an intrinsic renal cause of AKI?", options: ["Renal artery stenosis", "Ureteric stones", "Acute Glomerulonephritis", "Dehydration"], correct: 2, rationale: "Acute Glomerulonephritis is an inflammatory condition affecting the renal microvasculature, making it an intrinsic cause." },
+              { id: 18, question: "True or False: A high specific gravity in urinalysis is indicative of dehydration.", options: ["True", "False"], correct: 0, rationale: "High specific gravity typically indicates concentrated urine resulting from dehydration." },
+              { id: 19, question: "What is the recommended caloric intake range for patients with AKI?", options: ["15 to 25 kcal/kg/day", "25 to 30 kcal/kg/day", "35 to 50 kcal/kg/day", "60 to 75 kcal/kg/day"], correct: 2, rationale: "Total caloric intake of 35 to 50 kcal/kg/day should be maintained." },
+              { id: 20, question: "Which uremic side effect is considered an indication for Renal Replacement Therapy?", options: ["Mild nausea", "Pericarditis", "Fatigue", "Dry skin"], correct: 1, rationale: "Uremic pericarditis is a severe complication and a direct indication for RRT." },
+              { id: 21, question: "What is the primary mechanism by which septic shock causes prerenal azotemia?", options: ["Direct tubular toxicity", "Capillary leak", "Urinary obstruction", "Renal vein thrombosis"], correct: 1, rationale: "Septic shock causes prerenal azotemia primarily through capillary leak and vasodilation." },
+              { id: 22, question: "True or False: The AKIN Stage 1 creatinine criterion includes an increase of 0.3 mg/dl from baseline.", options: ["True", "False"], correct: 0, rationale: "AKIN Stage 1 is defined as 1.5-2 times baseline OR a 0.3 mg/dl increase from baseline." },
+              { id: 23, question: "Which strategy helps prevent Contrast-Induced Nephropathy?", options: ["Fluid restriction before procedure", "Use of high-osmolar contrast", "Volume expansion with isotonic saline", "Administration of high-dose dopamine"], correct: 2, rationale: "Pre-procedure volume expansion using isotonic saline is a key preventive measure." },
+              { id: 24, question: "What defines the 'Failure' category in RIFLE criteria based on urine output?", options: ["Anuria for 6 hours", "Anuria for 12 hours", "Less than 0.5 ml/kg/h for 12 hours", "Less than 0.5 ml/kg/h for 24 hours"], correct: 1, rationale: "Failure is defined as urine output <0.3 ml/kg/h for 24 hours OR Anuria for >12 hours." },
+              { id: 25, question: "Which phase of Acute Tubular Necrosis immediately follows the initial insult?", options: ["Recovery phase", "Polyuric phase", "Onset phase", "Oliguric phase"], correct: 2, rationale: "The Onset (initiating) phase begins with the initial insult and lasts until cell injury occurs." },
+              { id: 26, question: "True or False: Renal artery stenosis is classified as a postrenal cause of AKI.", options: ["True", "False"], correct: 1, rationale: "Renal artery stenosis decreases local blood flow to the kidney and is a prerenal cause." },
+              { id: 27, question: "What is the estimated incidence of AKI among patients in the ICU?", options: ["1-5%", "7-50%", "60-80%", "90-100%"], correct: 1, rationale: "The incidence of AKI is estimated at 7-50% of patients in the ICU." },
+              { id: 28, question: "Which medication class is a common cause of drug-induced renal vasoconstriction?", options: ["Beta blockers", "NSAIDs", "Calcium channel blockers", "Nitrates"], correct: 1, rationale: "Drug-induced renal vasoconstriction is commonly caused by agents like NSAIDs (implied under prerenal causes)." },
+              { id: 29, question: "What should be done with medications in a volume-overloaded AKI patient?", options: ["Discontinue all medications", "Dilute them in extra fluid", "Concentrate them", "Administer orally only"], correct: 2, rationale: "If volume overloaded, one should concentrate all medications and limit oral intake." },
+              { id: 30, question: "True or False: SLEDD-F stands for Sustained Low Efficiency Daily Dialysis with Filtration.", options: ["True", "False"], correct: 0, rationale: "The text explicitly defines SLEDD-F as Sustained (or slow) low efficiency daily dialysis with filtration." },
+              { id: 31, question: "Which type of renal replacement therapy is continuous?", options: ["Intermittent hemodialysis", "Isolated Ultrafiltration", "Continuous venovenous hemofiltration", "Sustained low efficiency daily dialysis"], correct: 2, rationale: "Continuous hemofiltration (CH) or CVVH is listed under continuous techniques." },
+              { id: 32, question: "What is the creatinine criteria for the RIFLE 'Injury' stage?", options: ["1.5 times baseline", "2 times baseline", "3 times baseline", "4 times baseline"], correct: 1, rationale: "The 'Injury' stage is defined by a serum creatinine increase of 2 times the baseline." },
+              { id: 33, question: "True or False: Prerenal azotemia can result from gastrointestinal losses like vomiting.", options: ["True", "False"], correct: 0, rationale: "GI losses such as vomiting and diarrhea lead to hypovolemia, a cause of prerenal azotemia." },
+              { id: 34, question: "Which condition is caused by microthrombosis affecting the renal microvasculature?", options: ["Acute Pyelonephritis", "Hemolytic Uremic Syndrome", "Polycystic Kidney Disease", "Renal Tuberculosis"], correct: 1, rationale: "HUS-TTP and DIC are listed under microthrombosis causes of intrinsic renal azotemia." },
+              { id: 35, question: "How long does the recovery phase of Acute Tubular Necrosis typically last?", options: ["Days to weeks", "Weeks to months", "Months to years", "Indefinitely"], correct: 2, rationale: "The recovery phase lasts from months to years as renal function returns to normality." },
+              { id: 36, question: "True or False: Metabolic acidosis is an indication for Renal Replacement Therapy.", options: ["True", "False"], correct: 0, rationale: "Metabolic acidosis is listed as a metabolic derangement that indicates the need for RRT." },
+              { id: 37, question: "What is the primary goal of using loop diuretics in oliguric AKI?", options: ["To improve mortality", "To repair renal tissue", "To facilitate fluid management", "To prevent dialysis need"], correct: 2, rationale: "Loop diuretics convert oliguric to non-oliguric AKI, allowing easier fluid and nutritional support." },
+              { id: 38, question: "Which laboratory finding suggests Pyelonephritis?", options: ["Red blood cell casts", "White blood cell casts", "Hyaline casts", "Fatty casts"], correct: 1, rationale: "WBCs and WBC casts are associated with pyelonephritis." },
+              { id: 39, question: "True or False: 'End-stage disease' in RIFLE criteria is defined as persistent failure for > 3 months.", options: ["True", "False"], correct: 0, rationale: "The text defines End-stage disease as persistent renal failure for greater than 3 months." },
+              { id: 40, question: "Which of the following is an example of a toxic cause of Acute Tubular Necrosis?", options: ["Prolonged ischemia", "Radiocontrast media", "Severe hemorrhage", "Septic shock"], correct: 1, rationale: "Radiocontrast media and aminoglycosides are listed as toxic causes of ATN." }
+            ]
+          },
+          {
+            id: 'ards',
+            title: 'ARDS',
+            iconName: 'wind',
+            color: 'emerald',
+            description: 'Acute Respiratory Distress Syndrome',
+            data: [
+              { id: 1, question: "Which condition is classified as a direct cause of lung injury?", options: ["Severe sepsis", "Acute pancreatitis", "Aspiration of gastric contents", "Massive blood transfusion"], correct: 2, rationale: "Direct lung injuries affect the lung tissue directly, such as pneumonia, aspiration, and toxic inhalation. Sepsis, pancreatitis, and transfusions are indirect causes." },
+              { id: 2, question: "What is the primary pathophysiological hallmark of the exudative phase?", options: ["Collagen deposition", "Hyaline membrane formation", "Vascular proliferation", "Fibrosing alveolitis"], correct: 1, rationale: "The exudative phase is characterized by diffuse alveolar damage, protein-rich edema, and the formation of hyaline membranes." },
+              { id: 3, question: "According to the Berlin definition, which PaO2/FiO2 ratio indicates severe ARDS?", options: ["Less than 100", "Between 100 and 200", "Between 200 and 300", "Greater than 300"], correct: 0, rationale: "Severe ARDS is defined as a PaO2/FiO2 ratio of less than 100 mmHg with PEEP of at least 5 cmH2O." },
+              { id: 4, question: "Which radiographic finding supports a diagnosis of cardiogenic edema over ARDS?", options: ["Peripheral distribution of infiltrates", "Normal vascular pedicle width", "Absence of septal lines", "Widening of the vascular pedicle"], correct: 3, rationale: "Cardiogenic edema typically presents with a widened vascular pedicle and central infiltrates, whereas ARDS presents with a normal pedicle and peripheral infiltrates." },
+              { id: 5, question: "What is the recommended target tidal volume for lung protective ventilation?", options: ["4 to 5 ml per kg", "6 to 8 ml per kg", "10 to 12 ml per kg", "12 to 15 ml per kg"], correct: 1, rationale: "Lung protective strategies recommend a tidal volume of 6-8 ml/kg to prevent volutrauma and overdistention." },
+              { id: 6, question: "Which cell type is responsible for re-epithelialization during the recovery phase?", options: ["Type I pneumocytes", "Type II pneumocytes", "Alveolar macrophages", "Fibroblasts"], correct: 1, rationale: "During recovery, Type II pneumocytes proliferate and differentiate into Type I cells to repopulate the alveolar basement membrane." },
+              { id: 7, question: "What is the primary mechanism by which prone positioning improves oxygenation?", options: ["Decreased cardiac output", "Improved ventilation perfusion matching", "Increased chest wall compliance", "Reduction of functional residual capacity"], correct: 1, rationale: "Prone positioning improves oxygenation primarily by optimizing ventilation-perfusion matching and recruiting dorsal lung regions." },
+              { id: 8, question: "Which factor is a component of the Murray Lung Injury Score?", options: ["Heart rate", "Serum creatinine", "Positive end expiratory pressure", "Systemic blood pressure"], correct: 2, rationale: "The Murray Score is calculated based on four factors: alveolar consolidation on CXR, hypoxemia score, pulmonary compliance, and PEEP level." },
+              { id: 9, question: "What is considered a contraindication for placing a patient in the prone position?", options: ["Severe hypoxemia", "High BMI", "Increased intracranial pressure", "Low tidal volume"], correct: 2, rationale: "Raised intracranial pressure (ICP) is a contraindication for prone positioning due to the risk of further elevating ICP." },
+              { id: 10, question: "Which fluid management strategy is associated with better outcomes in ARDS?", options: ["Aggressive fluid resuscitation", "Conservative fluid management", "Liberal fluid maintenance", "High volume replacement"], correct: 1, rationale: "The FACTT study demonstrated that a conservative (dry) fluid strategy improves lung function and shortens ventilation duration." },
+              { id: 11, question: "What is the upper limit for plateau pressure in a lung protective strategy?", options: ["20 cm H2O", "25 cm H2O", "30 cm H2O", "35 cm H2O"], correct: 2, rationale: "Plateau pressure should be kept below 30 cm H2O to minimize the risk of barotrauma and alveolar overdistention." },
+              { id: 12, question: "Which condition acts as an indirect cause of ARDS?", options: ["Toxic inhalation", "Pulmonary contusion", "Near drowning", "Acute pancreatitis"], correct: 3, rationale: "Acute pancreatitis causes systemic inflammation leading to indirect lung injury, whereas the other options are direct lung injuries." },
+              { id: 13, question: "What is the lowest acceptable pH level during permissive hypercapnia?", options: ["7.15", "7.20", "7.25", "7.30"], correct: 2, rationale: "In permissive hypercapnia, CO2 retention is allowed to minimize lung injury, provided the pH remains above 7.25." },
+              { id: 14, question: "Which feature distinguishes the fibroproliferative phase from the exudative phase?", options: ["Hyaline membranes", "Rapid onset hypoxemia", "Increased dead space", "Alveolar edema"], correct: 2, rationale: "The fibroproliferative phase involves fibrosis and vascular obliteration, leading to increased alveolar dead space and pulmonary hypertension." },
+              { id: 15, question: "How does nitric oxide therapy benefit patients with ARDS?", options: ["Systemic vasodilation", "Selective pulmonary vasodilation", "Increased cardiac contractility", "Reduction of inflammation"], correct: 1, rationale: "Nitric oxide acts as a selective pulmonary vasodilator in well-ventilated areas, improving V/Q mismatch and oxygenation." },
+              { id: 16, question: "Which clinical sign is most indicative of respiratory failure?", options: ["Mild cough", "Low grade fever", "Cyanosis", "Slight tachycardia"], correct: 2, rationale: "Cyanosis is a sign of severe hypoxemia and respiratory failure, alongside gasping breathing and respiratory arrest." },
+              { id: 17, question: "What is a potential complication of mechanical ventilation in ARDS?", options: ["Pulmonary embolism", "Barotrauma", "Myocardial infarction", "Renal failure"], correct: 1, rationale: "Barotrauma (or volutrauma) is a direct complication of mechanical ventilation due to high pressures or volumes." },
+              { id: 18, question: "Which finding on a chest X-ray suggests non-cardiogenic edema?", options: ["Central distribution", "Pleural effusions", "Peripheral distribution", "Cardiomegaly"], correct: 2, rationale: "Non-cardiogenic edema (ARDS) typically shows peripheral, patchy infiltrates, unlike the central butterfly pattern of cardiogenic edema." },
+              { id: 19, question: "What is the primary goal of the open lung approach?", options: ["Maximize tidal volume", "Minimize PEEP", "Prevent alveolar collapse", "Increase respiratory rate"], correct: 2, rationale: "The open lung approach uses maneuvers to open collapsed alveoli and PEEP to keep them open, preventing atelectrauma." },
+              { id: 20, question: "Which factor contraindicates the use of nitric oxide?", options: ["Systemic hypertension", "Methemoglobinemia", "Sinus tachycardia", "Hyperglycemia"], correct: 1, rationale: "Methemoglobinemia is an absolute contraindication for nitric oxide therapy as NO can worsen this condition." },
+              { id: 21, question: "What is a potential disadvantage of inverse ratio ventilation?", options: ["Decreased mean airway pressure", "Worsening oxygenation", "Increased need for sedation", "Lowered functional residual capacity"], correct: 2, rationale: "Inverse ratio ventilation often requires heavy sedation or muscle paralysis because it is uncomfortable and non-physiological for the patient." },
+              { id: 22, question: "Which phase of ARDS is characterized by reabsorption of edema fluid?", options: ["Exudative phase", "Fibroproliferative phase", "Recovery phase", "Inflammatory phase"], correct: 2, rationale: "The recovery phase involves the removal of protein and fluid via endocytosis and the restoration of the alveolar barrier." },
+              { id: 23, question: "What defines the onset timing in the Berlin definition of ARDS?", options: ["Within 24 hours", "Within 1 week", "Within 2 weeks", "Within 1 month"], correct: 1, rationale: "The Berlin definition specifies that the onset must be within 1 week of a known clinical insult or new respiratory symptoms." },
+              { id: 24, question: "Which parameter helps rule out hydrostatic edema in ARDS diagnosis?", options: ["Elevated wedge pressure", "Normal heart size", "Presence of S3 gallop", "Jugular venous distention"], correct: 1, rationale: "A normal-sized heart and absence of signs of heart failure (like S3) support a non-cardiogenic origin of edema." },
+              { id: 25, question: "What is the effect of ARDS on pulmonary compliance?", options: ["It remains unchanged", "It significantly increases", "It significantly decreases", "It fluctuates rapidly"], correct: 2, rationale: "ARDS causes 'stiff lungs' due to edema and surfactant dysfunction, leading to significantly decreased pulmonary compliance." },
+              { id: 26, question: "Which intervention is considered unconventional management for ARDS?", options: ["Extracorporeal membrane oxygenation", "Low tidal volume ventilation", "Positive end expiratory pressure", "Fluid restriction"], correct: 0, rationale: "ECMO is listed as an unconventional or rescue therapy for severe cases refractory to standard management." },
+              { id: 27, question: "What is a major risk factor for developing ventilator-associated pneumonia?", options: ["Use of sucralfate", "Prolonged intubation", "Early extubation", "Semi recumbent position"], correct: 1, rationale: "Prolonged mechanical ventilation and intubation significantly increase the risk of nosocomial infections like VAP." },
+              { id: 28, question: "Which drug inhibits prostaglandin pathways?", options: ["Ketoconazole", "Ibuprofen", "Pentoxifylline", "Nitric oxide"], correct: 1, rationale: "NSAIDS like ibuprofen and indomethacin inhibit prostaglandin pathways." },
+              { id: 29, question: "Which statement best describes the radiographic progression in the fibroproliferative phase?", options: ["Complete clearing of opacities", "Linear opacities and fibrosis", "New pleural effusions", "Lobar consolidation"], correct: 1, rationale: "The fibroproliferative phase is characterized radiologically by linear opacities consistent with evolving fibrosis." },
+              { id: 30, question: "What is the primary benefit of high-flow nasal cannula?", options: ["Guaranteed tidal volume", "Precise pressure control", "Ability to eat and speak", "Full respiratory support"], correct: 2, rationale: "High-flow nasal cannula is well tolerated and allows the patient to talk, eat, and move around while receiving high oxygen flows." },
+              { id: 31, question: "Sepsis is considered a direct cause of lung injury in ARDS.", options: ["True", "False"], correct: 1, rationale: "False. Sepsis is an indirect cause. Direct causes include pneumonia and aspiration." },
+              { id: 32, question: "The Berlin definition requires bilateral opacities on chest imaging.", options: ["True", "False"], correct: 0, rationale: "True. Bilateral opacities not fully explained by effusions or collapse are a key criterion." },
+              { id: 33, question: "Prone positioning is contraindicated in patients with unstable spinal fractures.", options: ["True", "False"], correct: 0, rationale: "True. Unstable spine is a contraindication due to the risk of exacerbating the injury during turning." },
+              { id: 34, question: "In ARDS, the pulmonary artery wedge pressure is typically elevated.", options: ["True", "False"], correct: 1, rationale: "False. PA wedge pressure is typically normal or low in ARDS, unlike in cardiogenic edema where it is elevated." },
+              { id: 35, question: "Lung protective ventilation aims for a tidal volume of 10-12 ml/kg.", options: ["True", "False"], correct: 1, rationale: "False. The target is 6-8 ml/kg. 10-12 ml/kg is considered high and potentially harmful." },
+              { id: 36, question: "Nitric oxide works by selectively dilating vessels in poorly ventilated alveoli.", options: ["True", "False"], correct: 1, rationale: "False. It dilates vessels in *well* ventilated alveoli, shunting blood away from poor areas to improve V/Q match." },
+              { id: 37, question: "Hyaline membranes are a characteristic finding of the exudative phase.", options: ["True", "False"], correct: 0, rationale: "True. Hyaline membranes composed of fibrin and cellular debris line the alveoli in the exudative phase." },
+              { id: 38, question: "Routine use of corticosteroids is recommended in the acute phase of ARDS.", options: ["True", "False"], correct: 1, rationale: "False. Routine use of steroids is not advocated, especially in the acute phase." },
+              { id: 39, question: "A conservative fluid strategy is associated with shorter duration of mechanical ventilation.", options: ["True", "False"], correct: 0, rationale: "True. The FACTT trial showed conservative fluid management improved lung function and reduced ventilator days." },
+              { id: 40, question: "Permissive hypercapnia allows for pH levels as low as 7.25.", options: ["True", "False"], correct: 0, rationale: "True. pH is allowed to drop to 7.25 to facilitate low tidal volume ventilation." }
+            ]
+          },
+          {
+            id: 'abg',
+            title: 'ABG',
+            iconName: 'droplet',
+            color: 'rose',
+            description: 'Arterial Blood Gases',
+            data: [
+              { id: 1, question: "Which formula is used to calculate the Anion Gap?", options: ["Sodium minus Chloride minus Bicarbonate", "Sodium plus Potassium minus Chloride", "Sodium minus Bicarbonate plus Chloride", "Sodium plus Chloride minus Bicarbonate"], correct: 0, rationale: "The Anion Gap is determined by the formula AG = Na - Cl - HCO3." },
+              { id: 2, question: "What is the normal range for arterial pH?", options: ["7.25 to 7.35", "7.35 to 7.45", "7.45 to 7.55", "7.15 to 7.25"], correct: 1, rationale: "The normal arterial pH range is 7.35 to 7.45." },
+              { id: 3, question: "Respiratory compensation for metabolic disorders alters ventilation within what timeframe?", options: ["Within minutes", "Within 12 hours", "Over 2 to 5 days", "After one week"], correct: 0, rationale: "Respiratory compensation occurs through H+ sensitive chemoreceptors and alters ventilation within minutes." },
+              { id: 4, question: "Which condition is a cause of High Anion Gap Metabolic Acidosis?", options: ["Diarrhea", "Renal Tubular Acidosis", "Diabetic Ketoacidosis", "Fistula"], correct: 2, rationale: "Diabetic Ketoacidosis is a cause of high anion gap acidosis due to ketones. The others cause normal anion gap acidosis." },
+              { id: 5, question: "What is the expected pH change for every 10 mmHg increase in pCO2 in Acute Respiratory Acidosis?", options: ["Decrease of 0.03", "Decrease of 0.08", "Increase of 0.08", "Increase of 0.03"], correct: 1, rationale: "In acute respiratory acidosis, for every 10 mmHg increase in pCO2, the pH decreases by 0.08." },
+              { id: 6, question: "A Delta Delta ratio between 1 and 2 indicates which acid-base disorder?", options: ["Pure gap acidosis", "Gap acidosis plus nongap acidosis", "Gap acidosis plus metabolic alkalosis", "Pure metabolic alkalosis"], correct: 0, rationale: "If the delta delta ratio is between 1 and 2, it indicates a pure gap acidosis." },
+              { id: 7, question: "Which treatment is indicated for chloride-responsive metabolic alkalosis caused by diuretics?", options: ["Half normal saline", "Potassium chloride", "Acetazolamide", "Hydrochloric acid infusion"], correct: 0, rationale: "Diuretic-induced chloride-responsive metabolic alkalosis is treated with 1/2 Normal Saline." },
+              { id: 8, question: "Severe acidemia with pH less than 7.25 can cause which cardiovascular effect?", options: ["Increased cardiac output", "Impaired cardiac output", "Arterial vasoconstriction", "Decreased risk of arrhythmias"], correct: 1, rationale: "Severe acidemia impairs cardiac output and can lead to hypotension and arrhythmias." },
+              { id: 9, question: "What is the normal range for the Anion Gap?", options: ["3 to 7 mmol per L", "8 to 12 mmol per L", "15 to 20 mmol per L", "22 to 26 mmol per L"], correct: 1, rationale: "The normal range for the Anion Gap is 8 to 12 mmol/L." },
+              { id: 10, question: "True or False: Metabolic compensation for respiratory disorders starts within 12 hours and takes 2 to 5 days to complete.", options: ["True", "False"], correct: 0, rationale: "Metabolic compensation involves renal handling of bicarbonate, which starts within 12 hours and occurs over 2-5 days." },
+              { id: 11, question: "Which clinical condition causes chloride-unresponsive metabolic alkalosis?", options: ["Vomiting", "Diuretic use", "Primary hyperaldosteronism", "Volume depletion"], correct: 2, rationale: "Primary hyperaldosteronism (Conn disease) causes chloride-unresponsive metabolic alkalosis." },
+              { id: 12, question: "In chronic respiratory acidosis, how much does bicarbonate increase for every 10 mmHg increase in pCO2?", options: ["1 mmol per L", "3 mmol per L", "5 mmol per L", "8 mmol per L"], correct: 1, rationale: "In chronic respiratory acidosis, bicarbonate increases by 3 mmol/L for every 10 mmHg rise in pCO2." },
+              { id: 13, question: "Which of the following is a calculated value in an ABG profile rather than a measured one?", options: ["pH", "PaCO2", "Base Excess", "Chloride"], correct: 2, rationale: "Base Excess is a calculated value. pH, PaCO2, and Chloride are measured." },
+              { id: 14, question: "True or False: Severe alkalemia causes a shift of the oxygen dissociation curve to the right.", options: ["True", "False"], correct: 1, rationale: "Severe alkalemia increases oxy-hemoglobin affinity, shifting the curve to the left, not the right." },
+              { id: 15, question: "Which acid-base disturbance is characterized by a low pH and a low HCO3?", options: ["Respiratory Acidosis", "Respiratory Alkalosis", "Metabolic Acidosis", "Metabolic Alkalosis"], correct: 2, rationale: "Metabolic acidosis presents with a low pH (acidemia) and a low Bicarbonate (primary metabolic defect)." },
+              { id: 16, question: "What is the primary treatment for acute metabolic acidosis caused by shock?", options: ["Sodium bicarbonate administration", "Identify and treat the underlying cause", "Hyperventilation therapy", "Renal replacement therapy"], correct: 1, rationale: "The primary treatment is to identify and treat the underlying cause, especially in shock." },
+              { id: 17, question: "Which urine chloride concentration suggests a chloride-responsive metabolic alkalosis?", options: ["Less than 10 mmol per L", "Greater than 20 mmol per L", "Greater than 40 mmol per L", "Greater than 60 mmol per L"], correct: 0, rationale: "A urine chloride concentration less than 10 mmol/L suggests chloride-responsive metabolic alkalosis." },
+              { id: 18, question: "What is the normal range for pCO2 in arterial blood?", options: ["25 to 35 mmHg", "35 to 45 mmHg", "45 to 55 mmHg", "55 to 65 mmHg"], correct: 1, rationale: "The normal range for pCO2 is 35-45 mmHg." },
+              { id: 19, question: "True or False: Sodium bicarbonate is the first-line treatment for all cases of acute metabolic acidosis.", options: ["True", "False"], correct: 1, rationale: "Sodium bicarbonate is not shown to be beneficial in all cases and may be harmful; treating the cause is primary." },
+              { id: 20, question: "Which toxin ingestion requires specific therapy and causes High Anion Gap Metabolic Acidosis?", options: ["Methanol", "Organophosphates", "Acetaminophen", "Opiates"], correct: 0, rationale: "Methanol is a toxin that causes High Anion Gap Metabolic Acidosis and requires specific therapy." },
+              { id: 21, question: "What is the standard base excess range in a healthy individual?", options: ["Minus 5 to Plus 5", "Minus 2 to Plus 2", "Minus 10 to Plus 10", "Zero to Plus 4"], correct: 1, rationale: "The normal Standard Base Excess is -2 to +2 mmol/L." },
+              { id: 22, question: "True or False: Respiratory Alkalosis is caused by conditions leading to hyperventilation like anxiety or pain.", options: ["True", "False"], correct: 0, rationale: "This is true. CNS stimulation from pain or anxiety causes hyperventilation, leading to respiratory alkalosis." },
+              { id: 23, question: "Which equation describes the relationship between H+, HCO3-, CO2, and H2O?", options: ["Henderson Equation", "Winters Formula", "Anion Gap Equation", "Delta Ratio Formula"], correct: 0, rationale: "The Henderson Equation describes the equilibrium between hydrogen ions, bicarbonate, carbon dioxide, and water." },
+              { id: 24, question: "A Delta Delta ratio greater than 2 indicates which condition?", options: ["Pure gap acidosis", "Gap acidosis plus metabolic alkalosis", "Gap acidosis plus nongap acidosis", "Pure respiratory acidosis"], correct: 1, rationale: "A Delta Delta ratio > 2 indicates a gap acidosis with a concurrent metabolic alkalosis." },
+              { id: 25, question: "True or False: A pH of 7.50 with a pCO2 of 28 mmHg suggests respiratory acidosis.", options: ["True", "False"], correct: 1, rationale: "False. High pH (7.50) and low pCO2 (28) suggest respiratory alkalosis, not acidosis." },
+              { id: 26, question: "Which electrolyte disturbance is a common complication of severe alkalemia?", options: ["Hyperkalemia", "Hypokalemia", "Hyperphosphatemia", "Hypercalcemia"], correct: 1, rationale: "Severe alkalemia often causes hypokalemia, hypophosphatemia, and hypocalcemia." },
+              { id: 27, question: "What is the calculated expected pCO2 using Winters formula for metabolic acidosis?", options: ["1.5 times Bicarbonate plus 8", "0.7 times Bicarbonate plus 21", "0.4 times Bicarbonate plus 10", "1.0 times Bicarbonate plus 40"], correct: 0, rationale: "Winters formula states Expected pCO2 = (1.5 x HCO3) + 8 (+/- 2)." },
+              { id: 28, question: "Which drug can be used to treat chloride-responsive metabolic alkalosis with hypervolemia?", options: ["Acetazolamide", "Sodium Bicarbonate", "Morphine", "Vasopressin"], correct: 0, rationale: "Acetazolamide is a diuretic that wastes bicarbonate and is used in hypervolemic metabolic alkalosis." },
+              { id: 29, question: "True or False: The Anion Gap reflects unmeasured cations in the blood.", options: ["True", "False"], correct: 1, rationale: "False. The Anion Gap reflects unmeasured anions (negatively charged species like proteins, phosphates, organic acids)." },
+              { id: 30, question: "What suggests a 'mixed' or complex acid-base disturbance?", options: ["pH is normal but pCO2 and HCO3 are abnormal", "pH is abnormal but pCO2 is normal", "pH, pCO2, and HCO3 are all within normal limits", "Base excess is exactly zero"], correct: 0, rationale: "If pH is normal (7.35-7.45) but pCO2 and HCO3 are abnormal, it suggests a mixed acid-base disturbance." },
+              { id: 31, question: "Which cause is associated with Normal Anion Gap Metabolic Acidosis?", options: ["Renal Tubular Acidosis", "Lactic Acidosis", "Methanol Toxicity", "Salicylate Toxicity"], correct: 0, rationale: "Renal Tubular Acidosis (RTA) causes a normal anion gap (hyperchloremic) metabolic acidosis." },
+              { id: 32, question: "True or False: Compensation is equivalent to correction of the acid-base disorder.", options: ["True", "False"], correct: 1, rationale: "False. Compensation minimizes pH change but does not correct the underlying cause." },
+              { id: 33, question: "What is the expected pCO2 formula for metabolic alkalosis compensation?", options: ["0.7 times Bicarbonate plus 21", "1.5 times Bicarbonate plus 8", "0.5 times Bicarbonate plus 15", "1.0 times Bicarbonate plus 10"], correct: 0, rationale: "For metabolic alkalosis, Expected pCO2 = (0.7 x HCO3) + 21 (+/- 2)." },
+              { id: 34, question: "Which of the following causes Respiratory Acidosis?", options: ["Anxiety", "Pulmonary Embolism", "CNS depression", "Fever"], correct: 2, rationale: "CNS depression leads to hypoventilation, which causes retention of CO2 and respiratory acidosis." },
+              { id: 35, question: "True or False: Chronic respiratory alkalosis is compensated by a decrease in bicarbonate of 15 mmol/L for every 10 mmHg decrease in pCO2.", options: ["True", "False"], correct: 1, rationale: "False. In chronic respiratory alkalosis, HCO3 decreases by 5 mmol/L (not 15) for every 10 mmHg decrease in pCO2." },
+              { id: 36, question: "What does Base Excess quantitate?", options: ["Amount of acid or alkali needed to normalize pH", "Amount of oxygen dissolved in blood", "Total amount of hemoglobin", "Rate of renal filtration"], correct: 0, rationale: "Base Excess is the quantity of Acid/Alkali required to return blood to normal pH under standard conditions." },
+              { id: 37, question: "True or False: Diarrhea typically causes a Metabolic Alkalosis.", options: ["True", "False"], correct: 1, rationale: "False. Diarrhea causes loss of bicarbonate, leading to Normal Anion Gap Metabolic Acidosis." },
+              { id: 38, question: "A Delta Delta ratio less than 1 indicates which combination of disorders?", options: ["Gap acidosis plus nongap acidosis", "Pure gap acidosis", "Gap acidosis plus metabolic alkalosis", "Pure respiratory alkalosis"], correct: 0, rationale: "A Delta Delta ratio < 1 indicates a combined High Anion Gap Acidosis and Normal Anion Gap Acidosis." },
+              { id: 39, question: "Which is a limitation of using Base Excess?", options: ["It can be erroneous due to crystalloid resuscitation", "It cannot be calculated from ABG", "It is not useful for metabolic disorders", "It is always zero in sick patients"], correct: 0, rationale: "Base Excess calculations can be erroneous due to crystalloid resuscitation, leading to hyperchloremic acidosis." },
+              { id: 40, question: "True or False: Spironolactone may be helpful in treating chloride-unresponsive metabolic alkalosis due to hyperaldosteronism.", options: ["True", "False"], correct: 0, rationale: "True. Spironolactone is an aldosterone antagonist and helps in conditions like Conn's syndrome." }
+            ]
+          },
+          {
+            id: 'vap',
+            title: 'VAP',
+            iconName: 'stethoscope',
+            color: 'purple',
+            description: 'Ventilator-Associated Pneumonia',
+            data: [
+              { id: 1, question: "According to the ATS/IDSA guidelines, what is the definition of Ventilator-Associated Pneumonia (VAP)?", options: ["Pneumonia occurring >48-72 hours post-intubation", "Pneumonia occurring within 24 hours of admission", "Pneumonia occurring <48 hours post-intubation", "Pneumonia present at the time of admission"], correct: 0, rationale: "VAP is defined as pneumonia occurring >48-72 hours post-intubation." },
+              { id: 2, question: "Which of the following is considered a 'Basic Practice' for preventing VAP according to SHEA recommendations?", options: ["Interrupt sedation daily", "Use silver-coated endotracheal tubes", "Perform early tracheotomy", "Monitor residual gastric volumes"], correct: 0, rationale: "Interrupting sedation daily is a basic practice recommended to assess readiness to extubate." },
+              { id: 3, question: "What is the most common route of bacterial entry into the lower respiratory tract leading to VAP?", options: ["Aspiration of oropharyngeal secretions", "Hematogenous spread", "Inhalation of contaminated aerosols", "Translocation from the GI tract"], correct: 0, rationale: "Aspiration of organisms from the oropharynx and GI tract is the most common cause." },
+              { id: 4, question: "True or False: Antibiotic therapy is recommended for ICU ventilator-associated tracheobronchitis to prevent progression to pneumonia.", options: ["True", "False"], correct: 1, rationale: "Studies have shown that antibiotic therapy did not prevent progression to pneumonia or shorten mechanical ventilation duration." },
+              { id: 5, question: "Which pathogen source is considered more controversial regarding its role in tracheal colonization?", options: ["Gastrointestinal tract", "Paranasal sinuses", "Dental plaque", "Subglottic area"], correct: 0, rationale: "The role of the gastrointestinal tract as a source of oropharyngeal and tracheal colonization is considered more controversial." },
+              { id: 6, question: "What is the recommended target for endotracheal tube cuff pressure?", options: ["20-30 cmH2O", "10-15 cmH2O", "35-45 cmH2O", "5-10 cmH2O"], correct: 0, rationale: "Guidelines recommend ensuring cuff pressure is maintained between 20-30 cmH2O." },
+              { id: 7, question: "According to the IHI VAP bundle, how often should oral care with chlorhexidine be performed?", options: ["Every 6 hours", "Every 12 hours", "Every 24 hours", "Every 2 hours"], correct: 0, rationale: "The text specifies applying chlorhexidine solution to clean the mouth every 6 hours." },
+              { id: 8, question: "Which of the following is a risk factor for Multidrug-Resistant (MDR) VAP?", options: ["Prior IV antibiotic use within 90 days", "Hospitalization for less than 2 days", "Absence of septic shock", "No history of ARDS"], correct: 0, rationale: "Use of intravenous antibiotics in the past 90 days is a specific risk factor for MDR VAP." },
+              { id: 9, question: "True or False: Hospital Acquired Pneumonia (HAP) is the most common intensive care unit (ICU) infection.", options: ["True", "False"], correct: 0, rationale: "The text states VAP is the most common ICU infection, and HAP is the second most common hospital infection." },
+              { id: 10, question: "Which radiological finding is part of the CDC criteria for diagnosing VAP?", options: ["New or progressive infiltrates", "Stable lung markings", "Decreased lung volume", "Clear lung fields"], correct: 0, rationale: "Radiological criteria include two or more chest X-rays showing new or progressive infiltrates, consolidation, or cavitation." },
+              { id: 11, question: "Late-onset VAP is defined as pneumonia occurring after how many days of hospitalization?", options: ["5 days or more", "Less than 4 days", "Exactly 48 hours", "Within 24 hours"], correct: 0, rationale: "Late-onset HAP and VAP occur 5 days or more after hospitalization." },
+              { id: 12, question: "What is the gold standard for diagnosing VAP?", options: ["Histological finding at open lung biopsy", "Clinical signs and symptoms", "Tracheal aspirate culture", "Chest X-ray findings"], correct: 0, rationale: "The gold standard is histological and bacteriological finding of infection at open lung biopsy, though it is not practical." },
+              { id: 13, question: "True or False: A normal chest X-ray is a typical finding in acute tracheo-bronchitis.", options: ["True", "False"], correct: 0, rationale: "Acute tracheo-bronchitis typically presents with a normal chest X-ray." },
+              { id: 14, question: "Which intervention is part of the 5-element IHI VAP bundle?", options: ["Daily sedation assessment", "Routine ventilator circuit changes", "Systemic antibiotic prophylaxis", "Prone positioning"], correct: 0, rationale: "Daily sedation assessment and spontaneous breathing trials are part of the 5-element bundle." },
+              { id: 15, question: "Which structure is considered part of the lower respiratory tract?", options: ["Trachea", "Nasopharynx", "Oropharynx", "Larynx"], correct: 0, rationale: "The lower respiratory tract includes the trachea, bronchi, bronchioles, and alveoli." },
+              { id: 16, question: "True or False: Early-onset VAP is more likely to be caused by multidrug-resistant pathogens.", options: ["True", "False"], correct: 1, rationale: "Early-onset VAP is more likely caused by antibiotic-sensitive bacteria; late-onset is associated with MDR pathogens." },
+              { id: 17, question: "What is the recommended head-of-bed elevation angle to prevent VAP?", options: ["30-45 degrees", "10-20 degrees", "60-90 degrees", "0 degrees"], correct: 0, rationale: "Elevating the head of the bed to 30-45 degrees is a recommended basic practice." },
+              { id: 18, question: "According to SHEA guidelines, which approach is 'Generally not recommended' due to lack of impact on VAP rates?", options: ["Kinetic beds", "Subglottic secretion drainage", "Noninvasive positive pressure ventilation", "Daily sedation interruption"], correct: 0, rationale: "Kinetic beds are listed under 'Generally not recommended' as they have no impact on VAP rates." },
+              { id: 19, question: "Which laboratory criteria supports a VAP diagnosis according to CDC definitions?", options: ["Leukopenia <4000 WBC/mm3", "Normal white blood cell count", "Decreased sedimentation rate", "Negative blood culture"], correct: 0, rationale: "Leukopenia (<4000 WBC/mm3) or leukocytosis (>12,000 WBC/mm3) is a general clinical criterion." },
+              { id: 20, question: "What is the typical prognosis for acute tracheo-bronchitis?", options: ["Good", "Poor", "Fatal", "Unknown"], correct: 0, rationale: "The prognosis for acute tracheo-bronchitis is listed as good." },
+              { id: 21, question: "True or False: The endotracheal tube facilitates efficient coughing in ventilated patients.", options: ["True", "False"], correct: 1, rationale: "The text states that intubated patients cannot cough efficiently." },
+              { id: 22, question: "Which mechanism allows endogenous inoculation of the airway?", options: ["Colonization of ventilator circuit condensate", "Aspiration of tap water", "Inhalation of ambient air", "Direct contact with health worker hands"], correct: 0, rationale: "Endogenous inoculation occurs via microbial colonization of condensate in the inspiratory circuit." },
+              { id: 23, question: "Subglottic secretion drainage is recommended for patients expected to require ventilation for how long?", options: ["Greater than 48 or 72 hours", "Less than 24 hours", "Less than 48 hours", "Any duration"], correct: 0, rationale: "It is recommended for patients expected to require greater than 48 or 72 hours of mechanical ventilation." },
+              { id: 24, question: "True or False: Clinical diagnosis of VAP is associated with a high rate of false-negative results.", options: ["True", "False"], correct: 0, rationale: "Clinical diagnosis is associated with 30-35% false-negative results." },
+              { id: 25, question: "Which condition prior to VAP is a risk factor for MDR pathogens?", options: ["Acute respiratory distress syndrome", "Minor elective surgery", "Community acquired pneumonia", "Absence of renal failure"], correct: 0, rationale: "ARDS before VAP is listed as a risk factor for MDR VAP." },
+              { id: 26, question: "When should the ventilator circuit be changed according to basic practices?", options: ["Only if visibly soiled or malfunctioning", "Every 24 hours", "Every 48 hours", "Every week"], correct: 0, rationale: "The recommendation is to change the ventilator circuit only if visibly soiled or malfunctioning." },
+              { id: 27, question: "True or False: Silver-coated endotracheal tubes are universally recommended as a basic practice for all patients.", options: ["True", "False"], correct: 1, rationale: "Silver-coated tubes are listed under 'Generally not recommended' in the SHEA table, although some studies show benefit." },
+              { id: 28, question: "Which component of the host defense system is bypassed or impaired by intubation?", options: ["Glottis closure", "Humoral immunity", "Alveolar macrophages", "Neutrophil function"], correct: 0, rationale: "The endotracheal tube holds the vocal cords open, bypassing the glottis anatomic barrier." },
+              { id: 29, question: "Deep venous thrombosis prophylaxis is a component of which prevention bundle?", options: ["IHI VAP bundle", "Sepsis bundle", "ARDS bundle", "Central line bundle"], correct: 0, rationale: "DVT prophylaxis is one of the 5 elements of the VAP bundle." },
+              { id: 30, question: "True or False: Biofilm forms only on the outer surface of the endotracheal tube.", options: ["True", "False"], correct: 1, rationale: "Biofilm formation occurs on both the inner and outer surfaces of the endotracheal tube." },
+              { id: 31, question: "Which antibiotic class is suggested for treating acute tracheo-bronchitis?", options: ["Cephalosporins", "Aminoglycosides", "Fluoroquinolones", "Carbapenems"], correct: 0, rationale: "Treatment options listed include 1st or 2nd generation cephalosporin or penicillin combination." },
+              { id: 32, question: "What temperature threshold defines fever in the CDC general clinical criteria for VAP?", options: [">38°C", ">39°C", ">37.5°C", ">38.5°C"], correct: 0, rationale: "Fever is defined as >38°C with no other recognized cause." },
+              { id: 33, question: "True or False: VAP increases medical costs and length of hospital stay.", options: ["True", "False"], correct: 0, rationale: "VAP is associated with increased medical costs, ventilator days, and ICU/hospital length of stay." },
+              { id: 34, question: "Within how many days does airway colonization typically shift to a nosocomial pattern?", options: ["3-4 days", "1-2 days", "7-10 days", "14 days"], correct: 0, rationale: "Colonization patterns change within the first 3-4 days from community-like to a typical nosocomial pattern." },
+              { id: 35, question: "Which of the following is considered an exogenous source of airway colonization?", options: ["Contaminated respiratory therapy equipment", "Stomach contents", "Sinus secretions", "Tracheal secretions"], correct: 0, rationale: "Contaminated respiratory-therapy equipment is an exogenous source." },
+              { id: 36, question: "What is the recommended approach for stress ulcer prophylaxis in the SHEA 'Generally not recommended' list?", options: ["Generally not recommended", "Always recommended", "Recommended for all ICU patients", "Recommended only with bleeding"], correct: 0, rationale: "The SHEA table lists stress ulcer prophylaxis under 'Generally not recommended' due to no impact on VAP rates." },
+              { id: 37, question: "True or False: Selective digestive decontamination is considered a 'Basic Practice' for all patients.", options: ["True", "False"], correct: 1, rationale: "It is listed under 'Special approaches', not basic practices." },
+              { id: 38, question: "Which factor contributes to aspiration in intubated patients?", options: ["Pooling of secretions above the cuff", "Increased cough reflex", "Decreased mucus production", "Tight glottic closure"], correct: 0, rationale: "Secretions pool above the inflated endotracheal tube cuff, leading to aspiration." },
+              { id: 39, question: "The use of noninvasive positive pressure ventilation is recommended for which purpose?", options: ["Selected populations to decrease ventilation duration", "All patients with pneumonia", "Patients with severe ARDS only", "Post-extubation failure only"], correct: 0, rationale: "It is recommended as a basic practice for selected populations." },
+              { id: 40, question: "How does bacterial translocation contribute to pneumonia?", options: ["Spread from GI tract in immunosuppressed patients", "Direct inhalation", "Through contaminated catheters", "Via contaminated hands"], correct: 0, rationale: "Bacterial translocation occurs from the gastrointestinal tract, especially in patients with malignancy or burns." }
+            ]
+          },
+          {
+            id: 'fluids',
+            title: 'Fluid & Electrolytes',
+            iconName: 'droplet',
+            color: 'cyan',
+            description: 'Imbalances & Management',
+            data: [
+              { id: 1, question: "Which of the following describes the effect of 1 liter of Normal Saline on intravascular volume?", options: ["Increases by 180 ml", "Increases by 500 ml", "Increases by 750 ml", "Increases by 800 ml"], correct: 0, rationale: "According to the text (Page 17), 1 L NS increases intravascular vol by 180 ml." },
+              { id: 2, question: "Which medication reverses the cardiac effects of hypermagnesemia?", options: ["Calcium Gluconate", "Potassium Chloride", "Sodium Bicarbonate", "Magnesium Sulfate"], correct: 0, rationale: "Page 14 states: 'Calcium gluconate reverses cardiac effects' in Hypermagnesemia." },
+              { id: 3, question: "What is the recommended maximum infusion rate for potassium in a peripheral line?", options: ["10 mEq per hour", "20 mEq per hour", "40 mEq per hour", "60 mEq per hour"], correct: 0, rationale: "Page 11: 'Peripheral line Infuse at 10 meq/hr.'" },
+              { id: 4, question: "Which class of diuretics is known to cause hypercalcemia?", options: ["Thiazide diuretics", "Loop diuretics", "Potassium-sparing diuretics", "Osmotic diuretics"], correct: 0, rationale: "Page 11 lists 'Drug-induced e.g. thiazide diuretics' as a cause of Hypercalcemia." },
+              { id: 5, question: "Which ECG change is most characteristic of early hyperkalemia?", options: ["U wave appearance", "ST segment depression", "Peaked T wave", "Shortened QT interval"], correct: 2, rationale: "Page 9: 'ECG changes: hyperacute T...'" },
+              { id: 6, question: "Care for hyperphosphatemia is primarily directed toward managing hypocalcemia.", options: ["True", "False"], correct: 0, rationale: "Page 14: 'Hyperphosphatemia... Care is directed to hypocalcemia.'" },
+              { id: 7, question: "Hyponatremia is defined as a serum sodium level below which value?", options: ["125 mEq per L", "130 mEq per L", "135 mEq per L", "140 mEq per L"], correct: 2, rationale: "Page 5: 'Na level < 135 mEq/L'." },
+              { id: 8, question: "Hypophosphatemia can lead to which of the following complications?", options: ["Rhabdomyolysis", "Hyperreflexia", "Bradycardia", "Hypertension"], correct: 0, rationale: "Page 13 Assessment findings for Hypophosphatemia include 'Musculoskeletal - Rhabdomyolysis'." },
+              { id: 9, question: "What is the primary intracellular cation?", options: ["Sodium", "Calcium", "Potassium", "Magnesium"], correct: 2, rationale: "Page 8: Potassium is described as the 'Major intracellular cation'." },
+              { id: 10, question: "Intracellular fluid accounts for approximately what fraction of total body fluid?", options: ["One quarter", "One third", "One half", "Two thirds"], correct: 3, rationale: "Page 1: '2/3 Intracellular fluid (ICF)'." },
+              { id: 11, question: "Normal Saline (0.9% NaCl) is a hypotonic solution.", options: ["True", "False"], correct: 1, rationale: "Page 15 lists Normal Saline under 'isotonic'." },
+              { id: 12, question: "Which complication is associated with the use of Hetastarch and Dextran?", options: ["Coagulopathy", "Hypercalcemia", "Hypokalemia", "Hyperglycemia"], correct: 0, rationale: "Page 15: 'increased the risk of renal impairment and coagulopathy'." },
+              { id: 13, question: "Which medication is used to treat central diabetes insipidus causing hypernatremia?", options: ["Furosemide", "Vasopressin", "Insulin", "Kayexalate"], correct: 1, rationale: "Page 4: 'In central diabetes insipidus... aqueous vasopressin (Pitressin)'." },
+              { id: 14, question: "What is the safe correction rate for chronic hypernatremia to avoid brain edema?", options: ["0.5 mEq per L per hour", "1.5 mEq per L per hour", "2.0 mEq per L per hour", "3.0 mEq per L per hour"], correct: 0, rationale: "Page 5: 'In chronic hypernatremia... Correct the free water deficit at a rate of 0.5 mEq/L every hour.'" },
+              { id: 15, question: "Hyperglycemia typically causes which type of hyponatremia?", options: ["Hypertonic", "Isotonic", "Hypotonic", "Hypovolemic"], correct: 0, rationale: "Page 6 under 'Hypertonic hyponatremia' lists 'Hyperglycemia'." },
+              { id: 16, question: "Trousseau's sign is a clinical manifestation associated with which electrolyte imbalance?", options: ["Hypernatremia", "Hypocalcemia", "Hyperkalemia", "Hyponatremia"], correct: 1, rationale: "Page 13: 'Positive Trousseau's Sign... often indicates hypocalcemia.'" },
+              { id: 17, question: "Lactated Ringer's solution should be avoided in patients with which condition?", options: ["Dehydration", "Burns", "Liver disease", "Acute blood loss"], correct: 2, rationale: "Page 16: 'Don't use in liver disease because the patient can't metabolize lactate'." },
+              { id: 18, question: "Water lost through the skin and lungs typically amounts to how much per day?", options: ["150 mL", "500 mL", "700 mL", "1500 mL"], correct: 2, rationale: "Page 1: 'Water lost through skin and lungs: 700 mL'." },
+              { id: 19, question: "Which medication is used to treat lithium-induced nephrogenic diabetes insipidus?", options: ["Amiloride", "Furosemide", "Vasopressin", "Insulin"], correct: 0, rationale: "Page 4: 'amiloride for lithium-induced DI'." },
+              { id: 20, question: "Rapid correction of hyponatremia may lead to which serious complication?", options: ["Flash pulmonary edema", "Central pontine myelinolysis", "Renal calculi", "Metabolic alkalosis"], correct: 1, rationale: "Page 7: 'Avoid too rapid correction: Central pontine myelinolysis'." },
+              { id: 21, question: "In the liver, lactate from Lactated Ringer's solution is converted into what?", options: ["Bicarbonate", "Glucose", "Urea", "Ammonia"], correct: 0, rationale: "Page 16: 'Lactate is converted readily to bicarb by the liver.'" },
+              { id: 22, question: "Which of the following is a cause of euvolemic hyponatremia?", options: ["Vomiting", "SIADH", "Congestive heart failure", "Liver cirrhosis"], correct: 1, rationale: "Page 6/7 lists SIADH under 'Euvolemic'." },
+              { id: 23, question: "What is the initial treatment to protect the heart in severe hyperkalemia?", options: ["Insulin and Glucose", "Calcium Gluconate", "Sodium Bicarbonate", "Furosemide"], correct: 1, rationale: "Page 10: 'Protect the heart: 10% Calcium Gluconate...'" },
+              { id: 24, question: "Interstitial fluid constitutes what percentage of the extracellular fluid?", options: ["20 percent", "40 percent", "60 percent", "80 percent"], correct: 3, rationale: "Page 1: '80% Interstitial fluid'." },
+              { id: 25, question: "Hypercalcemia causes lengthening of the QT interval on an ECG.", options: ["True", "False"], correct: 1, rationale: "Page 11: 'QT interval shortening is common' in Hypercalcemia." },
+              { id: 26, question: "Which fluid is considered a colloid?", options: ["Normal Saline", "Lactated Ringer's", "Albumin", "Dextrose 5%"], correct: 2, rationale: "Page 15 lists 'Albumin' under Colloids." },
+              { id: 27, question: "Hyperaldosteronism is a cause of which electrolyte imbalance?", options: ["Hypernatremia", "Hyponatremia", "Hyperkalemia", "Hypercalcemia"], correct: 0, rationale: "Page 3 lists 'Primary Hyperaldosteronism' under Sodium gains (Hypernatremia)." },
+              { id: 28, question: "Water of metabolism accounts for approximately what percentage of daily fluid intake?", options: ["10 percent", "30 percent", "50 percent", "60 percent"], correct: 0, rationale: "Page 1: 'Water of metabolism: 250 mL or 10%'." },
+              { id: 29, question: "Chronic hyponatremia is defined as lasting longer than what duration?", options: ["12 hours", "24 hours", "36 hours", "48 hours"], correct: 3, rationale: "Page 5: 'Chronic: > 48 hr'." },
+              { id: 30, question: "Which condition is a cause of hypervolemic hyponatremia?", options: ["Diarrhea", "Congestive heart failure", "Dehydration", "Burns"], correct: 1, rationale: "Page 7 lists 'Congestive heart failure' under 'Hypervolemic Edematous states'." },
+              { id: 31, question: "Hypermagnesemia is characterized by hyperactive deep tendon reflexes.", options: ["True", "False"], correct: 1, rationale: "Page 14 states Hypermagnesemia causes 'Reduced or weak DTR's'." },
+              { id: 32, question: "Magnesium levels below 1.4 mEq/L define hypomagnesemia.", options: ["True", "False"], correct: 0, rationale: "Page 14: 'Hypomagnesemia (<1.4mEq/L)'." },
+              { id: 33, question: "One liter of Hetastarch increases intravascular volume by approximately how much?", options: ["180 ml", "500 ml", "750 ml", "1000 ml"], correct: 2, rationale: "Page 17: '1 L of hetastarch by 750ml'." },
+              { id: 34, question: "Which clinical sign involves a facial muscle twitch when the facial nerve is tapped?", options: ["Trousseau's sign", "Chvostek's sign", "Babinski sign", "Brudzinski sign"], correct: 1, rationale: "Page 13: 'Chvostek's sign is a positive result when light tapping on the facial nerve causes a facial muscle twitch'." },
+              { id: 35, question: "Decreased platelet aggregation is a sign of which electrolyte imbalance?", options: ["Hypophosphatemia", "Hyperkalemia", "Hypomagnesemia", "Hypercalcemia"], correct: 0, rationale: "Page 13 lists 'Dec. platelet aggregation' under Hypophosphatemia findings." },
+              { id: 36, question: "What is a common cause of pseudohyperkalemia?", options: ["Renal failure", "Hemolysis of the sample", "Diuretic use", "Insulin therapy"], correct: 1, rationale: "Page 9: 'Hemolysis... Sample was shaken' under causes of pseudohyperkalemia." },
+              { id: 37, question: "Dextrose 5% in Water (D5W) is classified as a free water solution.", options: ["True", "False"], correct: 0, rationale: "Page 15: 'Free H2O solutions: ... D5W (5% dextrose in water)'." },
+              { id: 38, question: "A prominent U wave on an ECG is indicative of which condition?", options: ["Hyperkalemia", "Hypokalemia", "Hypercalcemia", "Hypomagnesemia"], correct: 1, rationale: "Page 10: 'appearance of U wave' is an ECG change in Hypokalemia." },
+              { id: 39, question: "Which fluid is typically used to treat hypovolemic hyponatremia?", options: ["Normal Saline", "Dextrose 5%", "3% Saline", "Sterile Water"], correct: 0, rationale: "Page 8: 'In hypovolemic hyponatremia: infuse physiological solutions (normal saline)'." },
+              { id: 40, question: "Total body water constitutes what percentage of body weight in an average male?", options: ["40 percent", "50 percent", "55 percent", "60 percent"], correct: 3, rationale: "Page 1: 'Total body weight (male) 60% Fluids'." },
+              { id: 41, question: "Severe hyponatremia is defined as a sodium level below which threshold?", options: ["120 mEq per L", "125 mEq per L", "130 mEq per L", "135 mEq per L"], correct: 1, rationale: "Page 5: 'Severe: <125'." },
+              { id: 42, question: "Aminoglycoside antibiotics are a contributing factor to which condition?", options: ["Hypomagnesemia", "Hypermagnesemia", "Hypercalcemia", "Hyperphosphatemia"], correct: 0, rationale: "Page 14 lists 'Aminoglycoside antibiotics' as a contributing factor for Hypomagnesemia." },
+              { id: 43, question: "Potassium supplements should never be administered via IV push.", options: ["True", "False"], correct: 0, rationale: "Page 10: 'it should be slowly...'. Rapid IV push causes cardiac arrest, implicitly forbidden." },
+              { id: 44, question: "Edema caused by lowered plasma osmotic pressure is seen in which condition?", options: ["Heart failure", "Venous obstruction", "Liver failure", "Lymphedema"], correct: 2, rationale: "Page 2: 'lowered plasma osmotic pressure (protein loss) • liver failure'." },
+              { id: 45, question: "Which of the following is an evidence-based indication for Albumin use?", options: ["Traumatic brain injury", "Large volume paracentesis", "Major trauma", "ARDS"], correct: 1, rationale: "Page 17: 'Evidence based indication 1. Large volume paracentesis'." },
+              { id: 46, question: "Insulin and glucose are used to treat hyperkalemia by which mechanism?", options: ["Increasing renal excretion", "Decreasing intestinal absorption", "Shifting potassium into cells", "Stabilizing cardiac membranes"], correct: 2, rationale: "Page 10: 'Push K to the cells: intracellular shift... Glucose insulin'." },
+              { id: 47, question: "Hypophosphatemia may be caused by which of the following?", options: ["Renal failure", "Malnutrition", "Hypoparathyroidism", "Rhabdomyolysis"], correct: 1, rationale: "Page 13 lists 'Malnutrition' as a contributing factor for Hypophosphatemia." },
+              { id: 48, question: "Hypernatremia is characterized by serum sodium levels greater than 145 mEq/L.", options: ["True", "False"], correct: 0, rationale: "Page 2: 'Plasma Na+ > 145 mEq/L'." },
+              { id: 49, question: "Which diuretic is loop-acting and promotes calcium excretion in hypercalcemia?", options: ["Hydrochlorothiazide", "Spironolactone", "Furosemide", "Mannitol"], correct: 2, rationale: "Page 12: 'Diuretics: furosemide (lasix)' used in Hypercalcemia treatment." },
+              { id: 50, question: "3% Saline is the first-line treatment for mild asymptomatic hyponatremia.", options: ["True", "False"], correct: 1, rationale: "Page 7: 'Use 3% saline in severe hyponatremia.' Mild is not treated with 3% saline." },
+              { id: 51, question: "Normal Saline (0.9% NaCl) provides how many calories per liter?", options: ["Zero", "Fifty", "One hundred", "Two hundred"], correct: 0, rationale: "Page 15: 'Does not provide free water or calories.'" },
+              { id: 52, question: "Which ECG change is a late manifestation of hyperkalemia?", options: ["Absent P wave", "U wave", "ST depression", "T wave inversion"], correct: 0, rationale: "Page 9: 'Late... absent P wave'." },
+              { id: 53, question: "Hypokalemia is defined as a potassium level less than 3.5 mEq/L.", options: ["True", "False"], correct: 0, rationale: "Page 10: 'Serum K+ < 3.5 mEq/L'." },
+              { id: 54, question: "Which electrolyte imbalance is associated with Tumor Lysis Syndrome?", options: ["Hypokalemia", "Hyperkalemia", "Hyponatremia", "Hypercalcemia"], correct: 1, rationale: "Page 8: 'Hyperkalemia... Causes... Tumor Lysis Syndrome'." },
+              { id: 55, question: "In an average female, fluids account for 60% of total body weight.", options: ["True", "False"], correct: 1, rationale: "Page 1: 'Total body weight (female) 55% Fluids'." },
+              { id: 56, question: "Hypertonic Saline (3%) is used for which condition?", options: ["Dehydration", "Severe dilutional hyponatremia", "Hypernatremia", "Maintenance fluid"], correct: 1, rationale: "Page 16: 'USES • Severe dilutional hyponatremia'." },
+              { id: 57, question: "Lactated Ringer's solution contains Magnesium.", options: ["True", "False"], correct: 1, rationale: "Page 16: 'doesn't contain magnesium'." },
+              { id: 58, question: "Neuro-manifestations such as lethargy and seizures are common in which condition?", options: ["Mild hypokalemia", "Hypernatremia", "Mild hyperphosphatemia", "Hypochloremia"], correct: 1, rationale: "Page 2: 'Neuro-manifestations of hypernatremia: Lethargy... seizures'." },
+              { id: 59, question: "Treatment for hypervolemic hyponatremia includes fluid restriction and diuresis.", options: ["True", "False"], correct: 0, rationale: "Page 8: 'In hypervolemic hyponatremia: diuresis and fluid restriction.'" },
+              { id: 60, question: "1 Liter of 5% Albumin increases intravascular volume by approximately how much?", options: ["180 ml", "300 ml", "500 ml", "750 ml"], correct: 2, rationale: "Page 17: '1 L 5% albumin by 500ml'." }
+            ]
+          }
+        ];
+
+        // --- COMPONENTS ---
+        const { useState, useEffect } = React;
+
+        function App() {
+          const [activeQuiz, setActiveQuiz] = useState(null);
+
+          const handleSelectQuiz = (quizId) => {
+            setActiveQuiz(quizId);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          };
+
+          const handleBackToMenu = () => {
+            setActiveQuiz(null);
+          };
+
+          return (
+            <div className="min-h-screen bg-slate-50 font-sans text-slate-800" dir="ltr">
+              <header className="bg-white shadow-sm border-b sticky top-0 z-20">
+                <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+                  <div className="flex items-center gap-2 cursor-pointer" onClick={handleBackToMenu}>
+                    <div className="bg-blue-600 text-white p-2 rounded-lg">
+                      <Icon name="stethoscope" size={20} />
+                    </div>
+                    <div>
+                      <h1 className="font-bold text-lg leading-tight text-slate-800">Damnhour Nursing Group</h1>
+                      <p className="text-xs text-slate-500 font-medium">جروب تمريض دمنهور</p>
+                    </div>
+                  </div>
+                  
+                  {activeQuiz && (
+                    <button 
+                      onClick={handleBackToMenu}
+                      className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-full"
+                    >
+                      <Icon name="home" size={16} />
+                      <span className="hidden sm:inline">Back to Menu</span>
+                    </button>
+                  )}
+                </div>
+              </header>
+
+              <main className="max-w-4xl mx-auto px-4 py-8">
+                {!activeQuiz ? (
+                  <MenuScreen onSelect={handleSelectQuiz} />
+                ) : (
+                  <QuizScreen 
+                    quizId={activeQuiz} 
+                    data={QUIZ_COLLECTIONS.find(q => q.id === activeQuiz)} 
+                    onBack={handleBackToMenu}
+                  />
+                )}
+              </main>
+
+               <footer className="mt-12 py-8 text-center text-slate-400 text-sm border-t">
+                <p className="mb-2">Exams by Abdulhalim Rizk</p>
+                <p dir="rtl">تم تجميع هذه الامتحانات بواسطة عبدالحليم رزق</p>
+              </footer>
+            </div>
+          );
+        }
+
+        function MenuScreen({ onSelect }) {
+          return (
+            <div className="animate-fade-in">
+              <div className="text-center mb-10">
+                <h2 className="text-3xl font-bold text-slate-800 mb-3">كويزات طب حرج</h2>
+                <p className="text-slate-500 max-w-lg mx-auto">تم انشاء هذا الموقع بواسطة عبدالحليم رزق</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {QUIZ_COLLECTIONS.map((quiz) => {
+                    // Manual color mapping for Tailwind classes
+                    let themeClass = "text-blue-600 bg-blue-50 border-blue-100 group-hover:border-blue-300";
+                    if (quiz.color === 'emerald') themeClass = "text-emerald-600 bg-emerald-50 border-emerald-100 group-hover:border-emerald-300";
+                    if (quiz.color === 'rose') themeClass = "text-rose-600 bg-rose-50 border-rose-100 group-hover:border-rose-300";
+                    if (quiz.color === 'purple') themeClass = "text-purple-600 bg-purple-50 border-purple-100 group-hover:border-purple-300";
+                    if (quiz.color === 'cyan') themeClass = "text-cyan-600 bg-cyan-50 border-cyan-100 group-hover:border-cyan-300";
+
+                    return (
+                        <button
+                            key={quiz.id}
+                            onClick={() => onSelect(quiz.id)}
+                            className={`group text-left p-6 rounded-2xl border bg-white shadow-sm hover:shadow-md transition-all duration-200 flex items-start gap-5 ${themeClass.replace('text-', 'border-').split(' ')[2]}`}
+                        >
+                            <div className={`p-4 rounded-xl ${themeClass.split(' ').slice(0, 2).join(' ')}`}>
+                                <Icon name={quiz.iconName} size={32} />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-blue-700 transition-colors">{quiz.title}</h3>
+                                <p className="text-slate-500 text-sm mb-3">{quiz.description}</p>
+                                <div className="inline-flex items-center text-xs font-semibold bg-slate-100 px-2.5 py-1 rounded text-slate-600">
+                                    <Icon name="file-text" size={12} className="mr-1.5" />
+                                    {quiz.data.length} Questions
+                                </div>
+                            </div>
+                        </button>
+                    );
+                })}
+              </div>
+            </div>
+          );
+        }
+
+        function QuizScreen({ quizId, data, onBack }) {
+          const [answers, setAnswers] = useState({});
+          const [score, setScore] = useState(0);
+          const [showSummary, setShowSummary] = useState(false);
+
+          useEffect(() => {
+            window.scrollTo(0,0);
+          }, [quizId]);
+
+          const handleAnswer = (qIndex, optIndex, isCorrect) => {
+            if (answers[qIndex] !== undefined) return;
+
+            const newAnswers = { ...answers, [qIndex]: optIndex };
+            setAnswers(newAnswers);
+
+            if (isCorrect) {
+              setScore(s => s + 1);
+            }
+
+            if (Object.keys(newAnswers).length === data.data.length) {
+              setTimeout(() => {
+                  setShowSummary(true);
+                  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+              }, 500);
+            }
+          };
+
+          const restartQuiz = () => {
+            setAnswers({});
+            setScore(0);
+            setShowSummary(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          };
+
+          const progress = Math.round((Object.keys(answers).length / data.data.length) * 100);
+
+          return (
+            <div className="animate-fade-in pb-20">
+              
+              <div className="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                    <Icon name={data.iconName} size={120} className="text-blue-900" />
+                </div>
+                <h1 className="text-3xl font-bold text-slate-800 mb-2">{data.title}</h1>
+                <p className="text-slate-500">{data.description}</p>
+              </div>
+
+              <div className="sticky top-0 bg-slate-50/95 backdrop-blur-sm z-10 py-4 mb-6 border-b border-slate-200 transition-all">
+                  <div className="flex justify-between text-sm font-semibold text-slate-600 mb-2 px-1">
+                      <span>Progress</span>
+                      <span>{Object.keys(answers).length} / {data.data.length}</span>
+                  </div>
+                  <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-blue-600 transition-all duration-500 ease-out" 
+                        style={{ width: `${progress}%` }}
+                      />
+                  </div>
+              </div>
+
+              <div className="space-y-6">
+                {data.data.map((q, qIndex) => {
+                  const isAnswered = answers[qIndex] !== undefined;
+                  const selectedOpt = answers[qIndex];
+                  const isCorrectAnswer = selectedOpt === q.correct;
+                  
+                  return (
+                    <div key={q.id} className={`bg-white rounded-xl p-6 border transition-all duration-300 ${isAnswered ? (isCorrectAnswer ? 'border-green-200 shadow-sm' : 'border-red-200 shadow-sm') : 'border-slate-100 shadow-sm hover:shadow-md'}`}>
+                      
+                      <div className="flex justify-between items-start mb-4">
+                        <span className="bg-blue-50 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-md">
+                            Q{qIndex + 1}
+                        </span>
+                        {q.options.length === 2 && (
+                            <span className="bg-purple-50 text-purple-700 text-xs font-bold px-2 py-1 rounded-md">True/False</span>
+                        )}
+                      </div>
+
+                      <h3 className="text-lg font-bold text-slate-800 mb-6 leading-relaxed">
+                        {q.question}
+                      </h3>
+
+                      <div className={`grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                        {q.options.map((opt, optIndex) => {
+                          let btnClass = "relative w-full text-left px-5 py-4 rounded-xl border flex items-center justify-between transition-all duration-200 group ";
+                          
+                          if (!isAnswered) {
+                            btnClass += "bg-white border-slate-200 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 text-slate-600";
+                          } else {
+                            if (optIndex === q.correct) {
+                              btnClass += "bg-green-50 border-green-500 text-green-800 font-medium"; 
+                            } else if (optIndex === selectedOpt && selectedOpt !== q.correct) {
+                              btnClass += "bg-red-50 border-red-500 text-red-800"; 
+                            } else {
+                              btnClass += "bg-slate-50 border-slate-100 text-slate-400 opacity-60"; 
+                            }
+                          }
+
+                          return (
+                            <button
+                              key={optIndex}
+                              disabled={isAnswered}
+                              onClick={() => handleAnswer(qIndex, optIndex, optIndex === q.correct)}
+                              className={btnClass}
+                            >
+                              <span className="z-10">{opt}</span>
+                              {isAnswered && optIndex === q.correct && <Icon name="check-circle" size={18} className="text-green-600 ml-2 shrink-0" />}
+                              {isAnswered && optIndex === selectedOpt && selectedOpt !== q.correct && <Icon name="x-circle" size={18} className="text-red-600 ml-2 shrink-0" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {isAnswered && (
+                        <div className="mt-6 bg-blue-50/80 rounded-xl p-5 border border-blue-100 animate-fade-in">
+                            <div className="flex gap-2 items-start">
+                                <Icon name="book-open" size={18} className="text-blue-600 mt-0.5 shrink-0" />
+                                <div>
+                                    <p className="text-blue-900 text-sm font-semibold mb-1">Rationale:</p>
+                                    <p className="text-blue-800 text-sm leading-relaxed">{q.rationale}</p>
+                                </div>
+                            </div>
+                        </div>
+                      )}
+
+                    </div>
+                  );
+                })}
+              </div>
+
+              {showSummary && (
+                <div className="mt-12 bg-white rounded-2xl shadow-xl p-8 text-center border border-slate-100 animate-slide-up">
+                    <div className="inline-flex justify-center items-center w-20 h-20 rounded-full bg-blue-50 mb-4">
+                        {score / data.data.length >= 0.5 ? <Icon name="check-circle" size={40} className="text-blue-600" /> : <Icon name="activity" size={40} className="text-blue-600" />}
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-800">Exam Completed</h2>
+                    <div className="mt-4 text-5xl font-black text-blue-600 mb-2 tracking-tight">
+                        {score} <span className="text-2xl text-slate-300 font-medium">/ {data.data.length}</span>
+                    </div>
+                    <p className="text-slate-500 mb-8 font-medium">
+                        {score / data.data.length >= 0.8 ? "Excellent work!" : score / data.data.length >= 0.5 ? "Good job, keep studying!" : "Keep practicing, you'll get there."}
+                    </p>
+                    <div className="flex justify-center gap-4">
+                        <button 
+                            onClick={restartQuiz} 
+                            className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200 font-semibold"
+                        >
+                            <Icon name="refresh-cw" size={18} /> Restart Exam
+                        </button>
+                        <button 
+                            onClick={onBack} 
+                            className="flex items-center gap-2 bg-white text-slate-600 border border-slate-200 px-8 py-3 rounded-xl hover:bg-slate-50 transition hover:border-slate-300 font-semibold"
+                        >
+                            <Icon name="home" size={18} /> Menu
+                        </button>
+                    </div>
+                </div>
+              )}
+
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

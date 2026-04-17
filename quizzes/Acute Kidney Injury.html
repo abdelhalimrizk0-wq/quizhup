@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Acute Kidney Injury</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "A patient in the ICU is diagnosed with Acute Kidney Injury (AKI). The nurse understands that which of the following is a leading cause of poor survival rates in these patients?",
+                options: ["Lack of available dialysis machines", "Coexisting non-kidney conditions", "Advanced age of the patient", "Ineffective diuretic therapy"],
+                correct: 1,
+                rationale: "AKI-associated mortality ranges from 15% to 60%. One of the reasons for poor survival is that critical care patients often have coexisting non-kidney conditions that increase their susceptibility."
+            },
+            {
+                id: 2,
+                question: "According to the RIFLE criteria, which finding classifies a patient in the 'Failure' category?",
+                options: ["Serum creatinine increased 2 times above normal", "Urine output less than 0.5 mL/kg/hr for 6 hours", "Serum creatinine increased 3 times above normal", "Complete loss of kidney function for 2 weeks"],
+                correct: 2,
+                rationale: "In the RIFLE criteria, 'Failure' is defined as serum creatinine increased 3 times above normal, serum Cr ≥4 mg/dL, or an acute rise ≥0.5 mg/dL."
+            },
+            {
+                id: 3,
+                question: "A patient has sustained significant blood loss from a trauma. The nurse recognizes this as a potential cause for which type of AKI?",
+                options: ["Prerenal", "Intrarenal", "Postrenal", "Intrinsic"],
+                correct: 0,
+                rationale: "Hemorrhage leads to decreased intravascular volume and kidney perfusion before the blood reaches the kidney, which is the definition of Prerenal AKI."
+            },
+            {
+                id: 4,
+                question: "Which medication class is known to cause prerenal AKI by inhibiting prostaglandin-mediated afferent arteriolar vasodilation?",
+                options: ["ACE Inhibitors", "Aminoglycosides", "NSAIDs", "Beta-blockers"],
+                correct: 2,
+                rationale: "NSAIDs inhibit prostaglandin-mediated afferent arteriolar vasodilation, reducing renal perfusion and potentially causing prerenal AKI."
+            },
+            {
+                id: 5,
+                question: "True or False: The diuretic phase of AKI is characterized by the kidney's ability to clear volume but not solutes effectively.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "During the diuretic phase, the kidneys can clear volume (high urine output) but not solutes, which can lead to volume depletion."
+            },
+            {
+                id: 6,
+                question: "A patient with AKI has a serum potassium level of 6.8 mmol/L and ECG changes. Which intervention should the nurse anticipate immediately?",
+                options: ["Administration of oral kayexalate", "Intravenous infusion of insulin and dextrose", " fluid restriction to 500 mL/day", "Administration of a loop diuretic"],
+                correct: 1,
+                rationale: "For refractory hyperkalemia or severe cases (associated with ECG changes), IV insulin and dextrose is used to shift potassium into cells. RRT may also be initiated."
+            },
+            {
+                id: 7,
+                question: "What is the primary mechanism of injury in Acute Tubular Necrosis (ATN) caused by ischemia?",
+                options: ["Allergic reaction to medication", " obstruction of the ureters", "Death of epithelial cells impeding urine flow", "Vasoconstriction of the efferent arteriole"],
+                correct: 2,
+                rationale: "Ischemia impairs oxygen delivery, causing epithelial cells in the tubules to die and slough off, filling the tubules with debris and impeding urine flow."
+            },
+            {
+                id: 8,
+                question: "Which laboratory finding is most consistent with Prerenal AKI?",
+                options: ["FENa > 2-3%", "Urine Sodium > 30 mEq/L", "BUN:Creatinine ratio of 20:1", "Presence of granular casts in urine"],
+                correct: 2,
+                rationale: "Prerenal AKI is characterized by a BUN-to-creatinine ratio of 20:1, whereas intrarenal causes often have a ratio of 10:1."
+            },
+            {
+                id: 9,
+                question: "The nurse is calculating the fluid restriction for a patient with AKI who had a urine output of 400 mL yesterday. What is the total fluid allowance for today?",
+                options: ["900 mL to 1150 mL", "1000 mL flat rate", "1500 mL to 2000 mL", "No restriction needed"],
+                correct: 0,
+                rationale: "Fluid requirements are calculated as daily urine volume plus insensible losses (500-750 mL). 400 + 500 to 750 = 900 to 1150 mL."
+            },
+            {
+                id: 10,
+                question: "True or False: Serum creatinine is considered a highly sensitive marker for early renal dysfunction.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Serum creatinine is a poor marker of early renal dysfunction because concentrations might not change until about 50% of kidney function is lost."
+            },
+            {
+                id: 11,
+                question: "Which of the following is a risk factor for contrast-induced nephropathy?",
+                options: ["Age less than 40", "Dehydration", "High cardiac output", "Low serum creatinine"],
+                correct: 1,
+                rationale: "Risk factors for CIN include dehydration, diabetic nephropathy, age >70, and heart failure."
+            },
+            {
+                id: 12,
+                question: "A patient is in the oliguric phase of AKI. Which electrolyte imbalance should the nurse monitor for?",
+                options: ["Hypokalemia", "Hypercalcemia", "Hyperphosphatemia", "Metabolic Alkalosis"],
+                correct: 2,
+                rationale: "The oliguric phase is characterized by electrolyte abnormalities including hyperkalemia, hyperphosphatemia, hypocalcemia, and metabolic acidosis."
+            },
+            {
+                id: 13,
+                question: "Which diagnostic test is most useful for ruling out obstruction in a patient suspected of Postrenal AKI?",
+                options: ["Renal Angiography", "Renal Ultrasonography", "Kidney Biopsy", "24-hour urine collection"],
+                correct: 1,
+                rationale: "Renal ultrasonography is especially useful in ruling out an obstruction and has the advantage of being non-invasive."
+            },
+            {
+                id: 14,
+                question: "The nurse is administering N-acetylcysteine to a patient. What is the primary purpose of this medication in the context of AKI?",
+                options: ["To treat hyperkalemia", "To prevent contrast-induced renal failure", "To increase blood pressure", "To treat metabolic acidosis"],
+                correct: 1,
+                rationale: "N-acetylcysteine is an antioxidant that may prevent contrast-induced renal failure in high-risk patients."
+            },
+            {
+                id: 15,
+                question: "According to the AKIN criteria, stage 1 AKI is defined by a creatinine increase of how much?",
+                options: ["1.5 to 2 times baseline", "2 to 3 times baseline", "Greater than 3 times baseline", "Greater than 4 mg/dL"],
+                correct: 0,
+                rationale: "AKIN Stage 1 is defined as a creatinine increase of 1.5-2 times baseline value or an increase of 0.3 mg/dL or more."
+            },
+            {
+                id: 16,
+                question: "True or False: Postrenal AKI is the most common cause of kidney failure in critically ill patients.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The text states that postrenal AKI is not a common cause of kidney failure in the critically ill."
+            },
+            {
+                id: 17,
+                question: "A patient typically recovers 70% to 80% of their GFR within what timeframe during the recovery phase?",
+                options: ["1 to 2 weeks", "1 to 2 months", "1 to 2 years", "5 to 10 years"],
+                correct: 2,
+                rationale: "During the recovery stage, renal function returns with a GFR that is 70% to 80% of normal within 1 to 2 years."
+            },
+            {
+                id: 18,
+                question: "Which of the following describes the mechanism of action of Angiotensin II in the pathophysiology of Prerenal AKI?",
+                options: ["Systemic vasodilation", "Decreased efferent arteriolar resistance", "Vasoconstriction and aldosterone release", "Inhibition of sodium retention"],
+                correct: 2,
+                rationale: "Angiotensin II causes profound systemic vasoconstriction and stimulates the release of aldosterone, which induces sodium and water retention."
+            },
+            {
+                id: 19,
+                question: "What is the recommended protein intake for a patient with AKI to control azotemia?",
+                options: ["0.5 to 0.8 g/kg/day", "1.2 to 1.5 g/kg/day", "2.0 to 2.5 g/kg/day", "No protein restriction"],
+                correct: 1,
+                rationale: "The recommended protein intake is 1.2 to 1.5 grams/kg per day to control azotemia."
+            },
+            {
+                id: 20,
+                question: "True or False: Loop diuretics act on the distal convoluted tubule to prevent water reabsorption.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Loop diuretics act in the loop of Henle to prevent the reabsorption of water."
+            },
+            {
+                id: 21,
+                question: "A patient with AKI complains of severe itching. The nurse associates this symptom with which laboratory imbalance?",
+                options: ["Hyperkalemia", "Hypocalcemia", "Hyperphosphatemia", "Hyponatremia"],
+                correct: 2,
+                rationale: "If hyperphosphatemia occurs, it results in severe pruritus (itching)."
+            },
+            {
+                id: 22,
+                question: "Which finding in urine microscopy is indicative of Intrarenal AKI (ATN)?",
+                options: ["Normal sediment", "Dark granular casts", "Hyaline casts only", "White blood cells only"],
+                correct: 1,
+                rationale: "Intrarenal failure (ATN) is associated with dark granular casts, hyaline casts, and kidney epithelial cells in the urine sediment."
+            },
+            {
+                id: 23,
+                question: "True or False: Prerenal AKI is generally reversible if the underlying cause of hypoperfusion is corrected.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Prerenal AKI is caused by decreased perfusion; if treatment is initiated during the onset phase (restoring flow), irreversible damage can be alleviated."
+            },
+            {
+                id: 24,
+                question: "What is the normal Glomerular Filtration Rate (GFR)?",
+                options: ["75 mL/min", "100 mL/min", "125 mL/min", "150 mL/min"],
+                correct: 2,
+                rationale: "Normal GFR is defined as 125 mL/min."
+            },
+            {
+                id: 25,
+                question: "Which of the following is considered a novel biomarker for AKI?",
+                options: ["Serum Creatinine", "BUN", "Neutrophil gelatinase-associated lipocalin (NGAL)", "Urine Sodium"],
+                correct: 2,
+                rationale: "NGAL, Cystatin C, KIM-1, and Interleukin-18 are listed as novel biomarkers."
+            },
+            {
+                id: 26,
+                question: "The nurse is assessing a patient for prerenal failure. Which physical assessment finding is consistent with this diagnosis?",
+                options: ["Distended neck veins", "Hypotension and dry mucous membranes", "Bounding pulses", "Polyuria"],
+                correct: 1,
+                rationale: "Assessment findings from hypovolemia (prerenal) include tachycardia, hypotension, flat neck veins, and dry mucous membranes."
+            },
+            {
+                id: 27,
+                question: "When does the 'Onset Phase' of AKI end?",
+                options: ["When urine output drops below 400 mL", "When cell injury occurs", "When the patient requires dialysis", "When GFR returns to normal"],
+                correct: 1,
+                rationale: "The onset phase is the period from when an insult occurs until cell injury."
+            },
+            {
+                id: 28,
+                question: "True or False: Dopamine at low doses (2-3 mcg/kg/min) is used to cause renal vasoconstriction.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Low-dose dopamine is used to stimulate blood flow to the kidney via splanchnic vasodilatation, not vasoconstriction."
+            },
+            {
+                id: 29,
+                question: "In the RIFLE criteria, 'Risk' is defined by a urine output of less than 0.5 mL/kg/hr for how many hours?",
+                options: ["6 hours", "12 hours", "24 hours", "48 hours"],
+                correct: 0,
+                rationale: "Risk in RIFLE is defined as UO < 0.5 mL/kg/hr for 6 hours."
+            },
+            {
+                id: 30,
+                question: "Which condition is a cause of Intrarenal AKI due to exogenous toxins?",
+                options: ["Rhabdomyolysis", "Radiocontrast dye", "Renal artery stenosis", "Prostatic hypertrophy"],
+                correct: 1,
+                rationale: "Radiocontrast dye is listed as an exogenous toxin causing intrarenal AKI. Rhabdomyolysis produces endogenous toxins."
+            },
+            {
+                id: 31,
+                question: "A patient with AKI develops anemia. The nurse understands this is due to a lack of which hormone?",
+                options: ["Renin", "Aldosterone", "Erythropoietin", "Angiotensin"],
+                correct: 2,
+                rationale: "Anemia occurs because the kidney no longer produces the hormone erythropoietin."
+            },
+            {
+                id: 32,
+                question: "True or False: Metabolic alkalosis is a common trademark of severe AKI.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Acidosis (pH less than 7.35), not alkalosis, is a trademark of severe AKI."
+            },
+            {
+                id: 33,
+                question: "Which of the following urine specific gravity results suggests a prerenal cause?",
+                options: ["1.010", "Less than 1.010", "Greater than 1.020", "Fixed at 1.010"],
+                correct: 2,
+                rationale: "Prerenal AKI is associated with a urine specific gravity > 1.020 (concentrated urine)."
+            },
+            {
+                id: 34,
+                question: "How is AKI defined by the Acute Kidney Injury Network (AKIN) regarding time?",
+                options: ["An abrupt increase in creatinine within 24 hours", "An abrupt increase in creatinine within 48 hours", "A gradual increase over 7 days", "A decline in function over 3 months"],
+                correct: 1,
+                rationale: "AKIN defines AKI as an abrupt increase in serum creatinine within 48 hours."
+            },
+            {
+                id: 35,
+                question: "True or False: In postrenal AKI, urine sodium concentration is typically less than 20 mEq/L.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "In postrenal AKI, urine sodium is typically 20-40 mEq/L. It is <20 in prerenal AKI."
+            },
+            {
+                id: 36,
+                question: "A patient is prescribed a loop diuretic. The nurse expects this medication to assist with which aspect of AKI management?",
+                options: ["Correcting acidosis", "Managing fluid volume overload", "Treating anemia", "Reducing serum creatinine directly"],
+                correct: 1,
+                rationale: "Loop diuretics aid in the management of fluid volume overload by augmenting diuresis."
+            },
+            {
+                id: 37,
+                question: "Which type of AKI is caused by benign prostatic hypertrophy (BPH)?",
+                options: ["Prerenal", "Intrarenal", "Postrenal", "Ischemic"],
+                correct: 2,
+                rationale: "BPH causes urethral obstruction, which hinders urine flow, leading to postrenal AKI."
+            },
+            {
+                id: 38,
+                question: "True or False: Patients with AKI in the ICU have a mortality rate exceeding 50% when four or more body systems fail.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The text states the mortality rate exceeded 50% when four or more body systems had failed."
+            },
+            {
+                id: 39,
+                question: "What is the typical duration of the Oliguric/Anuric phase in a nonoliguric patient?",
+                options: ["1 to 2 days", "5 to 8 days", "10 to 16 days", "3 to 4 weeks"],
+                correct: 1,
+                rationale: "The oliguric/anuric phase lasts 5 to 8 days in the nonoliguric patient."
+            },
+            {
+                id: 40,
+                question: "The nurse observes a fractional excretion of sodium (FENa) of <1%. This is indicative of which condition?",
+                options: ["Acute Tubular Necrosis", "Prerenal AKI", "Postrenal Obstruction", "Chronic Kidney Disease"],
+                correct: 1,
+                rationale: "A FENa of <1% indicates Prerenal AKI, while >2-3% indicates Intrarenal AKI."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

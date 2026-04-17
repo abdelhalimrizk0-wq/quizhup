@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracheal Tube Suctioning Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Tracheal Tube Suctioning</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-check text-4xl text-blue-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Which clinical finding serves as a specific indication for performing tracheal suctioning rather than scheduling it routinely?",
+                options: ["Normal arterial blood oxygen levels", "Auscultation of adventitious lung sounds", "Decreased peak airway pressures", "Resting respiratory rate of 16"],
+                correct: 1, 
+                rationale: "Tracheal suctioning should be performed only for a clinical indication, such as auscultation of adventitious lung sounds (Crackles) over the trachea or main stem bronchi."
+            },
+            {
+                question: "A nurse is caring for a patient with acute lung injury requiring high levels of PEEP. Which suctioning method is most advantageous for this patient?",
+                options: ["Open suction technique", "Closed suction technique", "Oral suctioning method", "Manual resuscitation bag method"],
+                correct: 1, 
+                rationale: "The closed-suction technique allows for the maintenance of oxygenation and ventilation support, which is beneficial when high levels of PEEP or inspired oxygen are required."
+            },
+            {
+                question: "When preparing to suction an adult patient with a size 8.0 mm endotracheal tube, what is the appropriate size for the suction catheter?",
+                options: ["10 French", "12 French", "14 French", "16 French"],
+                correct: 1, 
+                rationale: "The formula for suction catheter size is (ETT size - 2) x 2. For a size 8 tube: (8 - 2) x 2 = 12. The catheter should not be larger than half the internal diameter of the tube."
+            },
+            {
+                question: "What is the primary rationale for avoiding routine instillation of normal saline prior to endotracheal suctioning?",
+                options: ["It causes immediate bronchospasm", "It prevents coughing reflex", "It dislodges bacteria into lower airways", "It thickens the secretions excessively"],
+                correct: 2, 
+                rationale: "Routine instillation of normal saline is not recommended because it may contribute to lower airway contamination secondary to the mechanical dislodgment of bacteria within the artificial airway."
+            },
+            {
+                question: "How should the nurse manage the suction catheter if the patient begins to cough during insertion?",
+                options: ["Immediately apply continuous suction", "Withdraw the catheter completely", "Pull back one centimeter then suction", "Push the catheter deeper quickly"],
+                correct: 2, 
+                rationale: "If the patient coughs during insertion, the nurse should briefly hold the catheter, pull it 1 cm back, and then resume suction."
+            },
+            {
+                question: "For a patient with COPD, how should the nurse adjust the hyperoxygenation setting on the ventilator prior to suctioning?",
+                options: ["Increase baseline FiO2 by exactly 20 percent", "Set FiO2 to exactly 100 percent", "Maintain the current FiO2 setting", "Decrease FiO2 to prevent apnea"],
+                correct: 0, 
+                rationale: "In patients with COPD, the baseline fraction of inspired oxygen (FiO2) should be increased by only 20% above the baseline to prevent suppression of the hypoxemic drive."
+            },
+            {
+                question: "What is the maximum duration for applying suction during a single catheter pass to prevent hypoxemia and atelectasis?",
+                options: ["5 seconds", "10 seconds", "15 seconds", "20 seconds"],
+                correct: 1, 
+                rationale: "Suction should be applied for only a maximum of 10 seconds by applying the thumb on the air vent of the suction catheter."
+            },
+            {
+                question: "Which condition is considered a specific contraindication for hyperoxygenation during the suctioning procedure?",
+                options: ["Acute lung injury", "Untreated pneumothorax", "Low blood pressure", "High fever"],
+                correct: 1, 
+                rationale: "Hyperoxygenation should be avoided in patients with untreated pneumothorax, raised intracranial pressure (ICP), and copious secretions."
+            },
+            {
+                question: "During the assessment phase, why is it important to check the patient's Prothrombin Time (PT) and Partial Thromboplastin Time (PTT)?",
+                options: ["To assess for bleeding tendency", "To determine aspiration risk", "To calculate catheter size", "To evaluate lung compliance"],
+                correct: 0, 
+                rationale: "Assessing lab investigations such as PT and PTT is necessary to assess the patient's bleeding tendency before the procedure."
+            },
+            {
+                question: "When using a manual resuscitation bag (MRB) for hyperoxygenation, what is the correct administration technique?",
+                options: ["2 breaths over 10 seconds", "5 to 6 breaths over 30 seconds", "10 breaths over 60 seconds", "Continuous compression for 1 minute"],
+                correct: 1, 
+                rationale: "When using the MRB method, the nurse should attach the MRB to the tube and administer 5 to 6 breaths over 30 seconds."
+            },
+            {
+                question: "What is the maximum number of suction catheter passes recommended per suctioning episode?",
+                options: ["One pass", "Three passes", "Five passes", "Unlimited passes"],
+                correct: 1, 
+                rationale: "The catheter passes should be repeated as needed but no more than 3 times."
+            },
+            {
+                question: "Which technique is recommended to prevent mucosal trauma during the insertion of the suction catheter?",
+                options: ["Apply intermittent suction during insertion", "Insert gently without applying suction", "Rotate catheter while applying suction", "Insert while patient is coughing"],
+                correct: 1, 
+                rationale: "The catheter should be inserted into the trachea gently and quickly using the dominant hand without applying negative pressure suction until resistance is met."
+            },
+            {
+                question: "Which complication is specifically classified as a cardiovascular complication of tracheal suctioning?",
+                options: ["Tracheal mucosal damage", "Premature ventricular contractions", "Increased intracranial pressure", "Aspiration of gastric contents"],
+                correct: 1, 
+                rationale: "Cardiovascular complications include cardiac dysrhythmias such as tachycardia, bradycardia, premature ventricular contractions, heart block, and asystole."
+            },
+            {
+                question: "What is the primary advantage of the closed-suction technique regarding infection control?",
+                options: ["It eliminates the need for sterile gloves", "It decreases the risk of aerosolization", "It sterilizes the tracheal secretions", "It removes bacteria from the bronchi"],
+                correct: 1, 
+                rationale: "The closed-suction technique decreases the risk for aerosolization of tracheal secretions during suction-induced coughing."
+            },
+            {
+                question: "What should the nurse observe about the secretions when documenting the procedure?",
+                options: ["Volume color consistency and odor", "Weight density and pH level", "Taste temperature and bacterial count", "Specific gravity and glucose content"],
+                correct: 0, 
+                rationale: "Documentation of secretions should include characteristics such as volume, color, consistency, and odor."
+            },
+            {
+                question: "In which specific clinical situation is the closed-suction technique most indicated over the open technique?",
+                options: ["Suspected active tuberculosis", "Routine postoperative care", "Low PEEP requirements", "Thick tenacious secretions"],
+                correct: 0, 
+                rationale: "Closed suction is used for suspected active tuberculosis, grossly bloody pulmonary secretions, and high levels of PEEP or inspired oxygen."
+            },
+            {
+                question: "Why should the nurse place the patient in Fowler's position prior to suctioning?",
+                options: ["To increase intracranial pressure", "To promote comfort and oxygenation", "To reduce the heart rate", "To facilitate gastric emptying"],
+                correct: 1, 
+                rationale: "Assisting the patient to Fowler's position helps to promote comfort, oxygenation, and ventilation, and reduces anxiety."
+            },
+            {
+                question: "What is a potential neurological complication associated with tracheal suctioning?",
+                options: ["Decreased intracranial pressure", "Increased level of consciousness", "Increased intracranial pressure", "Peripheral neuropathy"],
+                correct: 2, 
+                rationale: "Neurological complications of tracheal suctioning include increased intracranial pressure and decreased level of consciousness."
+            },
+            {
+                question: "When should the nurse perform hand washing during the preparation phase?",
+                options: ["Only after the procedure", "Before pouring sterile saline", "After hyperoxygenating the patient", "Immediately after putting on gloves"],
+                correct: 1, 
+                rationale: "Hand washing is part of the preparation of the nurse ('Prepare yourself') before wearing gloves and opening the sterile catheter package."
+            },
+            {
+                question: "What action should be taken regarding the oxygen source immediately after withdrawing the suction catheter?",
+                options: ["Turn off the oxygen source", "Reconnect the oxygen source", "Decrease the flow rate", "Disconnect the ventilator"],
+                correct: 1, 
+                rationale: "After withdrawing the suction catheter, the nurse must reconnect the oxygen source and then hyperoxygenate the patient."
+            }
+        ];
+
+        const container = document.getElementById('quiz-container');
+        let score = 0;
+        let answeredCount = 0;
+
+        // Fisher-Yates Shuffle Function
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            
+            const quizHTML = quizData.map((q, index) => {
+                // Create an array of objects containing text and whether it is correct
+                let optionsObj = q.options.map((opt, i) => ({
+                    text: opt,
+                    isCorrect: i === q.correct
+                }));
+
+                // Shuffle the options array using Fisher-Yates
+                optionsObj = shuffleArray(optionsObj);
+
+                // Find the new index of the correct answer after shuffling
+                const newCorrectIndex = optionsObj.findIndex(opt => opt.isCorrect);
+
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3">
+                        ${optionsObj.map((opt, i) => `
+                            <button onclick="checkAnswer(${index}, ${i}, ${newCorrectIndex})" 
+                                class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white">
+                                <span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt.text}</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center group-hover:border-blue-400">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-blue-900 text-sm mb-1">Rationale</p>
+                                <p class="text-blue-800 text-sm leading-relaxed">${q.rationale}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+            
+            container.innerHTML = quizHTML;
+        }
+
+        window.checkAnswer = function(qIndex, optIndex, correctIndex) {
+            const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+            const buttons = document.querySelectorAll(`.option-btn-${qIndex}`);
+            
+            // Prevent multiple checks for the same question
+            if (feedbackEl.classList.contains('block')) return; 
+            
+            feedbackEl.classList.remove('hidden-content');
+            feedbackEl.classList.add('block');
+            
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'bg-white');
+                const iconContainer = btn.lastElementChild;
+                
+                if (i === correctIndex) {
+                    btn.classList.add('correct-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-check text-green-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else if (i === optIndex) {
+                    btn.classList.add('wrong-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-times text-red-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            answeredCount++;
+            if (optIndex === correctIndex) score++;
+            
+            if (answeredCount === quizData.length) {
+                const resultDiv = document.getElementById('result-summary');
+                resultDiv.classList.remove('hidden-content');
+                document.getElementById('score-display').textContent = score;
+                document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+                const messageEl = document.getElementById('score-message');
+                const percentage = (score / quizData.length) * 100;
+                
+                if (percentage === 100) messageEl.textContent = "Perfect Score!";
+                else if (percentage >= 75) messageEl.textContent = "Great Job!";
+                else if (percentage >= 50) messageEl.textContent = "Good effort.";
+                else messageEl.textContent = "Keep studying!";
+                
+                setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 500);
+            }
+        };
+
+        renderQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Chest Trauma</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "What is the primary definition of flail chest?",
+                options: [
+                    "Fracture of two or more ribs in two or more separate locations",
+                    "Single fracture of the sternum and clavicle",
+                    "Fracture of one rib in multiple locations",
+                    "Separation of the ribs from the sternum"
+                ],
+                correct: 0,
+                rationale: "The diagnosis of flail chest is made based on a fracture of two or more ribs, in two or more separate locations, causing an unstable segment."
+            },
+            {
+                id: 2,
+                question: "Penetrating trauma involves injury by foreign objects entering the tissue.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "Penetrating trauma refers to an injury produced by foreign objects penetrating the tissue."
+            },
+            {
+                id: 3,
+                question: "Which term describes the movement of a flail segment during inspiration?",
+                options: [
+                    "Inward movement",
+                    "Outward movement",
+                    "Upward movement",
+                    "Lateral movement"
+                ],
+                correct: 0,
+                rationale: "During inspiration in flail chest, the detached part of the rib segment moves in a paradoxical manner in that it is pulled inward."
+            },
+            {
+                id: 4,
+                question: "Which group is most statistically associated with primary spontaneous pneumothorax?",
+                options: [
+                    "Young tall thin men",
+                    "Elderly obese men",
+                    "Middle aged women",
+                    "Children with asthma"
+                ],
+                correct: 0,
+                rationale: "Primary spontaneous pneumothorax occurs primarily in young (early 20 to 30 years of age), tall, and thin men."
+            },
+            {
+                id: 5,
+                question: "A simple pneumothorax in trauma patients is often associated with a rib fracture puncturing the lung.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "In the trauma patient, closed pneumothorax is associated with puncture of the lung by a rib or compression of the chest against a closed glottis."
+            },
+            {
+                id: 6,
+                question: "What specific sound is characteristically heard in a patient with an open pneumothorax?",
+                options: [
+                    "Sucking sound during inspiration",
+                    "Crunching sound with heartbeat",
+                    "Wheezing during expiration",
+                    "Stridor during inspiration"
+                ],
+                correct: 0,
+                rationale: "Signs of open pneumothorax include a sucking sound from the wound when the patient takes a spontaneous breath."
+            },
+            {
+                id: 7,
+                question: "What defines a hemothorax?",
+                options: [
+                    "Collection of blood within the intrathoracic space",
+                    "Accumulation of air in the pleural space",
+                    "Fluid accumulation in the pericardium",
+                    "Collapse of the lung due to mucus"
+                ],
+                correct: 0,
+                rationale: "Hemothorax is the collection of blood within the intra-thoracic space."
+            },
+            {
+                id: 8,
+                question: "Paradoxical breathing in flail chest reduces the work of breathing.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "Paradoxical breathing can increase the work and pain involved in breathing."
+            },
+            {
+                id: 9,
+                question: "What is Homman's sign indicative of?",
+                options: [
+                    "Accumulation of air in the mediastinum",
+                    "Massive accumulation of blood in the pleura",
+                    "Complete collapse of the left lung",
+                    "Fracture of the first three ribs"
+                ],
+                correct: 0,
+                rationale: "Homman's sign is a crunching sound heard with each heartbeat, caused by accumulation of air in the mediastinum."
+            },
+            {
+                id: 10,
+                question: "Which condition is a risk factor for secondary spontaneous pneumothorax?",
+                options: [
+                    "COPD",
+                    "Hypertension",
+                    "Diabetes",
+                    "Obesity"
+                ],
+                correct: 0,
+                rationale: "Secondary pneumothorax occurs as a result of underlying lung disease, such as COPD."
+            },
+            {
+                id: 11,
+                question: "Flail chest causes the flail segment to bulge outward during expiration.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "On expiration in flail chest, the flail segment bulges outward, impairing the patient's ability to exhale."
+            },
+            {
+                id: 12,
+                question: "What is the immediate needle decompression site for tension pneumothorax if a chest tube is unavailable?",
+                options: [
+                    "Anterior second intercostal space",
+                    "Posterior fourth intercostal space",
+                    "Midaxillary fifth intercostal space",
+                    "Anterior fifth intercostal space"
+                ],
+                correct: 0,
+                rationale: "If a chest tube is not immediately available, a large-bore needle should be placed into the anterior second intercostal space."
+            },
+            {
+                id: 13,
+                question: "What volume of immediate blood evacuation defines a massive hemothorax?",
+                options: [
+                    "More than 1000 milliliters",
+                    "More than 500 milliliters",
+                    "More than 2000 milliliters",
+                    "More than 100 milliliters"
+                ],
+                correct: 0,
+                rationale: "Evacuation of more than 1000 mL of blood immediately after tube thoracotomy is considered a massive hemothorax."
+            },
+            {
+                id: 14,
+                question: "Primary spontaneous pneumothorax typically occurs in patients with severe underlying lung disease.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "Primary pneumothorax occurs in the absence of underlying lung disease."
+            },
+            {
+                id: 15,
+                question: "What is the first priority in managing a massive hemothorax before drainage?",
+                options: [
+                    "Infusion of fluids and blood products",
+                    "Immediate surgical exploration",
+                    "Insertion of a chest tube",
+                    "Administration of high dose opioids"
+                ],
+                correct: 0,
+                rationale: "Infusion of fluid must be started before any attempt to drain a massive hemothorax."
+            },
+            {
+                id: 16,
+                question: "Which device is often used for a small uncomplicated pneumothorax that does not require suction?",
+                options: [
+                    "Heimlich valve",
+                    "Water seal drain",
+                    "Needle catheter",
+                    "Vacuum regulator"
+                ],
+                correct: 0,
+                rationale: "The chest tube frequently is connected to a Heimlich valve instead of Flutter valve for small, uncomplicated pneumothorax."
+            },
+            {
+                id: 17,
+                question: "Tension pneumothorax involves a one way valve mechanism that traps air in the pleural space.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "Tension pneumothorax is caused by air entering the pleural space and becoming trapped without an exit. A one-way valve closed system is formed."
+            },
+            {
+                id: 18,
+                question: "What rate of continued bleeding warrants surgical exploration in traumatic hemothorax?",
+                options: [
+                    "150 to 200 milliliters per hour for 2 to 4 hours",
+                    "50 to 100 milliliters per hour for 6 hours",
+                    "300 milliliters per hour for 1 hour",
+                    "25 milliliters per hour for 12 hours"
+                ],
+                correct: 0,
+                rationale: "Surgical exploration is indicated for continued bleeding defined as 150-200 mL/hr for 2-4 hours."
+            },
+            {
+                id: 19,
+                question: "Which physiological change causes the paradoxical motion seen in flail chest?",
+                options: [
+                    "Pressure changes during respiration",
+                    "Muscle spasms in the chest wall",
+                    "Direct impact from the injury",
+                    "Accumulation of fluid in the lungs"
+                ],
+                correct: 0,
+                rationale: "The characteristic paradoxical motion of the flail segment occurs due to pressure changes associated with respiration that the rib cage normally resists."
+            },
+            {
+                id: 20,
+                question: "Patients with pneumothorax should be positioned in the Trendelenburg position.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "Keep the patient in the semi-fowler position."
+            },
+            {
+                id: 21,
+                question: "Which intervention is required for severe flail chest injuries to stabilize the thoracic cage?",
+                options: [
+                    "Mechanical ventilation",
+                    "Chest tube insertion",
+                    "Tight chest binding",
+                    "Needle decompression"
+                ],
+                correct: 0,
+                rationale: "For severe flail chest injuries, endotracheal intubation and mechanical ventilation are required to stabilize the thoracic cage."
+            },
+            {
+                id: 22,
+                question: "What clinical sign distinguishes tension pneumothorax from simple pneumothorax?",
+                options: [
+                    "Tracheal shift",
+                    "Chest pain",
+                    "Dyspnea",
+                    "Tachypnea"
+                ],
+                correct: 0,
+                rationale: "Signs of tension pneumothorax include chest asymmetry, tracheal shift, and neck vein distention."
+            },
+            {
+                id: 23,
+                question: "A central venous catheter is inserted in hemothorax patients to monitor left sided heart pressure.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "CVC insertion is used to monitor right sided cardiac filling pressure."
+            },
+            {
+                id: 24,
+                question: "Which mechanism allows air to enter the chest in an open pneumothorax?",
+                options: [
+                    "Through a chest wall defect during inspiration",
+                    "From the lung tissue during expiration",
+                    "From the mediastinum during coughing",
+                    "Through the diaphragm during relaxation"
+                ],
+                correct: 0,
+                rationale: "It is a chest wall defect that allows ambient air to enter the thoracic cavity; air enters the chest during inspiration."
+            },
+            {
+                id: 25,
+                question: "What is the primary hemodynamic consequence of tension pneumothorax?",
+                options: [
+                    "Decreased cardiac output",
+                    "Increased venous return",
+                    "Hypertension",
+                    "Bradycardia"
+                ],
+                correct: 0,
+                rationale: "The outcome is ventilation failure, compromised venous return, and insufficient cardiac output."
+            },
+            {
+                id: 26,
+                question: "Needle decompression is performed in the 5th intercostal space.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "A large-bore needle should be placed into the anterior second intercostal space."
+            },
+            {
+                id: 27,
+                question: "Which structures are commonly lacerated to cause a hemothorax?",
+                options: [
+                    "Intercostal or internal mammary vessels",
+                    "Bronchial arteries only",
+                    "The pericardium and heart muscle",
+                    "The diaphragm and stomach"
+                ],
+                correct: 0,
+                rationale: "It generally occurs when a lung or vessels (intercostal or internal mammary) is lacerated."
+            },
+            {
+                id: 28,
+                question: "Open pneumothorax results in the loss of negative pressure in the pleural space.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "This causes loss of negative pressure in the pleural space, collapsing the lung."
+            },
+            {
+                id: 29,
+                question: "What is the main objective of treatment for a small segment flail chest?",
+                options: [
+                    "Clear airway and aid lung expansion",
+                    "Immediate surgical fixation",
+                    "High pressure ventilation",
+                    "Complete sedation"
+                ],
+                correct: 0,
+                rationale: "If only a small segment of the chest is involved, the objectives are to clear the airway... to aid in the expansion of the lung."
+            },
+            {
+                id: 30,
+                question: "What is a major risk factor for developing primary spontaneous pneumothorax?",
+                options: [
+                    "Cigarette smoking",
+                    "Alcohol consumption",
+                    "High cholesterol",
+                    "Sedentary lifestyle"
+                ],
+                correct: 0,
+                rationale: "Family history and cigarette smoking are important risk factors."
+            },
+            {
+                id: 31,
+                question: "Homman's sign is caused by air accumulation in the pericardium.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "Homman's sign is caused by accumulation of air in the mediastinum."
+            },
+            {
+                id: 32,
+                question: "Which condition involves air entering the pleural space but being unable to exit?",
+                options: [
+                    "Tension pneumothorax",
+                    "Open pneumothorax",
+                    "Simple pneumothorax",
+                    "Spontaneous pneumothorax"
+                ],
+                correct: 0,
+                rationale: "Tension pneumothorax is caused by air entering the pleural space and becoming trapped without an exit."
+            },
+            {
+                id: 33,
+                question: "What is the definitive management for tension pneumothorax after needle insertion?",
+                options: [
+                    "Placement of a chest tube",
+                    "Surgical thoracotomy",
+                    "Continuous positive airway pressure",
+                    "Antibiotic therapy"
+                ],
+                correct: 0,
+                rationale: "After needle insertion, a chest tube is placed and connected to underwater seal drainage."
+            },
+            {
+                id: 34,
+                question: "The definitive treatment for mild flail chest includes mechanical ventilation.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "For severe flail chest injuries, endotracheal intubation and mechanical ventilation are required (not mild)."
+            },
+            {
+                id: 35,
+                question: "Which diagnostic test is used to identify rib fractures and chest wall stability?",
+                options: [
+                    "Chest X ray",
+                    "Electrocardiogram",
+                    "Bronchoscopy",
+                    "Echocardiogram"
+                ],
+                correct: 0,
+                rationale: "Diagnostic studies include Chest X-ray and Chest CT scan."
+            },
+            {
+                id: 36,
+                question: "What is the recommended treatment for pain in flail chest to assist breathing?",
+                options: [
+                    "Intercostal nerve blocks",
+                    "General anesthesia",
+                    "Sedative hypnotics",
+                    "Topical ointments"
+                ],
+                correct: 0,
+                rationale: "To relieve pain by intercostal nerve blocks, high thoracic epidural blocks, or cautious use of IV opioids."
+            },
+            {
+                id: 37,
+                question: "How does the diaphragm behave during normal inspiration?",
+                options: [
+                    "It contracts",
+                    "It relaxes",
+                    "It expands upward",
+                    "It remains stationary"
+                ],
+                correct: 0,
+                rationale: "During normal inspiration, the diaphragm contracts and intercostal muscles pull the rib cage out."
+            },
+            {
+                id: 38,
+                question: "What is a common sign of decreased cardiac output in chest trauma?",
+                options: [
+                    "Decreased blood pressure",
+                    "Warm flushed skin",
+                    "Bounding pulse",
+                    "Increased urine output"
+                ],
+                correct: 0,
+                rationale: "Evidence of decreased cardiac output (e.g. decreased blood pressure and poor tissue perfusion)."
+            },
+            {
+                id: 39,
+                question: "Blunt injury mechanisms include motor vehicle collisions and falls.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "Mechanisms of blunt injury include MVCs, falls, assaults, and contact sports."
+            },
+            {
+                id: 40,
+                question: "What defines an open pneumothorax?",
+                options: [
+                    "Chest wall defect allowing ambient air entry",
+                    "Air trapped in the mediastinum",
+                    "Rupture of an emphysematous bleb",
+                    "Blood accumulation in the pleural space"
+                ],
+                correct: 0,
+                rationale: "It is a chest wall defect that allows ambient air to enter the thoracic cavity."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

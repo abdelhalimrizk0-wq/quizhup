@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acute Coronary Syndrome Comprehensive Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .correct { background-color: #22c55e !important; color: #ffffff !important; border-color: #16a34a !important; }
+        .incorrect { background-color: #ef4444 !important; color: #ffffff !important; border-color: #dc2626 !important; }
+        .rationale-correct { background-color: #dcfce7; border-color: #22c55e; color: #14532d; }
+        .rationale-incorrect { background-color: #fee2e2; border-color: #ef4444; color: #7f1d1d; }
+        .option-btn:disabled:not(.correct):not(.incorrect) { background-color: #4b5563; opacity: 0.6; cursor: not-allowed; }
+        .option-btn:disabled { cursor: not-allowed; }
+        #score-container { position: sticky; top: 0; z-index: 10; }
+    </style>
+</head>
+<body class="bg-red-950 text-gray-100 p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-2">Acute Coronary Syndrome (ACS) Master Quiz</h1>
+        <p class="text-center text-red-300 mb-6">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</p>
+
+        <div id="score-container" class="bg-red-950 py-4 mb-8 border-b-2 border-red-700">
+            <div class="flex justify-between items-center max-w-2xl mx-auto px-4">
+                <div class="text-lg">Score: <span id="score" class="font-bold text-xl text-green-400">0</span></div>
+                <div class="text-lg">Attempted: <span id="attempted" class="font-bold text-xl text-yellow-400">0</span></div>
+                <div class="text-lg">Total: <span id="total-questions" class="font-bold text-xl">0</span></div>
+            </div>
+        </div>
+
+        <div id="quiz-container">
+            
+            <!-- Question 1 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="1">
+                <h2 class="text-xl font-semibold mb-4">1. Which of the following conditions is NOT included in the spectrum of Acute Coronary Syndrome (ACS)?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 1)">A. Unstable Angina</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 1)">B. Stable Angina</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 1)">C. ST-segment elevation MI (STEMI)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 1)">D. Non-ST-segment elevation MI (NSTEMI)</button>
+                </div>
+                <div id="rationale-1" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Acute Coronary Syndrome (ACS) includes unstable angina, NSTEMI, and STEMI. Stable angina is a chronic condition with predictable pain on exertion, not part of the acute spectrum.
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="2">
+                <h2 class="text-xl font-semibold mb-4">2. A patient presents with chest pain that occurs at rest and has increased in frequency and duration. This clinical presentation is most consistent with:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 2)">A. Stable Angina</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 2)">B. Unstable Angina</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 2)">C. Variant Angina</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 2)">D. Pulmonary Embolism</button>
+                </div>
+                <div id="rationale-2" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Unstable angina is characterized by unexpected chest pain or discomfort that usually occurs while at rest, is more intense, and lasts longer (often >20 minutes) than stable angina.
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="3">
+                <h2 class="text-xl font-semibold mb-4">3. Which of the following is considered a non-modifiable risk factor for cardiovascular disease?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 3)">A. Smoking</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 3)">B. High Cholesterol</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 3)">C. Family History of CVD</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 3)">D. Physical Inactivity</button>
+                </div>
+                <div id="rationale-3" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Non-modifiable risk factors are those that cannot be changed, such as age, gender, and family history. Smoking, cholesterol levels, and activity are modifiable.
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="4">
+                <h2 class="text-xl font-semibold mb-4">4. Variant (Prinzmetal's) angina is primarily caused by:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 4)">A. Plaque rupture</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 4)">B. Coronary artery spasm</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 4)">C. Increased oxygen demand during exercise</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 4)">D. Thrombus formation</button>
+                </div>
+                <div id="rationale-4" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Variant angina is the result of coronary artery spasm and usually occurs at rest, often between midnight and 8:00 am.
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="5">
+                <h2 class="text-xl font-semibold mb-4">5. The nurse is assessing a patient with chest pain using the NOPQRST acronym. What does 'P' stand for?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 5)">A. Pain level</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 5)">B. Past medical history</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 5)">C. Precipitating and Palliative Factors</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 5)">D. Pulse rate</button>
+                </div>
+                <div id="rationale-5" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> In the NOPQRST assessment tool, 'P' stands for Precipitating and Palliative factors (what makes the pain worse or better).
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="6">
+                <h2 class="text-xl font-semibold mb-4">6. Which cardiac biomarker is considered the preferred marker for diagnosing myocardial necrosis due to its high specificity?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 6)">A. Myoglobin</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 6)">B. CK-MB</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 6)">C. Troponin (T or I)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 6)">D. C-Reactive Protein</button>
+                </div>
+                <div id="rationale-6" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> A cardiac-specific troponin (T or I) is the preferred marker to obtain in all patients with chest discomfort consistent with ACS as it has replaced CK-MB for diagnosing myocardial necrosis.
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="7">
+                <h2 class="text-xl font-semibold mb-4">7. A patient with suspected ACS has a normal initial 12-lead ECG. What is the most appropriate nursing action?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 7)">A. Discharge the patient immediately.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 7)">B. Continue monitoring and treat as ACS until ruled out.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 7)">C. Assume the pain is gastrointestinal in origin.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 7)">D. Schedule an exercise stress test for the next day.</button>
+                </div>
+                <div id="rationale-7" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> A normal ECG does not exclude the possibility of ACS. The patient requires serial ECGs, cardiac markers, and observation.
+                </div>
+            </div>
+
+            <!-- Question 8 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="8">
+                <h2 class="text-xl font-semibold mb-4">8. In the management of angina, what is the primary mechanism of action of Nitroglycerin?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 8)">A. Vasodilation reducing ventricular preload and oxygen demand</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 8)">B. Decreasing heart rate</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 8)">C. Blocking platelet aggregation</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 8)">D. Dissolving existing thrombi</button>
+                </div>
+                <div id="rationale-8" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Nitroglycerin is a vasodilator that reduces myocardial oxygen demand by decreasing ventricular preload via vasodilation and improving arterial flow to ischemic areas.
+                </div>
+            </div>
+
+            <!-- Question 9 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="9">
+                <h2 class="text-xl font-semibold mb-4">9. NCLEX Style: A patient is prescribed sublingual nitroglycerin for angina. What instruction should the nurse provide regarding administration?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 9)">A. "Swallow the tablet with a full glass of water."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 9)">B. "Take one tablet every 15 minutes until pain stops."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 9)">C. "Take one tablet every 5 minutes for up to 3 doses; if pain persists, seek help."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 9)">D. "Store the tablets in a clear plastic container for easy access."</button>
+                </div>
+                <div id="rationale-9" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Nitroglycerin should be taken 5 minutes apart (no more than 3 doses in 15 minutes). If pain persists, immediate care is needed. Tablets must be kept in a dark glass bottle, not plastic or clear containers.
+                </div>
+            </div>
+
+            <!-- Question 10 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="10">
+                <h2 class="text-xl font-semibold mb-4">10. Morphine sulfate is indicated for ACS patients when:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 10)">A. The patient has a known allergy to aspirin.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 10)">B. The blood pressure is below 90/60 mmHg.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 10)">C. Symptoms are not relieved after three serial sublingual nitroglycerin tablets.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 10)">D. The heart rate is less than 50 bpm.</button>
+                </div>
+                <div id="rationale-10" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Morphine is recommended for patients whose symptoms are not relieved after three sublingual nitroglycerin tablets or who have recurring symptoms despite therapy.
+                </div>
+            </div>
+
+             <!-- Question 11 -->
+             <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="11">
+                <h2 class="text-xl font-semibold mb-4">11. Which medication is an antiplatelet agent administered as soon as ACS is suspected?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 11)">A. Heparin</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 11)">B. Aspirin</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 11)">C. Alteplase</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 11)">D. Metoprolol</button>
+                </div>
+                <div id="rationale-11" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Aspirin (160 to 325 mg chewed) inhibits platelet aggregation and should be administered as soon as unstable angina or NSTEMI/STEMI is suspected.
+                </div>
+            </div>
+
+            <!-- Question 12 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="12">
+                <h2 class="text-xl font-semibold mb-4">12. Beta-blockers are used in ACS management primarily to:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 12)">A. Dissolve the coronary thrombus.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 12)">B. Decrease myocardial oxygen consumption by reducing heart rate and contractility.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 12)">C. Increase systemic vascular resistance.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 12)">D. Prevent ventricular arrhythmias by increasing conduction velocity.</button>
+                </div>
+                <div id="rationale-12" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Beta-blockers reduce myocardial oxygen demand by decreasing heart rate, systemic arterial pressure, and myocardial contractility.
+                </div>
+            </div>
+
+            <!-- Question 13 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="13">
+                <h2 class="text-xl font-semibold mb-4">13. NCLEX Style: An elderly patient presents with confusion, weakness, and dyspnea but denies chest pain. The nurse should suspect:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 13)">A. Normal aging process</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 13)">B. Pneumonia</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 13)">C. Atypical presentation of ACS/MI</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 13)">D. Dehydration</button>
+                </div>
+                <div id="rationale-13" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Older patients often present with atypical symptoms such as dyspnea, confusion, weakness, or fainting rather than typical substernal chest pain.
+                </div>
+            </div>
+
+            <!-- Question 14 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="14">
+                <h2 class="text-xl font-semibold mb-4">14. What ECG change indicates the "Zone of Injury" in an acute MI?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 14)">A. T-wave inversion</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 14)">B. ST-segment elevation</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 14)">C. Pathologic Q waves</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 14)">D. Prolonged PR interval</button>
+                </div>
+                <div id="rationale-14" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The zone of injury is characterized by cells that do not fully repolarize due to deficient blood supply, recorded on ECG as ST-segment elevation.
+                </div>
+            </div>
+
+            <!-- Question 15 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="15">
+                <h2 class="text-xl font-semibold mb-4">15. Pathologic Q waves on an ECG generally indicate:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 15)">A. Acute ischemia</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 15)">B. Electrolyte imbalance</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 15)">C. Zone of Infarction (Necrosis)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 15)">D. Ventricular hypertrophy</button>
+                </div>
+                <div id="rationale-15" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Evidence of the zone of infarction (dead muscle) is seen as new pathologic Q waves, which reflect a lack of depolarization from the affected cardiac surface.
+                </div>
+            </div>
+
+             <!-- Question 16 -->
+             <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="16">
+                <h2 class="text-xl font-semibold mb-4">16. What is the optimal time frame for initiating fibrinolytic therapy after the onset of symptoms?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 16)">A. Within 24 hours</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 16)">B. Within 12 hours</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 16)">C. Within 3 hours</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 16)">D. Within 30 minutes</button>
+                </div>
+                <div id="rationale-16" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Fibrinolytic therapy provides maximal benefit if given within the first 3 hours after the onset of symptoms. The "door-to-needle" goal is 30 minutes upon ED arrival.
+                </div>
+            </div>
+
+            <!-- Question 17 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="17">
+                <h2 class="text-xl font-semibold mb-4">17. Which of the following is an ABSOLUTE contraindication for fibrinolytic therapy?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 17)">A. History of chronic hypertension</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 17)">B. Active peptic ulcer</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 17)">C. Suspected aortic dissection</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 17)">D. Current use of anticoagulants</button>
+                </div>
+                <div id="rationale-17" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Suspected aortic dissection, along with prior intracranial hemorrhage or known intracranial neoplasm, are absolute contraindications. Peptic ulcer and anticoagulant use are relative contraindications.
+                </div>
+            </div>
+
+            <!-- Question 18 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="18">
+                <h2 class="text-xl font-semibold mb-4">18. True or False: Myocardial tissue is best salvaged if revascularization occurs within the first 120 minutes (2 hours) of symptom onset.</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 18)">A. True</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 18)">B. False</button>
+                </div>
+                <div id="rationale-18" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Myocardial tissue can best be salvaged within the first 2 hours (120 minutes) after the onset of anginal symptoms.
+                </div>
+            </div>
+
+            <!-- Question 19 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="19">
+                <h2 class="text-xl font-semibold mb-4">19. Which heart sound is associated with decreased left ventricular compliance and is heard in almost all patients with MI?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 19)">A. S1</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 19)">B. S2</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 19)">C. S3</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 19)">D. S4</button>
+                </div>
+                <div id="rationale-19" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> An S4 heart sound is heard in almost all patients with MI because of decreased left ventricular compliance. S3 indicates systolic dysfunction/failure.
+                </div>
+            </div>
+
+            <!-- Question 20 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="20">
+                <h2 class="text-xl font-semibold mb-4">20. Which of the following is a mechanical complication of Acute Myocardial Infarction?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 20)">A. Cardiogenic shock</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 20)">B. Pericarditis</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 20)">C. Ventricular septal rupture</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 20)">D. Ventricular tachycardia</button>
+                </div>
+                <div id="rationale-20" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Mechanical complications include mitral valve regurgitation, left ventricular free wall rupture, ventricular septal rupture, and aneurysm. Shock is hemodynamic; Pericarditis is pericardial; VT is arrhythmic.
+                </div>
+            </div>
+
+             <!-- Question 21 -->
+             <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="21">
+                <h2 class="text-xl font-semibold mb-4">21. NCLEX Style: A patient with STEMI is receiving fibrinolytic therapy. Which finding would alert the nurse to a possible major complication?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 21)">A. Reperfusion dysrhythmias</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 21)">B. Change in level of consciousness</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 21)">C. Decrease in chest pain</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 21)">D. Minor oozing from the IV site</button>
+                </div>
+                <div id="rationale-21" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> A change in LOC could indicate an intracranial hemorrhage, the most serious complication of fibrinolytic therapy. Minor oozing and reperfusion arrhythmias are expected or less critical.
+                </div>
+            </div>
+
+            <!-- Question 22 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="22">
+                <h2 class="text-xl font-semibold mb-4">22. What is the target LDL cholesterol level for patients with UA/NSTEMI initiated on statin therapy?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 22)">A. < 130 mg/dL</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 22)">B. < 100 mg/dL</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 22)">C. < 70 mg/dL</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 22)">D. < 50 mg/dL</button>
+                </div>
+                <div id="rationale-22" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Titration to a dose necessary to sustain an LDL cholesterol concentration of 70 mg/dL or lower is reasonable for ACS patients.
+                </div>
+            </div>
+
+            <!-- Question 23 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="23">
+                <h2 class="text-xl font-semibold mb-4">23. During an anginal episode, what physical assessment finding might indicate hypercholesterolemia?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 23)">A. Pallor</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 23)">B. Diaphoresis</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 23)">C. Xanthomas</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 23)">D. Carotid bruits</button>
+                </div>
+                <div id="rationale-23" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Xanthomas are yellow nodules or plaques on the skin that indicate hypercholesterolemia.
+                </div>
+            </div>
+
+             <!-- Question 24 -->
+             <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="24">
+                <h2 class="text-xl font-semibold mb-4">24. What is the correct dosage and administration route for Aspirin in the initial management of suspected MI?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 24)">A. 81 mg swallowed whole</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 24)">B. 160 to 325 mg chewed</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 24)">C. 650 mg rectal suppository</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 24)">D. 325 mg IV push</button>
+                </div>
+                <div id="rationale-24" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The recommended dose is 160 to 325 mg chewed to facilitate rapid absorption and inhibition of platelet aggregation.
+                </div>
+            </div>
+
+            <!-- Question 25 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="25">
+                <h2 class="text-xl font-semibold mb-4">25. If a patient requires Primary PCI (Percutaneous Coronary Intervention), the goal is to open the culprit vessel within how many minutes of arrival?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 25)">A. 30 minutes</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 25)">B. 60 minutes</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 25)">C. 90 minutes</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 25)">D. 120 minutes</button>
+                </div>
+                <div id="rationale-25" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> If primary PCI is to be done, the goal is to open culprit vessels within 90 minutes of arrival ("door-to-balloon" time).
+                </div>
+            </div>
+
+            <!-- Question 26 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="26">
+                <h2 class="text-xl font-semibold mb-4">26. Which of the following patients is most likely to experience "Silent Ischemia" or atypical symptoms?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 26)">A. A 40-year-old male smoker</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 26)">B. A patient with hypertension</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 26)">C. A patient with Diabetes Mellitus</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 26)">D. A patient with high cholesterol</button>
+                </div>
+                <div id="rationale-26" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Patients with diabetes, along with women and the elderly, are more likely to present with atypical symptoms or silent ischemia.
+                </div>
+            </div>
+
+            <!-- Question 27 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="27">
+                <h2 class="text-xl font-semibold mb-4">27. Which diagnostic test is the definitive method to diagnose coronary artery disease and anatomical blockages?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 27)">A. 12-lead ECG</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 27)">B. Echocardiogram</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 27)">C. Stress Test</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 27)">D. Coronary Angiography</button>
+                </div>
+                <div id="rationale-27" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Coronary angiography is an invasive diagnostic test that provides a definitive diagnosis of coronary artery disease by visualizing the anatomy and blockages.
+                </div>
+            </div>
+
+            <!-- Question 28 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="28">
+                <h2 class="text-xl font-semibold mb-4">28. The nurse observes T-wave inversion on the ECG of a patient with chest pain. This finding most likely represents:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 28)">A. Myocardial Ischemia</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 28)">B. Acute Injury</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 28)">C. Infarction/Necrosis</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 28)">D. Normal variant</button>
+                </div>
+                <div id="rationale-28" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The outer region of the infarcted area is the zone of ischemia, where repolarization is impaired, manifesting as T-wave inversion.
+                </div>
+            </div>
+
+            <!-- Question 29 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="29">
+                <h2 class="text-xl font-semibold mb-4">29. Which medication should be discontinued if the patient's systolic blood pressure falls below 90 mmHg or heart rate drops below 50 bpm?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 29)">A. Aspirin</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 29)">B. Heparin</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 29)">C. Nitroglycerin</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 29)">D. Clopidogrel</button>
+                </div>
+                <div id="rationale-29" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Nitroglycerin causes vasodilation and can worsen hypotension. It should be withheld if SBP < 90 mmHg or HR < 50 bpm or > 100 bpm.
+                </div>
+            </div>
+
+            <!-- Question 30 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="30">
+                <h2 class="text-xl font-semibold mb-4">30. Dressler's syndrome is a complication of MI characterized by:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 30)">A. Acute mitral regurgitation</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 30)">B. Pericarditis with effusion</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 30)">C. Ventricular aneurysm</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 30)">D. Deep Vein Thrombosis</button>
+                </div>
+                <div id="rationale-30" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Dressler's syndrome is a form of pericarditis (often with effusion) that occurs as a late complication of MI, likely autoimmune in nature.
+                </div>
+            </div>
+
+             <!-- Question 31 -->
+             <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="31">
+                <h2 class="text-xl font-semibold mb-4">31. NCLEX Style: The nurse is teaching a patient about lifestyle modifications to reduce the risk of another MI. Which statement by the patient indicates a need for further teaching?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 31)">A. "I will walk indoors when it is very cold or windy."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 31)">B. "I can continue to smoke as long as I cut down to half a pack a day."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 31)">C. "I should avoid heavy meals and rest after eating."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 31)">D. "I need to restrict caffeine intake."</button>
+                </div>
+                <div id="rationale-31" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Smoking cessation is crucial; merely cutting down is insufficient. Smoking increases heart rate, BP, and CO levels. The other statements are correct.
+                </div>
+            </div>
+
+            <!-- Question 32 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="32">
+                <h2 class="text-xl font-semibold mb-4">32. Which of the following conditions is an indication for starting ACE inhibitors within the first 24 hours of MI?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 32)">A. Heart rate < 60 bpm</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 32)">B. Pulmonary congestion or LV ejection fraction < 40%</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 32)">C. Absence of chest pain</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 32)">D. Patient is on beta-blockers</button>
+                </div>
+                <div id="rationale-32" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> ACE inhibitors should be administered within 24 hours to patients with pulmonary congestion or an LV ejection fraction of 40% or lower to prevent remodeling.
+                </div>
+            </div>
+
+            <!-- Question 33 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="33">
+                <h2 class="text-xl font-semibold mb-4">33. How does Calcium Channel Blocker therapy benefit patients with Unstable Angina/NSTEMI?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 33)">A. By increasing heart rate</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 33)">B. By decreasing myocardial oxygen demand via reduced afterload and contractility</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 33)">C. By increasing preload</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 33)">D. By preventing platelet aggregation</button>
+                </div>
+                <div id="rationale-33" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Calcium channel blockers (like Verapamil and Diltiazem) decrease myocardial oxygen demand by decreasing afterload, contractility, and heart rate.
+                </div>
+            </div>
+
+            <!-- Question 34 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="34">
+                <h2 class="text-xl font-semibold mb-4">34. A patient with chest pain has ST elevation >1 mm in leads II, III, and aVF. Which wall of the heart is likely affected?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 34)">A. Anterior</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 34)">B. Inferior</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 34)">C. Lateral</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 34)">D. Posterior</button>
+                </div>
+                <div id="rationale-34" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Though not explicitly detailed in the text, leads II, III, and aVF are standard limb leads associated with the inferior wall. The text mentions ST elevation in contiguous limb leads.
+                </div>
+            </div>
+
+            <!-- Question 35 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="35">
+                <h2 class="text-xl font-semibold mb-4">35. NCLEX Style: A patient recovering from a PTCA (angioplasty) complains of wetness at the groin site. The nurse finds active bleeding. What is the PRIORITY action?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 35)">A. Call the physician immediately.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 35)">B. Apply firm manual pressure to the site.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 35)">C. Check the patient's blood pressure.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 35)">D. Reinforce the dressing with tape.</button>
+                </div>
+                <div id="rationale-35" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Complications of PTCA include hemorrhage. The priority is to stop bleeding by applying manual pressure, then assess and notify the provider.
+                </div>
+            </div>
+
+            <!-- Question 36 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="36">
+                <h2 class="text-xl font-semibold mb-4">36. Clopidogrel (Plavix) is primarily used in ACS management when:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 36)">A. The patient cannot tolerate beta-blockers.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 36)">B. The patient is intolerant of aspirin.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 36)">C. The patient requires immediate anticoagulation with Heparin.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 36)">D. The patient has a high risk of bleeding.</button>
+                </div>
+                <div id="rationale-36" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Clopidogrel is an antiplatelet agent used if the patient is intolerant of aspirin or in combination with aspirin for stent placement.
+                </div>
+            </div>
+
+            <!-- Question 37 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="37">
+                <h2 class="text-xl font-semibold mb-4">37. Which of the following is a classic characteristic of Unstable Angina pain?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 37)">A. Relieved immediately by rest.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 37)">B. Predictable pattern occurring with exertion.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 37)">C. Occurs at rest and lasts longer than 20 minutes.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 37)">D. Sharp, stabbing pain that worsens with deep breathing.</button>
+                </div>
+                <div id="rationale-37" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Unstable angina often occurs at rest, is more severe/prolonged (>20 mins), and does not follow the predictable pattern of stable angina.
+                </div>
+            </div>
+
+            <!-- Question 38 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="38">
+                <h2 class="text-xl font-semibold mb-4">38. A patient is being discharged after an MI. Which statement regarding sexual activity is generally appropriate?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 38)">A. "You must wait at least 6 months before resuming sexual activity."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 38)">B. "You can resume sexual activity when you can tolerate mild physical activity like climbing stairs without pain."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 38)">C. "Sexual activity is strictly forbidden if you take beta-blockers."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 38)">D. "You should take Nitroglycerin immediately before sexual activity as prophylaxis."</button>
+                </div>
+                <div id="rationale-38" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> General guidelines suggest sexual activity can be resumed when the patient can tolerate mild physical activity (like climbing two flights of stairs) without angina. Prophylactic NTG is not standard advice for all, and beta-blockers don't forbid sex (though may cause ED).
+                </div>
+            </div>
+
+            <!-- Question 39 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="39">
+                <h2 class="text-xl font-semibold mb-4">39. The nurse auscultates a new murmur in a patient 3 days post-MI. This could indicate which complication?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 39)">A. Pericarditis</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 39)">B. Papillary muscle dysfunction/mitral regurgitation</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 39)">C. Ventricular aneurysm</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 39)">D. Pulmonary embolism</button>
+                </div>
+                <div id="rationale-39" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Transient systolic murmurs may be heard because of papillary muscle dysfunction or rupture, leading to mitral valve regurgitation.
+                </div>
+            </div>
+
+            <!-- Question 40 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="40">
+                <h2 class="text-xl font-semibold mb-4">40. NCLEX Style: A patient with acute chest pain asks why they are receiving oxygen even though they are not short of breath. The best response is:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 40)">A. "It is hospital policy for all chest pain patients."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 40)">B. "It helps calm you down."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 40)">C. "It increases oxygen supply to the heart muscle to prevent further damage."</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 40)">D. "It prevents you from hyperventilating."</button>
+                </div>
+                <div id="rationale-40" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The goal of therapy is to restore the balance between oxygen supply and demand. Supplemental oxygen increases the supply to the ischemic myocardium.
+                </div>
+            </div>
+
+        </div>
+
+        <p class="text-center text-sm text-red-400 mt-8">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</p>
+    </div>
+
+    <script>
+        let score = 0;
+        let attempted = 0;
+        const totalQuestions = document.querySelectorAll('[data-question-id]').length;
+        document.getElementById('total-questions').innerText = totalQuestions;
+
+        function checkAnswer(selectedOption, questionId) {
+            const questionBlock = selectedOption.closest('[data-question-id]');
+            const options = questionBlock.querySelectorAll('.option-btn');
+            const rationaleBox = document.getElementById('rationale-' + questionId);
+            const isCorrect = selectedOption.getAttribute('data-answer') === 'correct';
+
+            attempted++;
+            document.getElementById('attempted').innerText = attempted;
+
+            options.forEach(btn => { btn.disabled = true; });
+            rationaleBox.style.display = 'block';
+
+            if (isCorrect) {
+                selectedOption.classList.add('correct');
+                rationaleBox.classList.add('rationale-correct');
+                score++;
+                document.getElementById('score').innerText = score;
+            } else {
+                selectedOption.classList.add('incorrect');
+                rationaleBox.classList.add('rationale-incorrect');
+                const correctOption = questionBlock.querySelector('[data-answer="correct"]');
+                correctOption.classList.add('correct');
+            }
+
+            if (attempted === totalQuestions) {
+                const quizContainer = document.getElementById('quiz-container');
+                const resultDiv = document.createElement('div');
+                resultDiv.id = 'quiz-complete';
+                resultDiv.className = 'text-center p-8 bg-red-900 rounded-lg shadow-lg border border-red-700 mt-8';
+                
+                const percentage = Math.round((score / totalQuestions) * 100);
+                
+                resultDiv.innerHTML = `
+                    <h2 class="text-3xl font-bold text-green-400 mb-4">Quiz Complete!</h2>
+                    <p class="text-xl mb-4">Your final score is: <span class="font-bold">${score}</span> / <span>${totalQuestions}</span></p>
+                    <p class="text-2xl font-bold text-yellow-400">Percentage: <span>${percentage}</span>%</p>
+                `;
+                
+                quizContainer.appendChild(resultDiv);
+                
+                setTimeout(() => {
+                    resultDiv.scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>

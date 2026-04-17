@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">First Aid & Emergency Nursing Final Exam</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (120 QUESTIONS) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "A first aider arrives at the scene of a car accident. What is the immediate priority before approaching the victim?",
+                options: ["Assess the victim for breathing", "Check for severe bleeding", "Ensure the scene is safe", "Call for medical help"],
+                correct: 2,
+                rationale: "The first step in Emergency Scene Management is the scene survey to ensure safety for the rescuer. You cannot help if you become a casualty yourself."
+            },
+            {
+                id: 2,
+                question: "Which of the following findings during a primary survey requires the most immediate intervention?",
+                options: ["A deformed lower leg", "Bright red blood spurting from the arm", "A large bruise on the forehead", "Complaints of thirst"],
+                correct: 1,
+                rationale: "Bright red spurting blood indicates arterial bleeding, which is life-threatening and takes priority over fractures or minor injuries in the ABC circulation check."
+            },
+            {
+                id: 3,
+                question: "You are caring for a patient who has just had a generalized tonic-clonic seizure. The patient is now sleeping. What is the best action?",
+                options: ["Wake the patient immediately", "Place the patient in the recovery position", "Insert a spoon into the mouth", "Restrain the patient's arms"],
+                correct: 1,
+                rationale: "The postictal patient should be placed in a lateral recumbent (recovery) position to protect the airway and facilitate drainage of secretions."
+            },
+            {
+                id: 4,
+                question: "A child has swallowed a corrosive household cleaner. What action should be avoided?",
+                options: ["Call the poison control center", "Monitor airway and breathing", "Induce vomiting immediately", "Keep the child calm"],
+                correct: 2,
+                rationale: "Inducing vomiting is contraindicated in poisoning with corrosives as it causes further damage to the esophagus on the way back up."
+            },
+            {
+                id: 5,
+                question: "Using the Rule of Nines for an adult, what is the estimated body surface area for a burn covering the entire left arm and the entire front torso?",
+                options: ["18 percent", "27 percent", "36 percent", "45 percent"],
+                correct: 1,
+                rationale: "The entire arm is 9 percent and the anterior trunk (front torso) is 18 percent. 9 + 18 = 27 percent."
+            },
+            {
+                id: 6,
+                question: "Which symptom is most characteristic of an aortic dissection?",
+                options: ["Dull aching chest pressure", "Tearing or ripping pain in the back", "Sharp pain that worsens with breathing", "Heaviness radiating to the left arm"],
+                correct: 1,
+                rationale: "Aortic dissection is classically described as a sharp, tearing, or ripping pain often felt in the back or flank."
+            },
+            {
+                id: 7,
+                question: "True or False: A first aider should use their thumb to check a casualty's pulse.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. You should not use your thumb because it has its own pulse, which can lead to confusion."
+            },
+            {
+                id: 8,
+                question: "A victim is pulled from cold water after drowning. The body core temperature is 28°C. What is the implication for defibrillation?",
+                options: ["Defibrillate immediately at max joules", "Defibrillation is not effective below 30°C", "Wait until temperature reaches 37°C", "Give three shocks then rewarm"],
+                correct: 1,
+                rationale: "If the body core temperature is less than 86°F (30°C), defibrillation and ALS medications are generally not effective until the patient is rewarmed."
+            },
+            {
+                id: 9,
+                question: "What is the correct ratio of chest compressions to breaths for adult CPR?",
+                options: ["15 compressions to 2 breaths", "30 compressions to 2 breaths", "30 compressions to 1 breath", "15 compressions to 1 breath"],
+                correct: 1,
+                rationale: "The standard CPR ratio for adults is 30 compressions to 2 breaths."
+            },
+            {
+                id: 10,
+                question: "Which toxidrome is characterized by the mnemonic SLUDGE (Salivation, Lacrimation, Urination, Diarrhea, GI upset, Emesis)?",
+                options: ["Anticholinergic", "Sympathomimetic", "Cholinergic", "Opioid"],
+                correct: 2,
+                rationale: "SLUDGE describes the signs of Cholinergic syndrome, often seen in organophosphate poisoning."
+            },
+            {
+                id: 11,
+                question: "A patient presents with a suspected fracture of the forearm. How should the splint be applied?",
+                options: ["Only over the break site", "Immobilize the wrist and elbow joints", "Tight enough to stop the pulse", "Loosely to allow for swelling"],
+                correct: 1,
+                rationale: "Fracture immobilization requires holding the joint above and the joint below the injured area to prevent movement."
+            },
+            {
+                id: 12,
+                question: "Which of the following is the antidote for Acetaminophen (Paracetamol) overdose?",
+                options: ["Naloxone", "Atropine", "N-acetylcysteine", "Flumazenil"],
+                correct: 2,
+                rationale: "N-acetylcysteine (Mucomyst) is the specific antidote for Acetaminophen toxicity."
+            },
+            {
+                id: 13,
+                question: "In a mass casualty situation, which victim should be treated first?",
+                options: ["Victim with a minor arm scrape", "Victim with no pulse and no breathing", "Victim with arterial bleeding from the leg", "Victim with a closed fracture of the ankle"],
+                correct: 2,
+                rationale: "The victim with life-threatening arterial bleeding has the highest priority for immediate intervention to preserve life."
+            },
+            {
+                id: 14,
+                question: "True or False: You should apply butter or oil to a thermal burn to soothe the skin.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Greasy substances can seal heat in and introduce bacteria."
+            },
+            {
+                id: 15,
+                question: "A patient complains of chest pain that is relieved by rest and nitroglycerin. What is this condition most likely?",
+                options: ["Myocardial Infarction", "Stable Angina Pectoris", "Aortic Aneurysm", "Pericarditis"],
+                correct: 1,
+                rationale: "Classic angina is typically relieved with rest and nitroglycerin, unlike an MI which is often not relieved."
+            },
+            {
+                id: 16,
+                question: "What does the 'A' in the AVPU scale stand for?",
+                options: ["Airway", "Alert", "Action", "Assess"],
+                correct: 1,
+                rationale: "In the AVPU scale for Level of Consciousness, A stands for Alert."
+            },
+            {
+                id: 17,
+                question: "You are treating a chemical burn to the eye. How long should you flush the eye with water?",
+                options: ["5 minutes", "10 minutes", "At least 20 minutes", "Until the pain stops"],
+                correct: 2,
+                rationale: "Chemical injuries to the eye require flushing with copious amounts of water for at least 20 minutes."
+            },
+            {
+                id: 18,
+                question: "Which sign indicates a severe airway obstruction (choking)?",
+                options: ["The victim can speak in full sentences", "The victim is coughing forcefully", "The victim cannot speak or breathe", "The victim is wheezing slightly"],
+                correct: 2,
+                rationale: "With a severe or complete blockage, the victim cannot cough forcefully, speak, or breathe."
+            },
+            {
+                id: 19,
+                question: "True or False: A first aider should try to push a protruding bone back into place.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. You should never attempt to push a protruding bone back in; simply cover the wound and immobilize."
+            },
+            {
+                id: 20,
+                question: "What is the primary medication used to treat an anaphylactic reaction?",
+                options: ["Insulin", "Nitroglycerin", "Epinephrine", "Aspirin"],
+                correct: 2,
+                rationale: "Epinephrine (often in an auto-injector) is the primary medication for reversing anaphylaxis."
+            },
+            {
+                id: 21,
+                question: "Which finding is consistent with 'dry drowning'?",
+                options: ["Lungs filled with water", "Laryngospasm preventing air entry", "Immediate cardiac arrest", "Hypothermia only"],
+                correct: 1,
+                rationale: "Dry drowning occurs when laryngeal spasms prevent fluid from entering the lungs, but the person still suffocates."
+            },
+            {
+                id: 22,
+                question: "When applying a tourniquet, where should it be placed relative to the wound?",
+                options: ["Directly over the wound", "One inch below the wound", "2 to 3 inches above the wound", "On the nearest joint"],
+                correct: 2,
+                rationale: "A tourniquet should be placed 2 to 3 inches above the bleeding wound, never over a joint."
+            },
+            {
+                id: 23,
+                question: "A patient with a head injury exhibits 'raccoon eyes'. What does this suggest?",
+                options: ["Direct trauma to the eye", "Bleeding inside the head", "Foreign body in the eye", "Chemical burn"],
+                correct: 1,
+                rationale: "A bloodshot or black eye (raccoon eyes) without direct eye trauma can be a sign of internal bleeding inside the head/skull fracture."
+            },
+            {
+                id: 24,
+                question: "Which position is best for a patient with a nosebleed?",
+                options: ["Lying flat on the back", "Sitting up and leaning forward", "Sitting up and tilting head back", "Lying on the side"],
+                correct: 1,
+                rationale: "Leaning forward prevents blood from draining down the throat, which can cause vomiting."
+            },
+            {
+                id: 25,
+                question: "True or False: If a sterile dressing becomes blood-soaked, you should remove it and apply a new one.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Do not remove blood-soaked dressings as this disturbs clots. Add more dressings on top."
+            },
+            {
+                id: 26,
+                question: "What is the correct hand placement for abdominal thrusts on a conscious choking adult?",
+                options: ["On the sternum", "Below the rib cage", "At the belly button", "Just above the navel"],
+                correct: 3,
+                rationale: "The fist should be placed above the navel (belly button) but well below the breastbone."
+            },
+            {
+                id: 27,
+                question: "Which condition is characterized by a 'tearing' pain radiating to the back?",
+                options: ["Myocardial Infarction", "Pulmonary Embolism", "Aortic Dissection", "Angina Pectoris"],
+                correct: 2,
+                rationale: "Aortic dissection pain is classically described as ripping or tearing and radiating to the back."
+            },
+            {
+                id: 28,
+                question: "What is the priority intervention for a patient with a sucking chest wound?",
+                options: ["Apply a tourniquet", "Seal the wound to prevent air entry", "Give the patient water", "Start CPR immediately"],
+                correct: 1,
+                rationale: "While not explicitly detailed in the basic text, sealing the wound is critical to prevent pneumothorax in chest injuries."
+            },
+            {
+                id: 29,
+                question: "Which burns are characterized by blisters and intense pain?",
+                options: ["First-degree burns", "Second-degree burns", "Third-degree burns", "Fourth-degree burns"],
+                correct: 1,
+                rationale: "Second-degree burns penetrate deeper than the first layer, resulting in blisters, swelling, and intense pain."
+            },
+            {
+                id: 30,
+                question: "True or False: Carbon Monoxide is known as the 'silent killer' because it has a strong odor.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Carbon Monoxide is colorless, odorless, and tasteless."
+            },
+            {
+                id: 31,
+                question: "What is the recommended rate of rescue breathing for an adult with a pulse but no breathing?",
+                options: ["1 breath every 3 seconds", "1 breath every 5-6 seconds", "2 breaths every 10 seconds", "1 breath every 12 seconds"],
+                correct: 1,
+                rationale: "For an adult with a pulse but no breathing, provide 1 breath every 5-6 seconds (10-12 breaths/min)."
+            },
+            {
+                id: 32,
+                question: "A patient has taken an overdose of opioids. Which clinical sign is most specific to this toxidrome?",
+                options: ["Dilated pupils", "Pinpoint pupils", "Hyperthermia", "Rapid breathing"],
+                correct: 1,
+                rationale: "Opioid intoxication typically presents with pinpoint pupils (miosis), respiratory depression, and coma."
+            },
+            {
+                id: 33,
+                question: "When should you call 123 for a seizure patient?",
+                options: ["If the seizure lasts more than 5 minutes", "If the patient is known to have epilepsy", "If the patient wakes up confused", "If the patient bit their tongue"],
+                correct: 0,
+                rationale: "Status epilepticus (seizure > 5 minutes) is a medical emergency requiring immediate transport."
+            },
+            {
+                id: 34,
+                question: "What is the 'Golden Hour' in emergency medicine?",
+                options: ["The time before rigor mortis sets in", "The critical period for treating life-threatening injuries", "The time it takes to fill out a report", "The first hour after waking up"],
+                correct: 1,
+                rationale: "The 'Golden Hour' refers to the period immediately following severe injury where prompt medical treatment yields the best survival chance."
+            },
+            {
+                id: 35,
+                question: "Which medication should be chewed by a patient suspected of having a heart attack?",
+                options: ["Tylenol", "Ibuprofen", "Aspirin", "Codeine"],
+                correct: 2,
+                rationale: "Administer 160-325 mg of aspirin to chew slowly to help thin the blood during a suspected AMI."
+            },
+            {
+                id: 36,
+                question: "True or False: You should perform abdominal thrusts on a drowning victim to remove water from the lungs.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Abdominal thrusts are not routine for drowning as they cause vomiting. Only use them if there is a solid foreign body obstruction."
+            },
+            {
+                id: 37,
+                question: "A 5-year-old child has a fever and experiences a seizure. What is this likely called?",
+                options: ["Grand Mal Seizure", "Febrile Seizure", "Petit Mal Seizure", "Psychomotor Seizure"],
+                correct: 1,
+                rationale: "Febrile seizures are triggered by a rapid rise in body temperature and are common in children aged 6 months to 6 years."
+            },
+            {
+                id: 38,
+                question: "Which assessment finding suggests a hip fracture?",
+                options: ["Lengthening of the leg", "Shortening and rotation of the leg", "Bruising on the knee", "Ability to walk without pain"],
+                correct: 1,
+                rationale: "A fractured hip or thigh bone often causes the limb to look shorter, twisted, or bent."
+            },
+            {
+                id: 39,
+                question: "What is the first step in using an AED?",
+                options: ["Apply the pads", "Turn it on", "Clear the patient", "Analyze the rhythm"],
+                correct: 1,
+                rationale: "The first step is always to turn on the AED and follow the voice prompts."
+            },
+            {
+                id: 40,
+                question: "Which type of shock is caused by severe blood loss?",
+                options: ["Cardiogenic", "Anaphylactic", "Hypovolemic", "Septic"],
+                correct: 2,
+                rationale: "Hypovolemic shock results from significant loss of blood or fluids."
+            },
+            {
+                id: 41,
+                question: "True or False: A first aider should remove a contact lens from an injured eye immediately.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Do not attempt to remove contact lenses even if they are causing pain, unless flushing a chemical burn dislodges them."
+            },
+            {
+                id: 42,
+                question: "What does the 'S' in the SAMPLE history acronym stand for?",
+                options: ["Severity", "Symptoms", "Safety", "Site"],
+                correct: 1,
+                rationale: "S stands for Symptoms (what the casualty is feeling)."
+            },
+            {
+                id: 43,
+                question: "Which of the following is a sign of internal bleeding?",
+                options: ["Warm, dry skin", "Slow pulse", "Vomiting coffee-ground material", "Increased urine output"],
+                correct: 2,
+                rationale: "Vomiting blood that looks like coffee grounds is a classic sign of internal bleeding in the stomach."
+            },
+            {
+                id: 44,
+                question: "What is the correct management for an amputated finger?",
+                options: ["Place it directly in ice water", "Wrap in moist dressing, seal in bag, place on ice", "Scrub it with soap and warm water", "Keep it in a dry pocket"],
+                correct: 1,
+                rationale: "The part should be wrapped in a moist dressing, sealed in a bag, and then placed in a container with ice (indirect cooling)."
+            },
+            {
+                id: 45,
+                question: "Which burn degree involves destruction of all skin layers and underlying tissue like muscle?",
+                options: ["Second-degree", "Third-degree", "Fourth-degree", "First-degree"],
+                correct: 2,
+                rationale: "Fourth-degree burns extend through all skin layers into underlying tissues, muscles, tendons, and bone."
+            },
+            {
+                id: 46,
+                question: "A patient has a foreign object impaled in their chest. What should you do?",
+                options: ["Remove it immediately", "Stabilize the object with bulky dressings", "Cut the object short", "Apply pressure on top of the object"],
+                correct: 1,
+                rationale: "Never remove an impaled object. Stabilize it in place to prevent further damage."
+            },
+            {
+                id: 47,
+                question: "True or False: Antibiotics are the first-line treatment for a viral cold.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Antibiotics do not treat viral infections."
+            },
+            {
+                id: 48,
+                question: "Which pulse point is checked in an unresponsive adult?",
+                options: ["Radial", "Carotid", "Brachial", "Femoral"],
+                correct: 1,
+                rationale: "The carotid pulse in the neck is the primary check for unresponsive adults."
+            },
+            {
+                id: 49,
+                question: "What is the purpose of the 'Head-Tilt, Chin-Lift' maneuver?",
+                options: ["To check for neck injury", "To open the airway", "To check pupil reaction", "To relieve pain"],
+                correct: 1,
+                rationale: "This maneuver moves the tongue away from the back of the throat, opening the airway."
+            },
+            {
+                id: 50,
+                question: "A patient with asthma is having a severe attack. They have a Metered-Dose Inhaler. How can you assist?",
+                options: ["Spray the inhaler in the air", "Shake the container and assist them in using it", "Tell them to hold their breath before using it", "Give them water instead"],
+                correct: 1,
+                rationale: "First aid involves assisting the victim to take their prescribed medication: Shake, remove cap, breathe out, inhale slowly while pressing."
+            },
+            {
+                id: 51,
+                question: "Which of the following describes a 'Greenstick' fracture?",
+                options: ["Bone is shattered into pieces", "Incomplete break where bone bends", "Bone pierces the skin", "Break is diagonal"],
+                correct: 1,
+                rationale: "A Greenstick fracture is an incomplete break, common in children, where the bone bends and cracks."
+            },
+            {
+                id: 52,
+                question: "What is the most critical factor for survival in a drowning incident?",
+                options: ["The temperature of the water", "Duration of submersion", "Age of the victim", "Cleanliness of the water"],
+                correct: 1,
+                rationale: "The duration of submersion has the greatest impact on the patient's prognosis."
+            },
+            {
+                id: 53,
+                question: "True or False: You should use a tourniquet for a minor cut on the finger.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Tourniquets are for catastrophic, life-threatening bleeding only."
+            },
+            {
+                id: 54,
+                question: "Which symptom distinguishes heat stroke from heat exhaustion?",
+                options: ["Heavy sweating", "Hot, dry skin and altered mental status", "Muscle cramps", "Pale skin"],
+                correct: 1,
+                rationale: "Hot, dry skin and altered mental status (confusion/unconsciousness) are hallmarks of life-threatening heat stroke."
+            },
+            {
+                id: 55,
+                question: "What is the first action when you see a person with their clothes on fire?",
+                options: ["Throw water on them", "Tell them to Stop, Drop, and Roll", "Run to get a blanket", "Use a fire extinguisher"],
+                correct: 1,
+                rationale: "Stop, Drop, and Roll is the immediate instruction to extinguish flames on clothing."
+            },
+            {
+                id: 56,
+                question: "A patient has a suspected spinal injury. How should you open the airway?",
+                options: ["Head-tilt, chin-lift", "Jaw-thrust without head-tilt", "Turn the head to the side", "Place a pillow under the head"],
+                correct: 1,
+                rationale: "The jaw-thrust maneuver opens the airway without moving the neck, protecting the spine."
+            },
+            {
+                id: 57,
+                question: "Which of the following is a sign of an infected wound?",
+                options: ["Cool skin around the wound", "Clear fluid drainage", "Red streaks spreading from the wound", "Itching"],
+                correct: 2,
+                rationale: "Red streaks spreading from the wound, along with heat and pus, indicate infection."
+            },
+            {
+                id: 58,
+                question: "What does the 'M' in MIST stand for when reporting to ambulance crews?",
+                options: ["Medical history", "Mechanism of Injury", "Medications", "Movement"],
+                correct: 1,
+                rationale: "MIST: Mechanism of Injury, Injuries found, Signs/Symptoms, Treatment provided."
+            },
+            {
+                id: 59,
+                question: "True or False: Vomiting is a common symptom of a heart attack in women.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Women often present with atypical symptoms like nausea, vomiting, and fatigue."
+            },
+            {
+                id: 60,
+                question: "Which gas is most likely to cause poisoning in a poorly ventilated room with a burning heater?",
+                options: ["Carbon Dioxide", "Carbon Monoxide", "Nitrogen", "Oxygen"],
+                correct: 1,
+                rationale: "Carbon Monoxide is a byproduct of incomplete combustion and accumulates in poorly ventilated spaces."
+            },
+            {
+                id: 61,
+                question: "What is the main purpose of a splint?",
+                options: ["To reduce pain and prevent further damage", "To fix the bone permanently", "To stop bleeding", "To warm the limb"],
+                correct: 0,
+                rationale: "Splinting immobilizes the injury to prevent further tissue damage and reduce pain."
+            },
+            {
+                id: 62,
+                question: "When caring for a patient with a nosebleed, you should pinch the soft part of the nose for how long?",
+                options: ["1-2 minutes", "5-10 minutes", "30 seconds", "Until they sneeze"],
+                correct: 1,
+                rationale: "Pinching the soft part of the nose for 10 minutes allows clotting to occur."
+            },
+            {
+                id: 63,
+                question: "True or False: Activated charcoal is effective for heavy metal poisoning (like iron or lithium).",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Activated charcoal does not bind well to heavy metals like iron, lithium, or alcohols."
+            },
+            {
+                id: 64,
+                question: "A patient is unresponsive and not breathing. You have called for help. What is your next action?",
+                options: ["Check for a pulse", "Begin chest compressions", "Give two rescue breaths", "Apply the AED"],
+                correct: 0,
+                rationale: "According to BLS algorithms, check for a pulse/breathing simultaneously before starting compressions."
+            },
+            {
+                id: 65,
+                question: "Which of the following indicates that a bandage is too tight?",
+                options: ["The patient feels comfortable", "The fingers below the bandage are blue and cold", "The bandage stays in place", "The pulse is strong below the bandage"],
+                correct: 1,
+                rationale: "Blue, cold, or tingling extremities indicate compromised circulation."
+            },
+            {
+                id: 66,
+                question: "What is the compression depth for adult CPR?",
+                options: ["1 inch", "At least 2 inches (5 cm)", "3 inches", "As deep as possible"],
+                correct: 1,
+                rationale: "Compressions should be at least 2 inches deep to be effective."
+            },
+            {
+                id: 67,
+                question: "Which type of seizure involves a blank stare and chewing movements?",
+                options: ["Simple Partial", "Complex Partial", "Tonic-Clonic", "Myoclonic"],
+                correct: 1,
+                rationale: "Complex partial seizures (psychomotor) often present with a blank stare and automatisms like chewing or lip smacking."
+            },
+            {
+                id: 68,
+                question: "True or False: You should place a pillow under the head of a patient with a suspected neck injury.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. This can flex the neck and worsen a spinal injury."
+            },
+            {
+                id: 69,
+                question: "What is the first aid for a jellyfish sting?",
+                options: ["Rub with sand", "Rinse with fresh water", "Rinse with vinegar", "Apply ice directly"],
+                correct: 2,
+                rationale: "Vinegar helps neutralize the nematocysts. Fresh water can cause them to fire."
+            },
+            {
+                id: 70,
+                question: "A patient has a loose tooth after a facial trauma. What is the risk?",
+                options: ["Infection", "Airway obstruction", "Loss of appetite", "Speech impediment"],
+                correct: 1,
+                rationale: "A loose tooth can become dislodged and block the airway."
+            },
+            {
+                id: 71,
+                question: "What is 'status epilepticus'?",
+                options: ["A seizure lasting less than 1 minute", "A seizure lasting more than 5 minutes", "A seizure while sleeping", "A first-time seizure"],
+                correct: 1,
+                rationale: "Status epilepticus is a seizure lasting longer than 5 minutes or repeated seizures without recovery."
+            },
+            {
+                id: 72,
+                question: "Which drug is an opioid antagonist used in overdose?",
+                options: ["Naloxone", "Flumazenil", "Atropine", "Glucagon"],
+                correct: 0,
+                rationale: "Naloxone (Narcan) reverses the effects of opioids."
+            },
+            {
+                id: 73,
+                question: "True or False: Pericarditis pain often worsens when lying flat.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Pericarditis pain typically worsens when lying flat and improves when sitting forward."
+            },
+            {
+                id: 74,
+                question: "What is the 'clonic' phase of a seizure?",
+                options: ["The recovery period", "The muscle rigidity phase", "The jerking/convulsion phase", "The warning aura"],
+                correct: 2,
+                rationale: "The clonic phase is characterized by violent jerking muscle contractions."
+            },
+            {
+                id: 75,
+                question: "How should you transport an avulsed tooth?",
+                options: ["In a dry tissue", "In milk or the patient's saliva", "In hot water", "In alcohol"],
+                correct: 1,
+                rationale: "Keeping the tooth moist in milk or saliva preserves the periodontal ligament for reimplantation."
+            },
+            {
+                id: 76,
+                question: "Which finding requires immediate medical attention in a burn victim?",
+                options: ["Pain at the site", "Redness", "Singed nasal hairs and hoarse voice", "Blisters on the finger"],
+                correct: 2,
+                rationale: "Singed nasal hairs and hoarseness indicate inhalation injury and potential airway compromise."
+            },
+            {
+                id: 77,
+                question: "True or False: You should rub frostbitten skin to warm it up.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Rubbing frostbitten skin causes tissue damage."
+            },
+            {
+                id: 78,
+                question: "What is the best way to remove a bee stinger?",
+                options: ["Pull it out with tweezers", "Scrape it off with a card", "Squeeze it out", "Leave it in"],
+                correct: 1,
+                rationale: "Scraping prevents squeezing the venom sac, which injects more venom."
+            },
+            {
+                id: 79,
+                question: "A patient feels dizzy and weak after working in the sun. Skin is cool and clammy. What do you suspect?",
+                options: ["Heat Stroke", "Heat Exhaustion", "Hypothermia", "Seizure"],
+                correct: 1,
+                rationale: "Cool, clammy skin with dizziness indicates heat exhaustion, as opposed to the hot dry skin of heat stroke."
+            },
+            {
+                id: 80,
+                question: "Which is a sign of a fracture?",
+                options: ["Crepitus (grating sound)", "Full range of motion", "Normal skin color", "Lack of pain"],
+                correct: 0,
+                rationale: "Crepitus, a grating noise or feeling, is a common sign of bone ends rubbing together."
+            },
+            {
+                id: 81,
+                question: "In a 'Load and Go' situation, you should:",
+                options: ["Perform a detailed secondary survey on scene", "Transport immediately after primary assessment", "Wait for police", "Splint all minor fractures first"],
+                correct: 1,
+                rationale: "Critical patients require immediate transport; secondary assessment happens en route."
+            },
+            {
+                id: 82,
+                question: "True or False: Do not give food or drink to a patient who might need surgery.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. An empty stomach reduces aspiration risk during anesthesia."
+            },
+            {
+                id: 83,
+                question: "Which color blood indicates venous bleeding?",
+                options: ["Bright red", "Dark red", "Pink", "Frothy"],
+                correct: 1,
+                rationale: "Venous blood is oxygen-poor, appearing dark red and flowing steadily."
+            },
+            {
+                id: 84,
+                question: "What is the first step in managing external bleeding?",
+                options: ["Apply a tourniquet", "Apply direct pressure", "Elevate the limb", "Apply ice"],
+                correct: 1,
+                rationale: "Direct pressure is the most effective initial method to control external bleeding."
+            },
+            {
+                id: 85,
+                question: "A patient has a pulse of 120, BP 90/60, and pale skin. What is this consistent with?",
+                options: ["Hypertension", "Shock", "Stroke", "Head injury"],
+                correct: 1,
+                rationale: "Tachycardia, hypotension, and pallor are classic signs of shock."
+            },
+            {
+                id: 86,
+                question: "True or False: You should try to make a person vomit if they swallowed gasoline.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Petroleum products can cause chemical pneumonia if aspirated during vomiting."
+            },
+            {
+                id: 87,
+                question: "Which assessment is part of the Cincinnati Prehospital Stroke Scale?",
+                options: ["Arm drift", "Leg strength", "Pulse rate", "Pupil size"],
+                correct: 0,
+                rationale: "Facial droop, Arm drift, and Speech are the three components."
+            },
+            {
+                id: 88,
+                question: "What is 'triage'?",
+                options: ["Treating the loudest person first", "Sorting patients based on injury severity", "Transporting everyone at once", "Diagnosing medical conditions"],
+                correct: 1,
+                rationale: "Triage is the process of prioritizing patients based on the severity of their condition."
+            },
+            {
+                id: 89,
+                question: "A diabetic patient is confused and sweaty. You are unsure if sugar is high or low. What do you do?",
+                options: ["Give insulin", "Give sugar", "Give water", "Do nothing"],
+                correct: 1,
+                rationale: "Hypoglycemia is immediately life-threatening; giving sugar is safer than insulin if unsure."
+            },
+            {
+                id: 90,
+                question: "True or False: Chest compressions should be performed on a soft mattress.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Compressions require a firm surface to be effective."
+            },
+            {
+                id: 91,
+                question: "Which injury requires an occlusive dressing taped on three sides?",
+                options: ["Open abdominal wound", "Sucking chest wound", "Neck laceration", "Arterial bleed"],
+                correct: 1,
+                rationale: "A sucking chest wound needs a 3-sided dressing to allow air out but not in."
+            },
+            {
+                id: 92,
+                question: "What is the priority for a patient with facial burns?",
+                options: ["Pain control", "Airway patency", "Infection control", "Cosmetic outcome"],
+                correct: 1,
+                rationale: "Facial burns often involve the airway; swelling can cause obstruction rapidly."
+            },
+            {
+                id: 93,
+                question: "Which spider bite causes a bullseye lesion and tissue necrosis?",
+                options: ["Black Widow", "Brown Recluse", "Tarantula", "Garden Spider"],
+                correct: 1,
+                rationale: "The Brown Recluse bite is known for causing local tissue necrosis."
+            },
+            {
+                id: 94,
+                question: "True or False: A patient with a nosebleed should blow their nose to clear clots.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Blowing the nose will dislodge clots and restart bleeding."
+            },
+            {
+                id: 95,
+                question: "What defines an 'open' fracture?",
+                options: ["The bone is broken in two places", "The skin over the fracture is broken", "The bone is bent", "The ligaments are torn"],
+                correct: 1,
+                rationale: "An open (compound) fracture involves a wound that communicates with the fracture site."
+            },
+            {
+                id: 96,
+                question: "Which creates the highest risk for infection?",
+                options: ["Human bite", "Cat scratch", "Paper cut", "Bruise"],
+                correct: 0,
+                rationale: "Human bites have a very high rate of infection due to oral bacteria."
+            },
+            {
+                id: 97,
+                question: "A patient is hyperventilating due to anxiety. What should you do?",
+                options: ["Have them breathe into a paper bag", "Calm them and encourage slow breathing", "Give oxygen", "Splash water on their face"],
+                correct: 1,
+                rationale: "Coaching slow breathing is safer; paper bags can be dangerous if the cause is hypoxia."
+            },
+            {
+                id: 98,
+                question: "True or False: You should put a spoon in a seizing person's mouth.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. This can break teeth or cause airway obstruction."
+            },
+            {
+                id: 99,
+                question: "What is the ratio of compressions to breaths for a child (single rescuer)?",
+                options: ["15:2", "30:2", "5:1", "50:2"],
+                correct: 1,
+                rationale: "Single rescuer CPR for all ages (except newborns) is 30:2."
+            },
+            {
+                id: 100,
+                question: "Which heat emergency is characterized by muscle spasms?",
+                options: ["Heat cramps", "Heat exhaustion", "Heat stroke", "Sunburn"],
+                correct: 0,
+                rationale: "Heat cramps are painful muscle spasms due to electrolyte loss."
+            },
+            {
+                id: 101,
+                question: "A patient has a protruding abdominal organ (evisceration). How do you treat it?",
+                options: ["Push it back in", "Cover with dry gauze", "Cover with moist sterile dressing", "Apply ice"],
+                correct: 2,
+                rationale: "Cover with a moist sterile dressing to prevent drying out. Never push back in."
+            },
+            {
+                id: 102,
+                question: "True or False: Agonal breathing (gasping) requires CPR.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Agonal gasps are not effective breathing; start CPR."
+            },
+            {
+                id: 103,
+                question: "What indicates a successful rescue breath?",
+                options: ["Stomach rises", "Chest rises visibly", "Air escapes nose", "Resistance is felt"],
+                correct: 1,
+                rationale: "Visible chest rise is the primary indicator of effective ventilation."
+            },
+            {
+                id: 104,
+                question: "Which of the following is a symptom of hypoglycemia?",
+                options: ["Fruity breath odor", "Hot dry skin", "Sudden irritability/confusion", "Deep sighing respirations"],
+                correct: 2,
+                rationale: "Hypoglycemia presents rapidly with confusion, irritability, and sweating."
+            },
+            {
+                id: 105,
+                question: "When suspecting a stroke, what time is critical to establish?",
+                options: ["Time the patient woke up", "Time symptoms started", "Time of last meal", "Time they went to bed"],
+                correct: 1,
+                rationale: "Time of onset determines eligibility for clot-busting drugs (fibrinolytics)."
+            },
+            {
+                id: 106,
+                question: "True or False: Hypothermia can occur even in temperatures above freezing.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Hypothermia is body temp < 35°C, which can happen in cool, wet, or windy conditions."
+            },
+            {
+                id: 107,
+                question: "What is the first sign of hypoxia?",
+                options: ["Cyanosis", "Restlessness/Anxiety", "Unconsciousness", "Slow pulse"],
+                correct: 1,
+                rationale: "Restlessness and anxiety are early signs of the brain not getting enough oxygen."
+            },
+            {
+                id: 108,
+                question: "Which splint is best for a clavicle fracture?",
+                options: ["Rigid leg splint", "Sling and Swathe", "Traction splint", "C-collar"],
+                correct: 1,
+                rationale: "A sling and swathe immobilizes the shoulder and clavicle."
+            },
+            {
+                id: 109,
+                question: "A patient has swallowed drain cleaner. Lips are burned. What is the priority?",
+                options: ["Administer charcoal", "Airway management", "Gastric lavage", "Neutralize with vinegar"],
+                correct: 1,
+                rationale: "Corrosive ingestion causes airway edema; maintaining the airway is the absolute priority."
+            },
+            {
+                id: 110,
+                question: "True or False: You should warm a hypothermic patient as fast as possible with hot water.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Rewarm slowly to prevent cardiac arrhythmias."
+            },
+            {
+                id: 111,
+                question: "What is the universal sign for choking?",
+                options: ["Clutching the throat", "Waving hands", "Pointing to mouth", "Coughing"],
+                correct: 0,
+                rationale: "Clutching the throat with one or both hands is the universal sign."
+            },
+            {
+                id: 112,
+                question: "Which condition causes 'pink frothy sputum'?",
+                options: ["Asthma", "Pulmonary Edema", "Pneumonia", "Bronchitis"],
+                correct: 1,
+                rationale: "Pink frothy sputum is a classic sign of severe pulmonary edema (fluid in lungs)."
+            },
+            {
+                id: 113,
+                question: "True or False: You should stand a patient up if they feel faint.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Lay them down and elevate legs to improve blood flow to the brain."
+            },
+            {
+                id: 114,
+                question: "What is the purpose of the secondary survey?",
+                options: ["To find life threats", "To perform a detailed head-to-toe exam", "To check scene safety", "To call 911"],
+                correct: 1,
+                rationale: "The secondary survey looks for injuries missed during the primary survey."
+            },
+            {
+                id: 115,
+                question: "A patient has a rigid, board-like abdomen. What does this indicate?",
+                options: ["Gas", "Internal bleeding/peritonitis", "Pregnancy", "Full bladder"],
+                correct: 1,
+                rationale: "A rigid abdomen is a sign of internal bleeding or irritation (peritonitis)."
+            },
+            {
+                id: 116,
+                question: "Which of the following is an example of an inhaled poison?",
+                options: ["Bleach", "Carbon Monoxide", "Lead paint", "Snake venom"],
+                correct: 1,
+                rationale: "Carbon Monoxide is a gas that is inhaled."
+            },
+            {
+                id: 117,
+                question: "True or False: Pain radiating down the left arm is always a heart attack.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. While common, it can also be musculoskeletal; however, it must be treated as cardiac until proven otherwise."
+            },
+            {
+                id: 118,
+                question: "What is the treatment for a chemical burn to the skin?",
+                options: ["Apply lotion", "Brush off dry powder then flush with water", "Cover with bandage immediately", "Apply ice"],
+                correct: 1,
+                rationale: "Dry chemicals should be brushed off before flushing to prevent activation; liquid chemicals are flushed immediately."
+            },
+            {
+                id: 119,
+                question: "Which creates a 'sucking sound' when breathing?",
+                options: ["Flail chest", "Open pneumothorax", "Rib fracture", "Asthma"],
+                correct: 1,
+                rationale: "An open pneumothorax (sucking chest wound) allows air to pass through the chest wall defect."
+            },
+            {
+                id: 120,
+                question: "What is the most effective way to prevent disease transmission?",
+                options: ["Wearing a mask", "Hand washing", "Wearing gloves", "Avoiding patients"],
+                correct: 1,
+                rationale: "Hand washing is universally cited as the single most effective way to prevent infection spread."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

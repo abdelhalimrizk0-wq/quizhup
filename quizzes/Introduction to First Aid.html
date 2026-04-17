@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Introduction to First Aid</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "Which of the following represents the correct order of the three main priorities of first aid?",
+                options: [
+                    "Promote recovery then preserve life",
+                    "Preserve life then prevent worsening",
+                    "Prevent worsening then promote recovery",
+                    "Preserve life then promote recovery"
+                ],
+                correct: 1,
+                rationale: "The three priorities of first aid, in order of importance, are to Preserve life, Prevent the illness or injury from becoming worse, and Promote recovery."
+            },
+            {
+                id: 2,
+                question: "What is the primary purpose of the 'Golden Hour' in emergency medicine?",
+                options: [
+                    "To ensure the first aider rests before helping",
+                    "To complete the secondary survey fully",
+                    "To transport the casualty to surgery quickly",
+                    "To contact the family of the casualty"
+                ],
+                correct: 2,
+                rationale: "The Golden Hour refers to the period immediately following a severe injury where getting the casualty to an operating room quickly improves survival chances."
+            },
+            {
+                id: 3,
+                question: "Which acronym is used to remember the information needed when reporting to an ambulance crew?",
+                options: [
+                    "FAST",
+                    "MIST",
+                    "SAMPLE",
+                    "AVPU"
+                ],
+                correct: 1,
+                rationale: "MIST stands for Mechanism of injury, Injuries found, Signs and symptoms, and Treatment provided."
+            },
+            {
+                id: 4,
+                question: "How should a first aider check for breathing in an unconscious casualty?",
+                options: [
+                    "Place a hand on the abdomen for one minute",
+                    "Listen for breathing for at least 30 seconds",
+                    "Check for breathing for 5 to 10 seconds",
+                    "Immediately start CPR without checking"
+                ],
+                correct: 2,
+                rationale: "If the casualty is unconscious, check for breathing for at least five seconds, and no more than 10 seconds."
+            },
+            {
+                id: 5,
+                question: "What does the letter 'P' stand for in the AVPU scale for Level of Consciousness?",
+                options: [
+                    "Pale skin color",
+                    "Pulse rate",
+                    "Pain response",
+                    "Pupil size"
+                ],
+                correct: 2,
+                rationale: "In AVPU, 'P' stands for Pain, meaning the casualty only responds when a painful stimulus is delivered."
+            },
+            {
+                id: 6,
+                question: "Which intervention is appropriate for opening the airway of a casualty with a suspected spinal injury?",
+                options: [
+                    "Head-tilt chin-lift maneuver",
+                    "Jaw-thrust without head-tilt",
+                    "Turning the head to the side",
+                    "Placing a pillow under the head"
+                ],
+                correct: 1,
+                rationale: "If you suspect a head or spinal injury, and have been trained, use a jaw-thrust without head-tilt to avoid moving the spine."
+            },
+            {
+                id: 7,
+                question: "During the secondary survey, what does the 'S' in the SAMPLE history acronym represent?",
+                options: [
+                    "Severity of the injury",
+                    "Safety of the scene",
+                    "Symptoms felt by casualty",
+                    "Source of the pain"
+                ],
+                correct: 2,
+                rationale: "In the SAMPLE history, 'S' stands for Symptoms, which describes what the casualty is feeling (e.g., pain, nausea)."
+            },
+            {
+                id: 8,
+                question: "True or False: A first aider should diagnose the exact medical condition of the casualty before providing care.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "First aiders do not diagnose or treat injuries or illnesses; they suspect injuries and give first aid until medical help arrives."
+            },
+            {
+                id: 9,
+                question: "What is the very first step in Emergency Scene Management (ESM)?",
+                options: [
+                    "Primary Survey",
+                    "Secondary Survey",
+                    "Scene Survey",
+                    "Ongoing Casualty Care"
+                ],
+                correct: 2,
+                rationale: "The first step of ESM is the Scene Survey, where you take control of the scene and ensure safety."
+            },
+            {
+                id: 10,
+                question: "Which of the following is considered an airborne pathogen?",
+                options: [
+                    "Hepatitis B",
+                    "Tuberculosis",
+                    "Hepatitis C",
+                    "HIV"
+                ],
+                correct: 1,
+                rationale: "Tuberculosis is listed as a bacterial infection that primarily affects the lungs and can be spread through the air."
+            },
+            {
+                id: 11,
+                question: "When performing a head-to-toe exam, how should the abdomen be assessed?",
+                options: [
+                    "Press deeply to feel organs",
+                    "Palpate firmly with fingertips",
+                    "Check gently with flat hands",
+                    "Do not touch the abdomen"
+                ],
+                correct: 2,
+                rationale: "The text states to check the abdomen carefully with flat hands and generally feel for pain or rigidity without pushing in."
+            },
+            {
+                id: 12,
+                question: "What is the correct action if a casualty has multiple injuries?",
+                options: [
+                    "Treat the most painful injury first",
+                    "Treat the most visible injury first",
+                    "Treat life-threatening conditions first",
+                    "Treat the easiest injury to fix first"
+                ],
+                correct: 2,
+                rationale: "The text explicitly states to give early treatment to the casualties with the most serious (life-threatening) conditions first."
+            },
+            {
+                id: 13,
+                question: "True or False: You should stop providing first aid as soon as the ambulance appears in the distance.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "Do not stop the first aid you are providing until the crew has arrived to the casualty and indicates they are ready to take over."
+            },
+            {
+                id: 14,
+                question: "Which sign indicates that a casualty might be in shock based on skin condition?",
+                options: [
+                    "Skin is warm and dry",
+                    "Skin is pink and hot",
+                    "Skin is pale and cold",
+                    "Skin is red and dry"
+                ],
+                correct: 2,
+                rationale: "If the skin is pale, cold, and wet (sweaty), this could be an indication of shock."
+            },
+            {
+                id: 15,
+                question: "What is the maximum amount of time a first aider should spend checking for breathing?",
+                options: [
+                    "5 seconds",
+                    "10 seconds",
+                    "15 seconds",
+                    "20 seconds"
+                ],
+                correct: 1,
+                rationale: "Check for breathing for at least five seconds, and no more than 10 seconds."
+            },
+            {
+                id: 16,
+                question: "In the context of First Aid, what does 'PPE' stand for?",
+                options: [
+                    "Personal Protective Equipment",
+                    "Primary Patient Examination",
+                    "Professional Paramedic Emergency",
+                    "Private Physician Evaluation"
+                ],
+                correct: 0,
+                rationale: "PPE stands for Personal Protective Equipment, such as gloves and masks, used to minimize health risks."
+            },
+            {
+                id: 17,
+                question: "When should the Secondary Survey be performed?",
+                options: [
+                    "Before the Primary Survey always",
+                    "Only if the casualty is unconscious",
+                    "If medical help is delayed 20 minutes",
+                    "Immediately upon arriving at scene"
+                ],
+                correct: 2,
+                rationale: "A secondary survey should be completed if medical help will be delayed for 20 minutes or more, or if there are multiple injuries."
+            },
+            {
+                id: 18,
+                question: "What is the correct technique for checking circulation in the fingernails?",
+                options: [
+                    "Pulling on the finger gently",
+                    "Tapping the nail bed lightly",
+                    "Squeezing and watching blood return",
+                    "Bending the finger back slightly"
+                ],
+                correct: 2,
+                rationale: "Check the fingernails for circulation by squeezing and watching the blood return."
+            },
+            {
+                id: 19,
+                question: "Which disease is primarily identified as a blood-borne pathogen risk for first aiders?",
+                options: [
+                    "Influenza",
+                    "Meningitis",
+                    "Hepatitis B",
+                    "Tuberculosis"
+                ],
+                correct: 2,
+                rationale: "Hepatitis B (along with HIV and Hepatitis C) is listed under diseases transmitted by exposure to blood or body fluids."
+            },
+            {
+                id: 20,
+                question: "True or False: If gloves are not available, you should use bare hands to treat a bleeding wound.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 1,
+                rationale: "The text advises that if gloves are not available, you should enclose your hands in clean plastic bags, avoiding bare contact."
+            },
+            {
+                id: 21,
+                question: "What does the 'L' stand for in the SAMPLE history acronym?",
+                options: [
+                    "Level of consciousness",
+                    "Location of the injury",
+                    "Last meal taken",
+                    "Length of symptoms"
+                ],
+                correct: 2,
+                rationale: "In SAMPLE, 'L' stands for Last meal - checking what they ate and when."
+            },
+            {
+                id: 22,
+                question: "What is the first step in the sequence for effective hand washing?",
+                options: [
+                    "Apply soap to dry hands",
+                    "Wet hands under running water",
+                    "Rub palms together vigorously",
+                    "Dry hands with paper towel"
+                ],
+                correct: 1,
+                rationale: "The first step in the hand washing diagram is to wet your hands under running water."
+            },
+            {
+                id: 23,
+                question: "Which part of the body is assessed during the Rapid Body Survey?",
+                options: [
+                    "Head to toe including heavy outerwear",
+                    "Only the chest and abdomen area",
+                    "Only the visible bleeding sites",
+                    "The extremities only for fractures"
+                ],
+                correct: 0,
+                rationale: "The rapid body survey involves running hands over the casualty's entire body from head to toe, even under heavy outerwear."
+            },
+            {
+                id: 24,
+                question: "True or False: You should cough or sneeze away from a wound while treating a casualty.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "The text explicitly states: Do not breathe, cough, or sneeze over a wound while you are treating a casualty."
+            },
+            {
+                id: 25,
+                question: "What action defines the 'Ongoing Casualty Care' phase of ESM?",
+                options: [
+                    "Monitoring condition until help arrives",
+                    "Searching the scene for hazards",
+                    "Checking for life-threatening injuries",
+                    "interviewing witnesses for details"
+                ],
+                correct: 0,
+                rationale: "Ongoing casualty care involves continuing to monitor the casualty's condition until medical help takes over."
+            },
+            {
+                id: 26,
+                question: "When assessing a pulse, which quality is NOT typically noted in the text?",
+                options: [
+                    "Rate",
+                    "Rhythm",
+                    "Strength",
+                    "Blood pressure"
+                ],
+                correct: 3,
+                rationale: "The text mentions counting the rate (beats per minute) but does not list measuring blood pressure as a first aid vital sign check."
+            },
+            {
+                id: 27,
+                question: "What is the significance of the 'Mechanism of Injury' during the scene survey?",
+                options: [
+                    "It determines the hospital choice",
+                    "It helps identify potential injuries",
+                    "It confirms the casualty's identity",
+                    "It clears the airway immediately"
+                ],
+                correct: 1,
+                rationale: "Understanding the mechanism of injury (what caused it) helps the first aider anticipate what injuries the casualty likely has."
+            },
+            {
+                id: 28,
+                question: "True or False: Meningitis is an infection that affects the spinal cord and brain.",
+                options: [
+                    "True",
+                    "False"
+                ],
+                correct: 0,
+                rationale: "The text defines Meningitis as a bacterial or viral infection which causes swelling that affects the spinal cord and brain."
+            },
+            {
+                id: 29,
+                question: "Which pulse location is recommended for infants?",
+                options: [
+                    "Wrist (Radial)",
+                    "Neck (Carotid)",
+                    "Upper arm (Brachial)",
+                    "Groin (Femoral)"
+                ],
+                correct: 2,
+                rationale: "For infants, the text recommends assessing the pulse at the inside of the upper arm."
+            },
+            {
+                id: 30,
+                question: "What is the correct way to assess breathing rate?",
+                options: [
+                    "Count breaths for 10 seconds multiply by 6",
+                    "Count breaths for 15 seconds multiply by 4",
+                    "Count breaths for 30 seconds multiply by 2",
+                    "Count breaths for 60 seconds exactly"
+                ],
+                correct: 2,
+                rationale: "To assess breathing rate, watch the casualty for 30 seconds and multiply that number by two."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

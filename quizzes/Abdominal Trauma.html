@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Abdominal Trauma Quiz</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "What is the primary cause of death in abdominal trauma within the first 48 hours?",
+                options: ["Sepsis", "Hemorrhage", "Head injury", "Infection"],
+                correct: 1,
+                rationale: "Abdominal injuries cause death primarily as a result of hemorrhage in the early stages."
+            },
+            {
+                id: 2,
+                question: "Which sign is characterized by dullness on percussion of the left upper quadrant?",
+                options: ["Kehr sign", "Balance sign", "Cullen sign", "Grey Turner sign"],
+                correct: 1,
+                rationale: "Balance's Sign is dullness on percussion of the left upper quadrant, indicating a ruptured spleen."
+            },
+            {
+                id: 3,
+                question: "The spleen is one of the most injured abdominal organs along with which other organ?",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Along with the liver, the spleen is the most injured abdominal organ, usually because of blunt trauma."
+            },
+            {
+                id: 4,
+                question: "Which fracture location increases suspicion for a liver injury?",
+                options: ["Left lower ribs", "Right lower ribs", "Sternum", "Lumbar vertebrae"],
+                correct: 1,
+                rationale: "Fractures of the right lower ribs increase suspicion for a liver injury."
+            },
+            {
+                id: 5,
+                question: "Why does diaphragm rupture occur more frequently on the left side?",
+                options: ["The heart protects the right side", "The liver protects the right side", "The spleen protects the left side", "The stomach protects the left side"],
+                correct: 1,
+                rationale: "Rupture occurs more frequently on the left side because there the diaphragm is not protected by the liver."
+            },
+            {
+                id: 6,
+                question: "What does Grey Turner sign indicate?",
+                options: ["Splenic rupture", "Liver laceration", "Diaphragm rupture", "Retroperitoneal hematoma"],
+                correct: 3,
+                rationale: "Grey-Turner sign (flank ecchymosis) indicates Retroperitoneal Hematoma or hemorrhagic pancreatitis."
+            },
+            {
+                id: 7,
+                question: "Diaphragm rupture is more common in penetrating injury than in blunt injury.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "It is more common in blunt injury (MVC and falls from height) than in penetrating injury."
+            },
+            {
+                id: 8,
+                question: "Where is a feeding jejunostomy tube typically placed in small bowel repair cases?",
+                options: ["Preoperatively", "Distal to the repair site", "Proximal to the repair site", "In the stomach"],
+                correct: 1,
+                rationale: "In most cases, a feeding jejunostomy tube is placed distal to the repair site."
+            },
+            {
+                id: 9,
+                question: "How frequently are hemoglobin and hematocrit analyses performed during the observation period for splenic injury?",
+                options: ["Every hour", "Every 6 hours", "Every 12 hours", "Every 24 hours"],
+                correct: 1,
+                rationale: "Hemoglobin and hematocrit (H&H) analyses are performed every 6 hours until stable."
+            },
+            {
+                id: 10,
+                question: "What is the standard management for hemodynamically stable patients with liver injuries?",
+                options: ["Immediate surgery", "Observation", "Embolization", "Packing"],
+                correct: 1,
+                rationale: "Hemodynamically stable patients with liver injuries are now managed nonoperatively (observation)."
+            },
+            {
+                id: 11,
+                question: "Physical signs are often absent in blunt small bowel injury.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Physical signs often are absent, and CT findings may be subtle and nonspecific."
+            },
+            {
+                id: 12,
+                question: "Where does pain radiate in Kehr sign?",
+                options: ["Right shoulder", "Left shoulder", "Back", "Groin"],
+                correct: 1,
+                rationale: "Kehr sign is left upper quadrant pain radiating to the left shoulder."
+            },
+            {
+                id: 13,
+                question: "Which medication is mentioned to promote renal perfusion in the text?",
+                options: ["Furosemide", "Low-dose dopamine", "Dobutamine", "Mannitol"],
+                correct: 1,
+                rationale: "Low-dose dopamine may be ordered to promote renal perfusion."
+            },
+            {
+                id: 14,
+                question: "What causes deaths occurring more than 48 hours after abdominal injury?",
+                options: ["Hemorrhage", "Sepsis", "Shock", "Embolism"],
+                correct: 1,
+                rationale: "Deaths occur more than 48 hours after abdominal injury are due to sepsis and its complications."
+            },
+            {
+                id: 15,
+                question: "Renal injuries are easily detected because bleeding is intraperitoneal.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Because the bleeding is retroperitoneal, it can be difficult to detect."
+            },
+            {
+                id: 16,
+                question: "What is the definitive treatment for diaphragm rupture?",
+                options: ["Chest tube", "Observation", "Surgical repair", "Mechanical ventilation"],
+                correct: 2,
+                rationale: "The only definitive treatment for diaphragm rupture is surgical repair."
+            },
+            {
+                id: 17,
+                question: "What is the standard observation period for splenic injuries?",
+                options: ["2 days", "3 days", "5 days", "7 days"],
+                correct: 2,
+                rationale: "An observation period of 5 days is the standard."
+            },
+            {
+                id: 18,
+                question: "What procedure is used for uncontrollable liver hemorrhage?",
+                options: ["Resection", "Packing", "Ligation", "Embolization"],
+                correct: 1,
+                rationale: "In the case of uncontrollable hemorrhage, the liver is packed."
+            },
+            {
+                id: 19,
+                question: "The liver is capable of healing itself.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The liver has been shown to heal itself, which supports nonoperative management."
+            },
+            {
+                id: 20,
+                question: "Which diagnostic tool usually provides the diagnosis for renal injury?",
+                options: ["Chest X-ray", "Helical CT scan", "DPL", "MRI"],
+                correct: 1,
+                rationale: "A helical CT scan, ultrasound, usually provides the diagnosis."
+            },
+            {
+                id: 21,
+                question: "What is a common presentation of blunt small bowel injury?",
+                options: ["Blood in nasogastric aspirate", "Severe flank pain", "Immediate peritonitis", "Massive hematochezia"],
+                correct: 0,
+                rationale: "Blunt small bowel or gastric injury can present with blood in the nasogastric aspirate or hematemesis."
+            },
+            {
+                id: 22,
+                question: "Which fractures increase suspicion for a splenic injury?",
+                options: ["Right lower ribs", "Left lower ribs", "Pelvis", "Clavicle"],
+                correct: 1,
+                rationale: "Presence of left lower rib fractures increases suspicion for a splenic injury."
+            },
+            {
+                id: 23,
+                question: "Balance's sign indicates a ruptured liver.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Balance's Sign indicates a ruptured spleen, not liver."
+            },
+            {
+                id: 24,
+                question: "What complication occurs in approximately 30 percent of patients with diaphragm rupture?",
+                options: ["Sepsis", "Bowel strangulation", "Hemorrhage", "Pneumonia"],
+                correct: 1,
+                rationale: "It is common to see abdominal contents in the thorax, which subsequently causes bowel strangulation in approximately 30% of patients."
+            },
+            {
+                id: 25,
+                question: "What indicates a retroperitoneal injury?",
+                options: ["Kehr sign", "Balance sign", "Cullen sign", "Murphy sign"],
+                correct: 2,
+                rationale: "The Cullen sign (periumbilical ecchymosis), may indicate retroperitoneal injury."
+            },
+            {
+                id: 26,
+                question: "Why is observation preferred over surgery for stable liver injuries?",
+                options: ["Surgery causes infection", "Surgery causes more bleeding", "Surgery takes too long", "Surgery is too expensive"],
+                correct: 1,
+                rationale: "Manipulation during surgery tends to cause more bleeding."
+            },
+            {
+                id: 27,
+                question: "Chest radiography findings for diaphragm rupture are often normal.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Chest radiography is the initial modality, however, findings are often normal or nonspecific."
+            },
+            {
+                id: 28,
+                question: "When can a patient with splenic injury begin a diet?",
+                options: ["Immediately", "When H&H is stable", "After 5 days", "After discharge"],
+                correct: 1,
+                rationale: "The patient is kept NPO until his or her H&H is stable, and then begins a diet."
+            },
+            {
+                id: 29,
+                question: "How are mild bowel contusions managed?",
+                options: ["Surgical repair", "Gastric decompression", "Immediate feeding", "Antibiotics only"],
+                correct: 1,
+                rationale: "A mild bowel contusion can be managed conservatively with gastric decompression and withholding oral intake."
+            },
+            {
+                id: 30,
+                question: "Surgery is rarely necessary for penetrating bowel wounds.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Surgery usually is necessary to repair penetrating wounds or bowel rupture."
+            },
+            {
+                id: 31,
+                question: "Which imaging modality is the initial tool used to diagnose diaphragm rupture?",
+                options: ["CT scan", "Ultrasound", "Chest radiography", "MRI"],
+                correct: 2,
+                rationale: "Chest radiography is the initial modality used to diagnose diaphragm rupture."
+            },
+            {
+                id: 32,
+                question: "Which mechanism can cause tearing of the renal artery intima?",
+                options: ["Penetrating trauma", "Sudden deceleration", "Compression", "Blast injury"],
+                correct: 1,
+                rationale: "Sudden deceleration injury can cause the kidney to move, or tearing the renal artery intima."
+            },
+            {
+                id: 33,
+                question: "What percentage of patients with blunt trauma have the spleen as the only injured organ?",
+                options: ["20 percent", "40 percent", "60 percent", "80 percent"],
+                correct: 2,
+                rationale: "In 60% of patients sustaining blunt trauma, the spleen is the only organ injured."
+            },
+            {
+                id: 34,
+                question: "Low-dose dopamine is used to promote renal perfusion in kidney trauma.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Optimal fluid balance must be maintained. Low-dose dopamine may be ordered to promote renal perfusion."
+            },
+            {
+                id: 35,
+                question: "What is required after packing a liver injury?",
+                options: ["Immediate discharge", "Second surgical procedure", "Long term antibiotics", "Permanent drain"],
+                correct: 1,
+                rationale: "An additional surgical procedure is required within the next few days to remove the packing."
+            },
+            {
+                id: 36,
+                question: "When is the diagnosis of blunt bowel injury often made?",
+                options: ["Immediately", "On admission", "When peritonitis develops", "During primary survey"],
+                correct: 2,
+                rationale: "Close observation is required; often, the diagnosis is not made until peritonitis develops."
+            },
+            {
+                id: 37,
+                question: "What clinical finding involves hearing bowel sounds in the thorax?",
+                options: ["Pneumothorax", "Hemothorax", "Diaphragm rupture", "Lung contusion"],
+                correct: 2,
+                rationale: "Clinical findings may include positive bowel sounds in the thorax."
+            },
+            {
+                id: 38,
+                question: "Patients with liver packing require a second surgery to remove packing.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "An additional surgical procedure is required within the next few days to remove the packing."
+            },
+            {
+                id: 39,
+                question: "Conservative management for renal injuries continues until which event?",
+                options: ["Pain resolves", "Gross hematuria resolves", "Fever starts", "Blood pressure drops"],
+                correct: 1,
+                rationale: "Many renal injuries can be managed conservatively with observation and bed rest until gross hematuria resolves."
+            },
+            {
+                id: 40,
+                question: "What is the primary management for hemodynamically unstable patients with splenic injury?",
+                options: ["Embolization", "Observation", "Immediate surgery", "Blood transfusion"],
+                correct: 2,
+                rationale: "Hemodynamically unstable patients require immediate surgery to determine the source of bleeding."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

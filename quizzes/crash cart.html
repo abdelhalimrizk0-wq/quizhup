@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport meta tag is essential for responsive design on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crash Cart Quiz</title>
+    
+    <!-- All styles are inlined here to ensure the file works offline. No external CSS files. -->
+    <style>
+        /* Global resets and box-sizing */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* Basic body and typography styling */
+        html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            /* Applying the requested red-brown theme */
+            background-color: #3b0d0c;
+            color: #f9fafb;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Header and Title Styling */
+        header {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background-color: #4f0f0d;
+            border-bottom: 3px solid #6a1a17;
+        }
+
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+
+        /* Arabic credit line */
+        .credit {
+            font-size: 1rem;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+            direction: rtl; /* Ensures correct rendering of Arabic text */
+        }
+
+        /* Live Score Tracker Styling */
+        #score-tracker {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: rgba(79, 15, 13, 0.9);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid #6a1a17;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #f9fafb;
+        }
+
+        #score-value {
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            background: #3b0d0c;
+            border-radius: 8px;
+            border: 1px solid #6a1a17;
+        }
+
+        /* Main quiz container */
+        main {
+            max-width: 800px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Individual Question Card Styling */
+        .question-card {
+            background: #4f0f0d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border: 1px solid #6a1a17;
+            transition: all 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Keyword highlighting */
+        .highlight {
+            color: #facc15; /* Yellow */
+            font-weight: 800;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+
+        /* Options container */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        /* Individual Option Button Styling */
+        .option {
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 3rem; /* Padding to make room for the icon */
+            font-size: 1rem;
+            font-weight: 500;
+            color: #f9fafb;
+            text-align: left;
+            background: #3b0d0c;
+            border: 2px solid #6a1a17;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            -webkit-tap-highlight-color: transparent; /* Removes blue flash on tap (iOS) */
+        }
+
+        /* Hover state for non-disabled options */
+        .option:hover:not(:disabled) {
+            background: #6a1a17;
+            border-color: #a12b28;
+        }
+
+        /* Disabled state for all options after answering */
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 1; /* Keep opacity high to show colors */
+        }
+
+        /*
+         * Custom Checkmark (✓) and X (×) Icons
+         * These are hidden by default and shown with JS by adding classes.
+        */
+        .status-icon {
+            display: none;
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            line-height: 1; /* Ensures icon is centered */
+        }
+
+        /* Show the correct icon (✓) */
+        .option.answered.correct .correct-icon {
+            display: flex;
+            background: #22c55e; /* Bright Green */
+        }
+        
+        /* Show the incorrect icon (×) */
+        .option.answered.incorrect .incorrect-icon {
+            display: flex;
+            background: #ef4444; /* Bright Red */
+            font-size: 1.2rem; /* Make the '×' slightly larger */
+        }
+
+
+        /* Styling for the *chosen* correct answer */
+        .option.correct {
+            background: #22c55e; /* Bright Green */
+            border-color: #16a34a;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Styling for the *chosen* incorrect answer */
+        .option.incorrect {
+            background: #ef4444; /* Bright Red */
+            border-color: #dc2626;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Styling for unselected, disabled options */
+        .option.disabled:not(.correct):not(.incorrect) {
+            background: #4b5563; /* Muted Gray */
+            color: #d1d5db;
+            opacity: 0.7;
+            border-color: #4b5563;
+        }
+
+        /* Rationale Box Styling */
+        .rationale {
+            display: none; /* Hidden by default */
+            margin-top: 1.25rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        /* Rationale for a correct answer */
+        .rationale.correct {
+            display: block;
+            background: #dcfce7; /* Light Green */
+            color: #14532d;
+            border: 1px solid #22c55e;
+        }
+        
+        /* Rationale for an incorrect answer */
+        .rationale.incorrect {
+            display: block;
+            background: #fee2e2; /* Light Red */
+            color: #7f1d1d;
+            border: 1px solid #ef4444;
+        }
+
+        .rationale strong {
+            color: #1f2937;
+        }
+
+        /* Final Score Container */
+        #final-score-container {
+            text-align: center;
+            background: #4f0f0d;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem auto;
+            border: 1px solid #6a1a17;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        #final-score-container h2 {
+            margin-top: 0;
+            font-size: 1.75rem;
+            color: #facc15;
+        }
+
+        #final-score-message {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        /* Utility class to hide elements */
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive design for smaller screens (e.g., iPhones) */
+        @media (max-width: 600px) {
+            body {
+                font-size: 16px; /* Ensures readability on mobile */
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .credit {
+                font-size: 0.9rem;
+            }
+
+            main {
+                margin-top: 1rem;
+            }
+
+            .question-card {
+                padding: 1rem;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .option {
+                padding: 0.75rem 0.75rem 0.75rem 3rem; /* Adjust padding for mobile */
+                font-size: 0.95rem;
+            }
+
+            #final-score-container {
+                padding: 1.5rem;
+            }
+
+            #final-score-message {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Crash Cart Quiz</h1>
+        <div class="credit">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</div>
+    </header>
+
+    <!-- Live Score Tracker (Sticky) -->
+    <div id="score-tracker">
+        Score: <span id="score-value">0 / 30</span>
+    </div>
+
+    <!-- Main Quiz Content Area -->
+    <main id="quiz-container">
+
+        <!-- Question 1 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">1. What is the definition of a crash cart?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. A portable trolley with equipment, supplies, and drugs for CPR and emergency care.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. A cart used only for transporting patients to the operating room.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. A stationary cabinet where medications are locked.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. A trolley that only holds a defibrillator and an oxygen tank.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A crash cart is defined as "a portable trolley containing all equipment, supplies, and drugs required for cardiopulmonary resuscitation and emergency care."
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">2. What is one of the primary purposes of a crash cart?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To store patient charts and records.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To provide a writing surface for physicians.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To initiate necessary treatment in emergency and life-threatening situations.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To hold personal protective equipment (PPE) for daily use.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A purpose of the crash cart is "To initiate necessary treatment in emergency and life-threatening situations in all health care facilities."
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">3. A crash cart is indicated for use when a patient's:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Blood pressure is slightly elevated.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Heart or lungs are failing or have failed.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Temperature is high.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Patient requests pain medication.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "This emergency equipment is used only if the patient's heart or lungs stop working. The cart is brought to the patient's bedside when the patient's heart or lungs are failing or have failed."
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">4. True or False: Using the tools on a crash cart requires certification in Advanced Cardiac Life Support (ACLS).</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. True
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. False
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> True. The document states, "Using the tools on a crash cart requires advanced medical skills and certification in Advanced Cardiac Life Support (ACLS)."
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">5. What piece of equipment is typically found on <strong class="highlight">top</strong> of the crash cart?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Portable monitor/defibrillator unit
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Cardiac board
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Oxygen cylinder
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Ambu bag
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The "Crash cart top" section lists the "Portable monitor/defibrillator unit with charged batteries." The cardiac board is on the back and the oxygen cylinder is on the side.
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">6. Where is the cardiac board located?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. On the top of the cart
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. In the first drawer
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. On the back of the cart
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. In the bottom drawer
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The document specifies that the "Crash cart back" contains the "Cardiac board."
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">7. What is located on the <strong class="highlight">side</strong> of the crash cart?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Sharps container
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Oxygen cylinder
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Cardiac board
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Portable suction
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The "Crash cart sides" section lists the "Oxygen cylinder." The sharps container and suction are listed on the top.
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">8. Which drawer contains adult medications like Epinephrine, Atropine, and Amiodarone?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Drawer 1
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Drawer 2
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Drawer 3
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Drawer 4
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Drawer 1: Adult Medications" lists all the primary resuscitation drugs.
+            </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">9. What is the <strong class="highlight">MAIN</strong> category of items found in Drawer 2?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Adult Medications
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Breathing and Airway
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Circulation and IV supplies
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. IV solutions and tubing
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The document labels "Drawer 2: Breathing and Airway (large drawer)."
+            </div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">10. All of the following are found in the Airway drawer (Drawer 2) <strong class="highlight">EXCEPT</strong>:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Ambu bag with mask
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Laryngoscope handles and blades
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Endotracheal tubes (ETTs)
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. IV start kits
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> IV start kits are found in Drawer 3 (Circulation and IV supplies). All the other items are listed in Drawer 2 (Breathing and Airway).
+            </div>
+        </div>
+
+        <!-- Question 11 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">11. Which drawer contains syringes of various sizes (3cc, 5cc, 10cc, etc.), blood tubes, and IV start kits?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Drawer 1
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Drawer 2
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Drawer 3
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Drawer 4
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Drawer 3: Circulation and IV supplies" contains syringes, blood tubes, and IV start kits.
+            </div>
+        </div>
+
+        <!-- Question 12 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">12. IV solutions such as Normal Saline (500ml) and D5% (250ml) are found in which drawer?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Drawer 2
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Drawer 3
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Drawer 4
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Drawer 5
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Drawer 4: Circulation and tubing (large drawer)" lists IV fluids like Lactating Ringer, Normal Saline, and D5%.
+            </div>
+        </div>
+
+        <!-- Question 13 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">13. Which drawer contains miscellaneous items like chest tubes, sutures, and a cut down tray?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Drawer 2
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Drawer 3
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Drawer 4
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Drawer 5
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Drawer 5: Others (large drawer)" contains items such as ECG electrodes, chest tubes, sutures, and a cut down tray.
+            </div>
+        </div>
+
+        <!-- Question 14 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">14. What is the correct organizational order for the top drawers of a crash cart?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Medications, then Airway, then Circulation (IV supplies).
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Airway, then Medications, then Circulation (IV supplies).
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. IV solutions, then Airway, then Medications.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Circulation (IV supplies), then Medications, then Airway.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The (N.B) note states: "Drawers are organized and arranged from top to bottom in the following order: medications, airway, circulation, IV solution and tubing, others."
+            </div>
+        </div>
+
+        <!-- Question 15 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">15. What is a key nursing responsibility at the <strong class="highlight">beginning</strong> of a shift?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Clean and lock the cart.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Check that the defibrillator is charged and check the contents against the checklist.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Contact the pharmacist for drug replacement.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Order a new oxygen tank regardless of the pressure.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "At the beginning of a nursing shift, the nurse responsible for the crash cart should: 1. Check that the defibrillator is charged. 2. Check the content of the crash cart... compared with the crash cart checklist."
+            </div>
+        </div>
+
+        <!-- Question 16 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">16. What is the <strong class="highlight">FIRST</strong> priority for the nurse after a crash cart has been used in an emergency?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Send the cart for routine cleaning.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Lock the cart with a new security seal.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Check the expiration dates of the remaining items.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Replace all used emergency supplies immediately.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "After using a crash cart: 1. Content should be replaced immediately after use. After each emergency, the team nurse replaces used emergency supplies."
+            </div>
+        </div>
+
+        <!-- Question 17 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">17. True or False: The nurse who used the medications is responsible for going to the pharmacy to get replacements.</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. True
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. False
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> False. The procedure is: "If indicated, the team nurse *contacts the pharmacist* for drug replacement." The nurse doesn't necessarily leave the unit to get them.
+            </div>
+        </div>
+
+        <!-- Question 18 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">18. True or False: After use, the cart is cleaned, covered, and left unlocked for the next emergency.</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. True
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. False
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> False. The procedure is: "The cart is cleaned, covered and *locked*." A security seal is also mentioned as a requirement.
+            </div>
+        </div>
+
+        <!-- Question 19 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">19. How often must the crash cart be checked for the expiry dates of its *supplies*?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Every shift
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Every day
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Monthly
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Every 6 months
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "The crash cart must be checked *monthly* for the expiry dates of its supplies." (Medications are checked for expiration up to every 6 months).
+            </div>
+        </div>
+
+        <!-- Question 20 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">20. Laryngoscopes should be checked at what interval?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Prior to placement on the cart and monthly.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Before every shift.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Only after being used in an emergency.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Annually, by the maintenance department.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Laryngoscopes will be checked prior to placement on the cart and monthly."
+            </div>
+        </div>
+
+        <!-- Question 21 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">21. At what pressure level should an oxygen cylinder be replaced?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. When it is completely empty (0 psi).
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. When it has less than 100 psi.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. When it has less than 500 psi.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. When it has less than 2000 psi.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Oxygen cylinders are replaced when the tank has less than 500 psi."
+            </div>
+        </div>
+
+        <!-- Question 22 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">22. For how long should the crash cart checklists be maintained by the manager?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. 6 months
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. 1 year
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. 3 years
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Indefinitely
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "The crash cart checklists should be maintained by the manager for each crash cart for 3 years."
+            </div>
+        </div>
+
+        <!-- Question 23 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">23. What is required on the cart to ensure it has <strong class="highlight">NOT</strong> been opened or tampered with?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. A handwritten note from the previous nurse.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. A security seal.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. A layer of adhesive tape.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. A proximity alarm.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "It is important to ensure that unless it is being used, this cart needs to have a security seal."
+            </div>
+        </div>
+
+        <!-- Question 24 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">24. Departmental policy should identify who is responsible for the cart. Who are the recommended "keepers of the cart"?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The nurse manager and the pharmacist.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. The head of maintenance and the supply clerk.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. A physician and a nurse.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Any two staff members present on the unit.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A recommendation is that policy identifies "Those responsible for the cart; a physician and a nurse ought to be identified as the 'keepers of the cart'."
+            </div>
+        </div>
+
+        <!-- Question 25 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">25. Policy should also identify how often the cart inventory is checked. What are the examples given for checking frequency?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Monthly or Annually
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Every shift, every day, etc.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Only after use.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Bi-annually (every 6 months).
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A recommendation is for policy to identify "Who will check the inventory and how often it will be checked (e.g., Every shift, every day, etc)."
+            </div>
+        </div>
+
+        <!-- Question 26 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">26. What is the recommendation for a pediatric crash cart?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. It should be combined with the adult cart to save space.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. It should be identical to the adult cart for consistency.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. It should be separate and distinct (different style/color) from the adult cart.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Pediatric items should just be placed in the bottom drawer of the adult cart.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "The pediatric cart should be separate and distinct from the adult cart (different style, different color)."
+            </div>
+        </div>
+
+        <!-- Question 27 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">27. What is the recommendation for crash carts across multiple emergency departments in the same hospital group?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Each department should have a unique and different cart.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. The crash carts should be consistent from site to site.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Only the main ED needs a crash cart.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The carts should be rotated between sites weekly.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Groups that cover multiple emergency departments ought to ensure that the crash carts are consistent site to site."
+            </div>
+        </div>
+
+        <!-- Question 28 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">28. Which of these items is <strong class="highlight">NOT</strong> listed as being on the top of the crash cart?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Portable suction apparatus
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Sharps container
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Cardiac board
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Portable monitor/defibrillator
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The Cardiac board is located on the *back* of the cart, not the top. The other items are all listed for the cart top.
+            </div>
+        </div>
+
+        <!-- Question 29 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">29. An Intubation tray, found in Drawer 2, contains all of the following <strong class="highlight">EXCEPT</strong>:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Laryngoscope handles (straight and curved blades)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. 10cc syringe
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Normal Saline 500ml
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Lubricant
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Normal Saline 500ml is an IV fluid found in Drawer 4. The intubation tray in Drawer 2 contains laryngoscopes, blades, a 10cc syringe (for the ETT cuff), and lubricant.
+            </div>
+        </div>
+
+        <!-- Question 30 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">30. What item in Drawer 2 is used to confirm endotracheal tube placement?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Padded tongue blade
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. End tidal CO2 detector
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Stylet
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Tracheostomy tube
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Drawer 2 (Breathing and Airway) contains an "End tidal CO2 detector," which is used to measure exhaled carbon dioxide and help confirm correct ETT placement in the trachea.
+            </div>
+        </div>
+
+
+        <!-- Final Score Section -->
+        <div id="final-score-container" class="hidden">
+            <h2>Quiz Complete!</h2>
+            <p id="final-score-message">You answered 0 out of 0 correctly — 0%</p>
+        </div>
+
+    </main>
+
+    <!-- 
+      All JavaScript is inlined here to ensure the file works offline.
+      No external .js files or CDN links are used.
+    -->
+    <script>
+        // Wait for the DOM to be fully loaded before running scripts
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Enable :active pseudo-class on iOS Safari for touch feedback ---
+            // This is a common fix to make touch events feel more responsive on iOS
+            document.addEventListener("touchstart", function() {}, true);
+
+            // --- Element Selections ---
+            const quizContainer = document.getElementById('quiz-container');
+            const scoreTracker = document.getElementById('score-value');
+            const finalScoreContainer = document.getElementById('final-score-container');
+            const finalScoreMessage = document.getElementById('final-score-message');
+            const allQuestions = document.querySelectorAll('.question-card');
+
+            // --- State Variables ---
+            const totalQuestions = allQuestions.length; // This will correctly be 30
+            let score = 0;
+            let questionsAnswered = 0;
+
+            // --- Function to Highlight Keywords ---
+            // Wraps specified keywords in a <strong class="highlight"> tag
+            function highlightKeywords() {
+                const keywords = ['NOT', 'EXCEPT', 'FIRST', 'MAINLY'];
+                const questionTexts = document.querySelectorAll('.question-text');
+
+                questionTexts.forEach(element => {
+                    let html = element.innerHTML;
+                    // Use a RegExp to find whole words, case-insensitive, but replace with uppercase
+                    keywords.forEach(kw => {
+                        const regex = new RegExp(`\\b(${kw})\\b`, 'gi');
+                        html = html.replace(regex, `<strong class="highlight">${kw.toUpperCase()}</strong>`);
+                    });
+                    element.innerHTML = html;
+                });
+            }
+
+            // --- Function to Update Live Score ---
+            function updateScore() {
+                scoreTracker.textContent = `${score} / ${totalQuestions}`;
+            }
+
+            // --- Function to Show Final Score ---
+            function showFinalScore() {
+                const percentage = Math.round((score / totalQuestions) * 100);
+                finalScoreMessage.innerHTML = `You answered <strong>${score}</strong> out of <strong>${totalQuestions}</strong> correctly — <strong>${percentage}%</strong>`;
+                finalScoreContainer.classList.remove('hidden');
+                // Scroll to the final score box for a better user experience
+                finalScoreContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // --- Main Quiz Logic (Event Delegation) ---
+            // A single event listener on the main container is more efficient
+            // than adding one to every single button.
+            quizContainer.addEventListener('click', (e) => {
+                // Check if the clicked element is an option button
+                if (e.target.classList.contains('option')) {
+                    const selectedOption = e.target;
+                    const questionCard = selectedOption.closest('.question-card');
+
+                    // --- Prevent Re-answering ---
+                    // If the 'data-answered' attribute is 'true', do nothing.
+                    if (questionCard.dataset.answered === 'true') {
+                        return;
+                    }
+                    
+                    // Mark the question as answered
+                    questionCard.dataset.answered = 'true';
+                    questionsAnswered++;
+
+                    // --- Check Answer ---
+                    const isCorrect = selectedOption.dataset.answer === 'correct';
+                    const rationale = questionCard.querySelector('.rationale');
+                    const allOptions = questionCard.querySelectorAll('.option');
+
+                    // Add 'answered' class to the selected option to trigger icon display
+                    selectedOption.classList.add('answered');
+
+                    if (isCorrect) {
+                        score++;
+                        selectedOption.classList.add('correct');
+                        rationale.classList.add('correct');
+                    } else {
+                        selectedOption.classList.add('incorrect');
+                        rationale.classList.add('incorrect');
+                        
+                        // If wrong, find and highlight the correct answer
+                        const correctOption = questionCard.querySelector('[data-answer="correct"]');
+                        correctOption.classList.add('correct');
+                    }
+
+                    // --- Disable All Options for this Question ---
+                    allOptions.forEach(opt => {
+                        opt.disabled = true;
+                        // Add 'disabled' class to unselected options for graying out
+                        if (opt !== selectedOption && opt.dataset.answer !== 'correct') {
+                            opt.classList.add('disabled');
+                        }
+                    });
+
+                    // --- Update UI ---
+                    updateScore();
+
+                    // --- Check for Quiz Completion ---
+                    if (questionsAnswered === totalQuestions) {
+                        // Use a short delay to allow the user to see the last answer
+                        setTimeout(showFinalScore, 1000);
+                    }
+                }
+            });
+
+            // --- Initialization ---
+            // Run the keyword highlighter and set the initial score on load.
+            highlightKeywords();
+            updateScore(); // Sets the initial score to "0 / 30"
+        });
+    </script>
+
+</body>
+</html>

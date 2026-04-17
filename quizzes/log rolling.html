@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport meta tag is essential for responsive design on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Rolling Quiz</title>
+    
+    <!-- All styles are inlined here to ensure the file works offline. No external CSS files. -->
+    <style>
+        /* Global resets and box-sizing */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* Basic body and typography styling */
+        html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            /* Applying the requested red-brown theme */
+            background-color: #3b0d0c;
+            color: #f9fafb;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Header and Title Styling */
+        header {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background-color: #4f0f0d;
+            border-bottom: 3px solid #6a1a17;
+        }
+
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+
+        /* Arabic credit line */
+        .credit {
+            font-size: 1rem;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+            direction: rtl; /* Ensures correct rendering of Arabic text */
+        }
+
+        /* Live Score Tracker Styling */
+        #score-tracker {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: rgba(79, 15, 13, 0.9);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid #6a1a17;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #f9fafb;
+        }
+
+        #score-value {
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            background: #3b0d0c;
+            border-radius: 8px;
+            border: 1px solid #6a1a17;
+        }
+
+        /* Main quiz container */
+        main {
+            max-width: 800px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Individual Question Card Styling */
+        .question-card {
+            background: #4f0f0d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border: 1px solid #6a1a17;
+            transition: all 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Keyword highlighting */
+        .highlight {
+            color: #facc15; /* Yellow */
+            font-weight: 800;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+
+        /* Options container */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        /* Individual Option Button Styling */
+        .option {
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 3rem; /* Padding to make room for the icon */
+            font-size: 1rem;
+            font-weight: 500;
+            color: #f9fafb;
+            text-align: left;
+            background: #3b0d0c;
+            border: 2px solid #6a1a17;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            -webkit-tap-highlight-color: transparent; /* Removes blue flash on tap (iOS) */
+        }
+
+        /* Hover state for non-disabled options */
+        .option:hover:not(:disabled) {
+            background: #6a1a17;
+            border-color: #a12b28;
+        }
+
+        /* Disabled state for all options after answering */
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 1; /* Keep opacity high to show colors */
+        }
+
+        /*
+         * Custom Checkmark (✓) and X (×) Icons
+         * These are hidden by default and shown with JS by adding classes.
+        */
+        .status-icon {
+            display: none;
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            line-height: 1; /* Ensures icon is centered */
+        }
+
+        /* Show the correct icon (✓) */
+        .option.answered.correct .correct-icon {
+            display: flex;
+            background: #22c55e; /* Bright Green */
+        }
+        
+        /* Show the incorrect icon (×) */
+        .option.answered.incorrect .incorrect-icon {
+            display: flex;
+            background: #ef4444; /* Bright Red */
+            font-size: 1.2rem; /* Make the '×' slightly larger */
+        }
+
+
+        /* Styling for the *chosen* correct answer */
+        .option.correct {
+            background: #22c55e; /* Bright Green */
+            border-color: #16a34a;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Styling for the *chosen* incorrect answer */
+        .option.incorrect {
+            background: #ef4444; /* Bright Red */
+            border-color: #dc2626;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Styling for unselected, disabled options */
+        .option.disabled:not(.correct):not(.incorrect) {
+            background: #4b5563; /* Muted Gray */
+            color: #d1d5db;
+            opacity: 0.7;
+            border-color: #4b5563;
+        }
+
+        /* Rationale Box Styling */
+        .rationale {
+            display: none; /* Hidden by default */
+            margin-top: 1.25rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        /* Rationale for a correct answer */
+        .rationale.correct {
+            display: block;
+            background: #dcfce7; /* Light Green */
+            color: #14532d;
+            border: 1px solid #22c55e;
+        }
+        
+        /* Rationale for an incorrect answer */
+        .rationale.incorrect {
+            display: block;
+            background: #fee2e2; /* Light Red */
+            color: #7f1d1d;
+            border: 1px solid #ef4444;
+        }
+
+        .rationale strong {
+            color: #1f2937;
+        }
+
+        /* Final Score Container */
+        #final-score-container {
+            text-align: center;
+            background: #4f0f0d;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem auto;
+            border: 1px solid #6a1a17;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        #final-score-container h2 {
+            margin-top: 0;
+            font-size: 1.75rem;
+            color: #facc15;
+        }
+
+        #final-score-message {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        /* Utility class to hide elements */
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive design for smaller screens (e.g., iPhones) */
+        @media (max-width: 600px) {
+            body {
+                font-size: 16px; /* Ensures readability on mobile */
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .credit {
+                font-size: 0.9rem;
+            }
+
+            main {
+                margin-top: 1rem;
+            }
+
+            .question-card {
+                padding: 1rem;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .option {
+                padding: 0.75rem 0.75rem 0.75rem 3rem; /* Adjust padding for mobile */
+                font-size: 0.95rem;
+            }
+
+            #final-score-container {
+                padding: 1.5rem;
+            }
+
+            #final-score-message {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Log Rolling Quiz</h1>
+        <div class="credit">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</div>
+    </header>
+
+    <!-- Live Score Tracker (Sticky) -->
+    <div id="score-tracker">
+        Score: <span id="score-value">0 / 25</span>
+    </div>
+
+    <!-- Main Quiz Content Area -->
+    <main id="quiz-container">
+
+        <!-- Question 1 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">1. What is the definition of the log roll maneuver?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. A maneuver used to move a patient without flexing the spinal column.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. A procedure to help a patient walk after spinal surgery.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. A technique for rolling a patient as quickly as possible.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. A maneuver to intentionally flex the spine to check for pain.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "The log roll or logrolling is a maneuver used to move a patient without flexing the spinal column."
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">2. What is the <strong class="highlight">MAIN</strong> principle of the log rolling procedure?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To perform the roll as quickly as possible.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To adhere to correct anatomical alignment to prevent further neurologic injury.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To ensure at least two people are present.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To check the patient's back for rashes only.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "The main principles... are the strict adherence to correct anatomical alignment in order to prevent the possibility of further, catastrophic neurologic injury..."
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">3. One purpose of the log roll maneuver is to maintain spinal alignment for patients with:</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Suspected spinal injury or post-spinal surgery.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Pneumonia.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. A mild headache.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. A broken leg.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A purpose is "To maintain alignment of the spine while turning and moving the patient who has had spinal surgery or suspected or documented spinal injury."
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">4. Besides maintaining spinal alignment, log rolling is also used to prevent:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Headaches
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Pressure sores
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Hypothermia
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Malnutrition
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Another purpose of the log roll maneuver is "To prevent pressure sores."
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">5. Which of the following is listed as an indication for a log roll?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Administering oral medications.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Checking pupillary response.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Examination of the patient's back.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Taking a blood pressure reading.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Indications include "Examination of the patient's back," "Cervical collar care," and "Pressure care."
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">6. True or False: Log rolling can be used to facilitate medical interventions, such as with a vomiting patient.</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. True
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. False
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> True. An indication is "To facilitate medical interventions such as with the vomiting patient" (to clear the airway while maintaining spinal alignment).
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">7. What are the two types of log rolling maneuvers mentioned in the text?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Manual and Automatic
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Adult and Pediatric
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Pre-hospital and In-hospital
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Quick and Slow
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The document lists "1. Pre-hospital procedure" and "2. In-hospital procedure" as the types of log rolling.
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">8. A log roll is <strong class="highlight">BEST</strong> performed using how many people?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. One person
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Two people
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Four to six people
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. At least seven people
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "A log roll is best performed using four to six first aiders..."
+            </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">9. Who is in control of the log roll?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The head hold person
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. The chest person
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. The hip person
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The leg person
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The "Head hold person... is in control of the roll. They must ensure all members of the team are ready before proceeding and should give clear instructions."
+            </div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">10. What is the <strong class="highlight">MAIN</strong> responsibility of the head hold person?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To grasp the patient's shoulder.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To manage cervical spine alignment.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To place the spinal board.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To support the weight of the legs.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The head hold person "manages cervical spine alignment and is in control of the roll."
+            </div>
+        </div>
+
+        <!-- Question 11 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">11. Who should ideally be the "chest person" in the team?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The person with the most experience.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. The person at the patient's head.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. The tallest person in the team.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The person closest to the patient's legs.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The "Chest person: Should be the tallest person in the team who places hands over the patient's shoulder and lower back."
+            </div>
+        </div>
+
+        <!-- Question 12 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">12. What is the "hip person" responsible for ensuring?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. That the patient's head is stable.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. That the patient's arms are crossed.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. That the lower spine is not twisted during the roll.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. That the spinal board is ready.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Hip person: This person is responsible for ensuring the lower spine is not twisted during the roll."
+            </div>
+        </div>
+
+        <!-- Question 13 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">13. A "leg person" is required in all the following situations <strong class="highlight">EXCEPT</strong>:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. For tall patients.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. For heavy patients.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. For patients in plaster.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. For all patients, regardless of size.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A leg person is *not* always required. They *are* required for tall, heavy, or plastered patients.
+            </div>
+        </div>
+
+        <!-- Question 14 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">14. What is the role of the fifth (or extra) staff member during a log roll?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To hold the patient's head.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To hold the patient's hips.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To perform an assessment or place the spinal board.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To give the 1, 2, 3 count.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A fifth member is needed "to perform any required procedure (assessment of the patient's back) or placing spinal board."
+            </div>
+        </div>
+
+        <!-- Question 15 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">15. Log rolling should <strong class="highlight">NOT</strong> be provided if:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The patient is complaining of pain.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. The patient has a suspected spinal injury.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. There are not enough personnel or securing an airway is the priority.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The patient's family is not present.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Logrolling technique should not be provided when there are not enough personnel to safely perform the technique or when other conditions are a priority; eg. Need to obtain and secure an airway..."
+            </div>
+        </div>
+
+        <!-- Question 16 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">16. What is the rationale for assessing the need for log rolling?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To save time and effort.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To protect the patient from complications of cervical spine injury.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To gain patient cooperation.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To prevent cross-infection.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The rationale for assessing the need is "To protect patient from complication of cervical spine injury."
+            </div>
+        </div>
+
+        <!-- Question 17 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">17. What must be ensured about the patient <strong class="highlight">BEFORE</strong> starting the log roll procedure?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The patient is in a lateral position.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. The patient has had a recent meal.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. The patient is anatomically aligned and the collar (if present) is well-fitting.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The patient's family has given verbal consent.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Preparation includes: "Ensure that the collar is well fitting prior to commencement" and "Ensure that the patient is anatomically aligned prior to commencement..."
+            </div>
+        </div>
+
+        <!-- Question 18 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">18. Why must the patient be anatomically aligned before the roll?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To facilitate the roll and reduce the risk of complication.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To make it easier to count to three.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To prevent the patient from falling off the bed.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To ensure the patient is comfortable.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The rationale is "To facilitate log rolling and reduce risk of complication."
+            </div>
+        </div>
+
+        <!-- Question 19 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">19. What is the <strong class="highlight">FIRST</strong> action performed by the team leader during the implementation phase?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Count to three.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Grasp the patient's upper arm.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Manually stabilize the patient's head with both hands.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Slide the backboard under the patient.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Head hold person (the leader): manually stabilize the patient's head with both hands."
+            </div>
+        </div>
+
+        <!-- Question 20 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">20. What parts of the patient does the "chest person" and "hip person" grasp?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The upper arm and the hip.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. The head and the legs.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. The patient's clothing only.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The ankle and the wrist.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "The chest person reaches across the patient, securely grasping the upper arm." and "Hip person reaches across the injured person and grasps the hip."
+            </div>
+        </div>
+
+        <!-- Question 21 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">21. After the head person counts 1, 2, 3, the coordinated roll is performed:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Away from the hip & chest person.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Towards the hip & chest person.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. As fast as possible, regardless of coordination.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Onto the patient's stomach (prone position).
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "...a coordinated roll of the patient towards the hip & chest person is performed..."
+            </div>
+        </div>
+
+        <!-- Question 22 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">22. What is done immediately after the patient is rolled?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The patient is returned to supine position.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. The board is slid against the patient's back or an assessment is performed.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. The team washes their hands.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The cervical collar is removed.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Slide the board against the patient's back... or perform the necessary procedure needed as back assessment."
+            </div>
+        </div>
+
+        <!-- Question 23 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">23. After the procedure is complete, what is done for the patient?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The patient is left in the lateral position without support.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. The patient is returned to supine or supported laterally with wedge pillows.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. The patient is helped to a sitting position.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The patient is immediately transported.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Post-care involves: "Return the patient to supine position... or support the patient in a lateral position with wedge pillows."
+            </div>
+        </div>
+
+        <!-- Question 24 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">24. What information should be recorded in the documentation?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The use of the technique and the number of staff who participated.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Only the time the procedure started.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Only if an unexpected outcome occurred.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The names of all staff members involved.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Documentation includes: "Record use of logrolling technique and number of staff that participated."
+            </div>
+        </div>
+
+        <!-- Question 25 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">25. The log roll maneuver is used to move a patient <strong class="highlight">WITHOUT</strong> flexing the:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Knees or elbows
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Spinal column
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Hips
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Shoulders
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The definition states the log roll "is a maneuver used to move a patient without flexing the spinal column."
+            </div>
+        </div>
+
+
+        <!-- Final Score Section -->
+        <div id="final-score-container" class="hidden">
+            <h2>Quiz Complete!</h2>
+            <p id="final-score-message">You answered 0 out of 0 correctly — 0%</p>
+        </div>
+
+    </main>
+
+    <!-- 
+      All JavaScript is inlined here to ensure the file works offline.
+      No external .js files or CDN links are used.
+    -->
+    <script>
+        // Wait for the DOM to be fully loaded before running scripts
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Enable :active pseudo-class on iOS Safari for touch feedback ---
+            // This is a common fix to make touch events feel more responsive on iOS
+            document.addEventListener("touchstart", function() {}, true);
+
+            // --- Element Selections ---
+            const quizContainer = document.getElementById('quiz-container');
+            const scoreTracker = document.getElementById('score-value');
+            const finalScoreContainer = document.getElementById('final-score-container');
+            const finalScoreMessage = document.getElementById('final-score-message');
+            const allQuestions = document.querySelectorAll('.question-card');
+
+            // --- State Variables ---
+            const totalQuestions = allQuestions.length; // This will correctly be 25
+            let score = 0;
+            let questionsAnswered = 0;
+
+            // --- Function to Highlight Keywords ---
+            // Wraps specified keywords in a <strong class="highlight"> tag
+            function highlightKeywords() {
+                const keywords = ['NOT', 'EXCEPT', 'FIRST', 'MAINLY'];
+                const questionTexts = document.querySelectorAll('.question-text');
+
+                questionTexts.forEach(element => {
+                    let html = element.innerHTML;
+                    // Use a RegExp to find whole words, case-insensitive, but replace with uppercase
+                    keywords.forEach(kw => {
+                        const regex = new RegExp(`\\b(${kw})\\b`, 'gi');
+                        html = html.replace(regex, `<strong class="highlight">${kw.toUpperCase()}</strong>`);
+                    });
+                    element.innerHTML = html;
+                });
+            }
+
+            // --- Function to Update Live Score ---
+            function updateScore() {
+                scoreTracker.textContent = `${score} / ${totalQuestions}`;
+            }
+
+            // --- Function to Show Final Score ---
+            function showFinalScore() {
+                const percentage = Math.round((score / totalQuestions) * 100);
+                finalScoreMessage.innerHTML = `You answered <strong>${score}</strong> out of <strong>${totalQuestions}</strong> correctly — <strong>${percentage}%</strong>`;
+                finalScoreContainer.classList.remove('hidden');
+                // Scroll to the final score box for a better user experience
+                finalScoreContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // --- Main Quiz Logic (Event Delegation) ---
+            // A single event listener on the main container is more efficient
+            // than adding one to every single button.
+            quizContainer.addEventListener('click', (e) => {
+                // Check if the clicked element is an option button
+                if (e.target.classList.contains('option')) {
+                    const selectedOption = e.target;
+                    const questionCard = selectedOption.closest('.question-card');
+
+                    // --- Prevent Re-answering ---
+                    // If the 'data-answered' attribute is 'true', do nothing.
+                    if (questionCard.dataset.answered === 'true') {
+                        return;
+                    }
+                    
+                    // Mark the question as answered
+                    questionCard.dataset.answered = 'true';
+                    questionsAnswered++;
+
+                    // --- Check Answer ---
+                    const isCorrect = selectedOption.dataset.answer === 'correct';
+                    const rationale = questionCard.querySelector('.rationale');
+                    const allOptions = questionCard.querySelectorAll('.option');
+
+                    // Add 'answered' class to the selected option to trigger icon display
+                    selectedOption.classList.add('answered');
+
+                    if (isCorrect) {
+                        score++;
+                        selectedOption.classList.add('correct');
+                        rationale.classList.add('correct');
+                    } else {
+                        selectedOption.classList.add('incorrect');
+                        rationale.classList.add('incorrect');
+                        
+                        // If wrong, find and highlight the correct answer
+                        const correctOption = questionCard.querySelector('[data-answer="correct"]');
+                        correctOption.classList.add('correct');
+                    }
+
+                    // --- Disable All Options for this Question ---
+                    allOptions.forEach(opt => {
+                        opt.disabled = true;
+                        // Add 'disabled' class to unselected options for graying out
+                        if (opt !== selectedOption && opt.dataset.answer !== 'correct') {
+                            opt.classList.add('disabled');
+                        }
+                    });
+
+                    // --- Update UI ---
+                    updateScore();
+
+                    // --- Check for Quiz Completion ---
+                    if (questionsAnswered === totalQuestions) {
+                        // Use a short delay to allow the user to see the last answer
+                        setTimeout(showFinalScore, 1000);
+                    }
+                }
+            });
+
+            // --- Initialization ---
+            // Run the keyword highlighter and set the initial score on load.
+            highlightKeywords();
+            updateScore(); // Sets the initial score to "0 / 25"
+        });
+    </script>
+
+</body>
+</html>

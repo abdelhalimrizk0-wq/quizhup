@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Medical & Nursing Quiz</title>
+    <style>
+        /* --- Base & Typography --- */
+        :root {
+            --bg-deep-red: #3b0d0c;
+            --card-red: #4f0f0d;
+            --text-light: #f9fafb;
+            --text-dark: #1f2937;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --disabled-gray: #4b5563;
+            --hover-red: #6a1a17;
+            --border-red: #802f2d;
+            --rationale-green-bg: #dcfce7;
+            --rationale-green-text: #14532d;
+            --rationale-red-bg: #fee2e2;
+            --rationale-red-text: #7f1d1d;
+            --highlight-yellow: #facc15;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-deep-red);
+            color: var(--text-light);
+            line-height: 1.6;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* --- Main Layout & Header --- */
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .credit {
+            font-size: 1rem;
+            color: #ccc;
+            font-style: italic;
+            margin-bottom: 1.5rem;
+        }
+
+        .score-tracker {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background-color: var(--card-red);
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            
+            /* Sticky header for score */
+            position: -webkit-sticky; /* Safari */
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+
+        /* --- Question Card --- */
+        .question-card {
+            background-color: var(--card-red);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .highlight-word {
+            color: var(--highlight-yellow);
+            font-weight: 700;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+
+        /* --- Options Buttons --- */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 14px 20px;
+            padding-right: 50px; /* Space for icon */
+            background-color: var(--hover-red);
+            border: 2px solid var(--border-red);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            position: relative; /* For icon positioning */
+            -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+        }
+
+        .option-btn:not(:disabled):hover {
+            background-color: var(--border-red);
+        }
+
+        /* --- Answer State Styling --- */
+
+        /* Base state for feedback icons */
+        .option-btn::after {
+            content: '';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: none; /* Hidden by default */
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-align: center;
+            line-height: 24px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .option-btn.correct {
+            background-color: var(--accent-green) !important;
+            border-color: var(--accent-green) !important;
+            color: var(--text-light) !important;
+            font-weight: 700;
+        }
+        
+        .option-btn.correct::after {
+            display: block;
+            background-color: var(--rationale-green-bg);
+            color: var(--accent-green);
+            content: '✓'; /* Checkmark */
+        }
+
+        .option-btn.incorrect {
+            background-color: var(--accent-red) !important;
+            border-color: var(--accent-red) !important;
+            color: var(--text-light) !important;
+            font-weight: 700;
+        }
+
+        .option-btn.incorrect::after {
+            display: block;
+            background-color: var(--rationale-red-bg);
+            color: var(--accent-red);
+            content: '×'; /* X mark */
+            font-size: 1.3rem; /* Make X more prominent */
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+        
+        /* Unselected, disabled options */
+        .option-btn.disabled {
+            background-color: var(--bg-deep-red);
+            border-color: var(--disabled-gray);
+            color: #9ca3af;
+            opacity: 0.6;
+        }
+
+        /* --- Rationale Box --- */
+        .rationale {
+            display: none;
+            margin-top: 1.5rem;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .rationale.visible {
+            display: block;
+        }
+
+        .rationale.correct {
+            background-color: var(--rationale-green-bg);
+            color: var(--rationale-green-text);
+        }
+
+        .rationale.incorrect {
+            background-color: var(--rationale-red-bg);
+            color: var(--rationale-red-text);
+        }
+
+        .rationale strong {
+            font-weight: 600;
+        }
+
+        /* --- Final Score --- */
+        #final-score {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            background-color: var(--accent-green);
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 30px;
+            line-height: 1.4;
+        }
+
+        .hidden {
+            display: none;
+        }
+        
+        /* --- Responsive Design --- */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .score-tracker {
+                font-size: 1.2rem;
+                padding: 10px;
+                top: 5px;
+            }
+            
+            .question-card {
+                padding: 20px;
+            }
+            
+            .question-text {
+                font-size: 1.1rem;
+            }
+            
+            .option-btn {
+                padding: 12px 15px;
+                padding-right: 45px;
+                font-size: 0.95rem;
+            }
+            
+            #final-score {
+                font-size: 1.3rem;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <header>
+            <h1>Medical & Nursing Quiz</h1>
+            <div class="credit">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</div>
+            <div class="score-tracker">
+                Score: <span id="score">0</span> / <span id="total-questions">120</span>
+            </div>
+        </header>
+
+        <main id="quiz-container">
+
+            <!-- Questions are now shuffled and renumbered -->
+
+            <div class="question-card">
+                <p class="question-text">1. Which type of defibrillator waveform flows in two directions, is more effective, and requires a lower energy level?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Biphasic</button>
+                    <button class="option-btn" data-answer="incorrect">Monophasic</button>
+                    <button class="option-btn" data-answer="incorrect">Triphasic</button>
+                    <button class="option-btn" data-answer="incorrect">Sinusoidal</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Biphasic technology incorporates two-way current flow. It is more effective and safe, and needs low joules (150-200 J) to deliver a shock.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">2. Which type of collar is a stiff, two-piece foam collar that supports the lower jaw and extends down to the upper thoracic spine, often used after surgery?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Philadelphia collar</button>
+                    <button class="option-btn" data-answer="incorrect">Soft collar</button>
+                    <button class="option-btn" data-answer="incorrect">Hard collar</button>
+                    <button class="option-btn" data-answer="incorrect">Basic foam collar</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> A Philadelphia collar is a stiff foam collar composed of 2 pieces. It covers more area and puts greater restrictions on motion, making it common after cervical spine surgery.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">3. True or False: When administering IV Sodium Bicarbonate, it is critical to flush the line before and after administration.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">True</button>
+                    <button class="option-btn" data-answer="incorrect">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> True. You must flush the line before and after administration of sodium bicarbonate. It is incompatible with many other emergency drugs, such as calcium chloride and epinephrine.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">4. What is the standard paper speed for recording an ECG?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">10 mm/s</button>
+                    <button class="option-btn" data-answer="incorrect">50 mm/s</button>
+                    <button class="option-btn" data-answer="correct">25 mm/s</button>
+                    <button class="option-btn" data-answer="incorrect">100 mm/s</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The standard paper speed is usually 25 mm/s. The standard calibration (amplitude) is 10 mm/mV.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">5. What does the T wave represent on an ECG tracing?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Atrial depolarization</button>
+                    <button class="option-btn" data-answer="incorrect">Ventricular depolarization</button>
+                    <button class="option-btn" data-answer="incorrect">A U wave</button>
+                    <button class="option-btn" data-answer="correct">Ventricular repolarization</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The T wave in an ECG is the result of the relaxation of cardiac muscle, also known as ventricular repolarization.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">6. Which inhalation device is mechanical, features no gas propellant, and does <span class="highlight-word">NOT</span> require a battery or power to operate?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Jet nebulizer</button>
+                    <button class="option-btn" data-answer="incorrect">Ultrasonic nebulizer</button>
+                    <button class="option-btn" data-answer="correct">Soft mist inhaler</button>
+                    <button class="option-btn" data-answer="incorrect">Vibrating mesh nebulizer</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The soft mist inhaler is rotated by hand to build tension in a spring, which forms a soft mist. It features no gas propellant and no need for battery/power to operate.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">7. True or False: Electrode packages should be opened at the start of the shift to save time, even if they aren't being used immediately.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. Avoid opening the electrode packages until just before using to prevent the gel from drying out, which can decrease conduction.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">8. Cardioversion is the recommended treatment for which of these rhythms?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Ventricular Fibrillation (VF)</button>
+                    <button class="option-btn" data-answer="correct">Unstable ventricular tachycardia *with a pulse*</button>
+                    <button class="option-btn" data-answer="incorrect">Asystole</button>
+                    <button class="option-btn" data-answer="incorrect">Symptomatic bradycardia</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Synchronized cardioversion is recommended for unstable atrial tachycardia, atrial fibrillation, atrial flutter, and *ventricular tachycardia with a pulse*. VF and pulseless VT require defibrillation.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">9. True or False: For the best ECG signal, electrodes should be placed directly on bony prominences and hairy locations.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. Avoid placing electrodes on bony prominences, hairy locations, areas for defibrillator pads, or areas for chest compression.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">10. Where is the V1 chest lead placed for a 12-lead ECG?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Fourth intercostal space, left of the sternum</button>
+                    <button class="option-btn" data-answer="incorrect">Fifth intercostal space, mid-clavicular line</button>
+                    <button class="option-btn" data-answer="correct">Fourth intercostal space, right of the sternum</button>
+                    <button class="option-btn" data-answer="incorrect">Mid-axillary line, same horizontal line as V4</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> V1 (white/red lead) is placed in the fourth intercostal space, just to the right of the sternum.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">11. Who is considered the leader of the log roll team and is in control of the roll?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">The chest person</button>
+                    <button class="option-btn" data-answer="incorrect">The hip person</button>
+                    <button class="option-btn" data-answer="incorrect">The leg person</button>
+                    <button class="option-btn" data-answer="correct">The head hold person</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The head hold person must be a registered nurse or medical officer; this person manages cervical spine alignment and is in control of the roll.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">12. True or False: A standard 12-lead ECG uses 12 electrodes placed on the patient's body.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. A standard ECG uses 10 lead wires with electrodes at the ends (4 placed on the limbs, and 6 placed on the chest) to produce 12 electrical views (leads).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">13. In a standard five-lead system, where is the LA (black) lead placed?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Below left clavicle, 2nd ICS, MCL</button>
+                    <button class="option-btn" data-answer="incorrect">Left lower rib cage, 8th ICS</button>
+                    <button class="option-btn" data-answer="incorrect">Below right clavicle, 2nd ICS, MCL</button>
+                    <button class="option-btn" data-answer="incorrect">Right lower rib cage, 8th ICS</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The LA (black) lead is placed below the left clavicle, 2nd Intercostal Space (ICS), Mid-Clavicular Line (MCL).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">14. What is the <span class="highlight-word">MAIN</span> principle of the log roll maneuver?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">To quickly turn the patient</sbutton>
+                    <button class="option-btn" data-answer="correct">To move the patient without flexing the spinal column</button>
+                    <button class="option-btn" data-answer="incorrect">To check for leg injuries</button>
+                    <button class="option-btn" data-answer="incorrect">To assess level of consciousness</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The log roll is a maneuver used to move a patient *without flexing the spinal column* to maintain alignment and prevent further injury.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">15. What is the standard sterno-apical placement for defibrillator paddles?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Both paddles on the front, left of the sternum</button>
+                    <button class="option-btn" data-answer="incorrect">One on the chest, one on the back</button>
+                    <button class="option-btn" data-answer="correct">Right of sternum below clavicle, and 5th intercostal space mid-axillary line</button>
+                    <button class="option-btn" data-answer="incorrect">Both paddles over the apex of the heart</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Standard sterno-apical placement is one paddle to the right of the sternum below the clavicle, and the other at the apex, in the 5th intercostal space, mid-axillary line.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">16. The "PAAD" acronym for using an AED stands for:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Press, Analyze, Airway, Defibrillate</button>
+                    <button class="option-btn" data-answer="correct">Power on, Attach pads, Analyze, Defibrillate</button>
+                    <button class="option-btn" data-answer="incorrect">Pulse, Airway, Assess, Defibrillate</button>
+                    <button class="option-btn" data-answer="incorrect">Power on, Assess, Analyze, Deliver</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The technique for using an AED is PAAD: P- Power on, A- Attach pads, A - Analyze, D - Defibrillate.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">17. Which of the following is an indication for performing a log roll?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Administering oral medications</button>
+                    <button class="option-btn" data-answer="incorrect">Starting an IV</button>
+                    <button class="option-btn" data-answer="correct">Examination of the patient's back</button>
+                    <button class="option-btn" data-answer="incorrect">Checking pupillary response</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Indications include examination of the patient's back, cervical collar care, pressure care, and transporting a casualty with suspected spinal injury.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">18. True or False: Routine "stripping" or "milking" of chest tubes is highly recommended to prevent clots.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. Routine chest tube stripping or milking is *not* recommended as it can cause transient high negative pressures and potential lung entrapment.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">19. The "hip person" is primarily responsible for ensuring the:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Head stays in alignment</button>
+                    <button class="option-btn" data-answer="incorrect">Backboard is placed correctly</button>
+                    <button class="option-btn" data-answer="correct">Lower spine is not twisted</button>
+                    <button class="option-btn" data-answer="incorrect">Arms are secured</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> This person is responsible for ensuring the lower spine is not twisted during the roll.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">20. What is "tidaling" in a chest tube's water seal chamber?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Continuous, vigorous bubbling</button>
+                    <button class="option-btn" data-answer="correct">The rise and fall of the fluid level with respiration</button>
+                    <button class="option-btn" data-answer="incorrect">The drainage of blood from the chest</button>
+                    <button class="option-btn" data-answer="incorrect">A complete stop in fluid movement</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Tidaling is the normal movement (rising and falling) of the fluid in the water seal tube that corresponds with the patient's breathing (up on inspiration, down on expiration).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">21. True or False: For consistency and ease of use, pediatric and adult crash carts should be the same color and style.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. The pediatric cart should be separate and distinct from the adult cart (e.g., different style, different color) to prevent errors.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">22. Which of the following is an indication for nebulizer therapy?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Hypertension</button>
+                    <button class="option-btn" data-answer="incorrect">Diabetes Mellitus</button>
+                    <button class="option-btn" data-answer="correct">Asthma</button>
+                    <button class="option-btn" data-answer="incorrect">Chest pain</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Indications for nebulizer therapy include Asthma, Cystic fibrosis, COPD, and other respiratory disorders.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">23. True or False: Nebulizers are only used to deliver antibiotics.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. Nebulizers are most commonly used for bronchodilators, but can also deliver anticholinergics, corticosteroids, antibiotics, and antifungals.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">24. What does the P wave represent on an ECG tracing?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Ventricular depolarization</button>
+                    <button class="option-btn" data-answer="incorrect">Ventricular repolarization</button>
+                    <button class="option-btn" data-answer="correct">Atrial depolarization</button>
+                    <button class="option-btn" data-answer="incorrect">AV node delay</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Electrical stimulation of the atria produces the P wave in an ECG and results in coordinated mechanical contraction (atrial systole).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">25. True or False: A patient wearing a cervical collar should be encouraged to sit in soft, low chairs to maximize comfort.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. Avoid sitting in soft, low chairs. This can affect posture and put extra pressure on the neck. A firm chair is recommended.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">26. Which type of nebulizer is also commonly called an "atomizer" and uses compressed air?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Jet nebulizer</button>
+                    <button class="option-btn" data-answer="incorrect">Ultrasonic wave nebulizer</button>
+                    <button class="option-btn" data-answer="incorrect">Vibrating mesh nebulizer</button>
+                    <button class="option-btn" data-answer="incorrect">Soft mist inhaler</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The most commonly used nebulizers are jet nebulizers, which are also called "atomizers". They use compressed air or oxygen to turn liquid medicine into an aerosol.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">27. True or False: A primary disadvantage of ultrasonic wave nebulizers is that they are very loud.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. An *advantage* of ultrasonic wave nebulizers is that they are almost silent. Disadvantages include liquid waste and potential heating of the medication.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">28. Which of the following is a potential complication of nebulizer therapy?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Bronchospasm</button>
+                    <button class="option-btn" data-answer="incorrect">Hypertension</button>
+                    <button class="option-btn" data-answer="incorrect">Hypoglycemia</button>
+                    <button class="option-btn" data-answer="incorrect">Bradycardia</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Complications include irritation of mucosa, bronchospasm, dyspnea, airway burns, and infection from contaminated equipment. Tachycardia (not bradycardia) is also a common side effect.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">29. What is the normal heart rate generated by the sinus node under normal conditions?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">40 to 60 times per minute</button>
+                    <button class="option-btn" data-answer="correct">60 to 100 times per minute</button>
+                    <button class="option-btn" data-answer="incorrect">100 to 120 times per minute</button>
+                    <button class="option-btn" data-answer="incorrect">20 to 40 times per minute</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The sinus node generates an electrical stimulus regularly, 60 to 100 times per minute under normal conditions.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">30. What does the QRS complex represent on an ECG tracing?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Ventricular depolarization</button>
+                    <button class="option-btn" data-answer="incorrect">Atrial repolarization</button>
+                    <button class="option-btn" data-answer="incorrect">Ventricular repolarization</button>
+                    <button class="option-btn" data-answer="incorrect">Atrial depolarization</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Electrical stimulation of the ventricles produces the QRS complex on an ECG and results in coordinated ventricular contraction (ventricular systole).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">31. What is the standard recommended dosage of Aspirin to treat Acute Coronary Syndrome (ACS)?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">81 mg</button>
+                    <button class="option-btn" data-answer="correct">160 to 325 mg</button>
+                    <button class="option-btn" data-answer="incorrect">500 mg</button>
+                    <button class="option-btn" data-answer="incorrect">1000 mg</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The standard recommended aspirin dosage to treat ACS is 160 to 325 mg, typically chewed to speed absorption.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">32. Which inotropic drug increases myocardial contractility *without* a significant change in blood pressure, making it a good choice for heart failure with ischemia?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Dopamine</button>
+                    <button class="option-btn" data-answer="incorrect">Norepinephrine</button>
+                    <button class="option-btn" data-answer="incorrect">Epinephrine</button>
+                    <button class="option-btn" data-answer="correct">Dobutamine</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Dobutamine increases myocardial contractility & cardiac output without a significant change in blood pressure. It is generally considered the inotrope of choice in patients with myocardial ischemia.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">33. Where is the V4 chest lead placed for a 12-lead ECG?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Midway between V2 and V3</button>
+                    <button class="option-btn" data-answer="correct">Fifth intercostal space, mid-clavicular line</button>
+                    <button class="option-btn" data-answer="incorrect">Fourth intercostal space, left of the sternum</button>
+                    <button class="option-btn" data-answer="incorrect">Anterior axillary line, same horizontal line as V4</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> V4 (white/brown lead) is placed in the fifth intercostal space, mid-clavicular line.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">34. A "renal dose" of Dopamine, which causes vasodilation in renal and mesenteric beds, is typically:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">&lt; 5 mcg/kg/min</button>
+                    <button class="option-btn" data-answer="incorrect">5 - 10 mcg/kg/min</button>
+                    <button class="option-btn" data-answer="incorrect">&gt; 10 mcg/kg/min</button>
+                    <button class="option-btn" data-answer="incorrect">&gt; 20 mcg/kg/min</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> At low rates of infusion (< 5 mcg/kg/min), Dopamine affects dopaminergic receptors, causing vasodilation in the renal and other vascular beds, thus increasing urine output.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">35. True or False: A standard 12-lead ECG uses 12 electrodes placed on the patient's body.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. A standard ECG uses 10 lead wires with electrodes at the ends (4 placed on the limbs, and 6 placed on the chest) to produce 12 electrical views (leads).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">36. A three-electrode monitoring system typically allows viewing of which leads?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">V1 through V6</button>
+                    <button class="option-btn" data-answer="correct">Leads I, II, or III</button>
+                    <button class="option-btn" data-answer="incorrect">Leads aVL, aVR, or aVF</button>
+                    <button class="option-btn" data-answer="incorrect">All 12 leads</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The three-electrode system produces limited selections of leads I, II, or III with only a single lead viewed on the screen at one time.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">37. True or False: It is crucial to remove any transdermal medication patches from the patient's chest before defibrillation.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">True</button>
+                    <button class="option-btn" data-answer="incorrect">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> True. Medication patches must be removed as they can block the electrical current and cause burns to the patient's skin.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">38. True or False: An AED should be applied to any patient who is responsive but complaining of severe chest pain.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. An AED should be applied only to *Unresponsive, non-breathing, and pulseless* patients.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">39. A one-bottle drainage system acts as both the drainage collection chamber and the:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Suction control chamber</button>
+                    <button class="option-btn" data-answer="correct">Water seal chamber</button>
+                    <button class="option-btn" data-answer="incorrect">Air leak meter</button>
+                    <button class="option-btn" data-answer="incorrect">Heimlich valve</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> In a one-bottle system, the bottle acts as both the collection chamber and the water seal (the long tube is immersed 2 cm under water).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">40. In a standard five-lead system, where is the LL (red) lead placed?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Below right clavicle, 2nd ICS, MCL</button>
+                    <button class="option-btn" data-answer="incorrect">Right lower rib cage, 8th ICS</button>
+                    <button class="option-btn" data-answer="incorrect">Below left clavicle, 2nd ICS, MCL</button>
+                    <button class="option-btn" data-answer="correct">Left lower rib cage, 8th ICS, MCL</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The LL (red) lead is placed on the left lower rib cage, 8th Intercostal Space (ICS), Mid-Clavicular Line (MCL).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">41. Which of the following items would be found in Drawer 2 (Breathing and Airway)?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Amiodarone</button>
+                    <button class="option-btn" data-answer="incorrect">Syringes</button>
+                    <button class="option-btn" data-answer="correct">Laryngoscope handle and blades</button>
+                    <button class="option-btn" data-answer="incorrect">Normal Saline 500ml</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Drawer 2 contains the intubation tray, which includes laryngoscope handles, blades (straight and curved), and other airway supplies.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">42. In a standard five-lead system, where is the RA (white) lead placed?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Left lower rib cage, 8th ICS</button>
+                    <button class="option-btn" data-answer="correct">Below right clavicle, 2nd ICS, MCL</button>
+                    <button class="option-btn" data-answer="incorrect">Below left clavicle, 2nd ICS, MCL</button>
+                    <button class="option-btn" data-answer="incorrect">Right lower rib cage, 8th ICS</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The RA (white) lead is placed below the right clavicle, 2nd Intercostal Space (ICS), Mid-Clavicular Line (MCL).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">43. What is the <span class="highlight-word">FIRST</span> choice drug for treating symptomatic bradycardia?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Epinephrine</button>
+                    <button class="option-btn" data-answer="incorrect">Dopamine</button>
+                    <button class="option-btn" data-answer="correct">Atropine</button>
+                    <button class="option-btn" data-answer="incorrect">Amiodarone</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Atropine is the first choice drug for symptomatic bradycardia. It works by increasing the heart rate through its anticholinergic effect.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">44. A normal QRS complex width is less than:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">0.12 seconds</button>
+                    <button class="option-btn" data-answer="incorrect">0.20 seconds</button>
+                    <button class="option-btn" data-answer="incorrect">0.04 seconds</button>
+                    <button class="option-btn" data-answer="incorrect">0.16 seconds</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The normal width of a QRS complex is less than 0.12 seconds (3 small squares).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">45. True or False: A sign of tension pneumothorax is tracheal deviation towards the <span class="highlight-word">AFFECTED</span> side.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. In a tension pneumothorax, pressure builds up on the affected side, pushing the trachea and heart *away* from the injury, towards the *unaffected* side.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">46. What is considered the natural pacemaker of the heart, generating the initial electrical stimulus?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Atrioventricular (AV) node</button>
+                    <button class="option-btn" data-answer="correct">Sinoatrial (SA) node</button>
+                    <button class="option-btn" data-answer="incorrect">Bundle of His</button>
+                    <button class="option-btn" data-answer="incorrect">Purkinje fibers</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The Sinoatrial (SA) node is a small mass of specialized tissue in the right atrium that generates the electrical stimulus regularly, acting as the heart's natural pacemaker.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">47. Drawer 3 (Circulation and IV supplies) typically contains:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Endotracheal tubes</button>
+                    <button class="option-btn" data-answer="incorrect">Bags of Lactated Ringer's</button>
+                    <button class="option-btn" data-answer="incorrect">Chest tubes</button>
+                    <button class="option-btn" data-answer="correct">Syringes, blood tubes, and IV start kits</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Drawer 3 contains IV supplies such as 3-way stopcocks, alcohol swabs, various sizes of syringes, blood tubes, and IV start kits.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">48. Which type of collar is flexible, made of foam, and typically used as a transition *after* a more rigid collar?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Hard collar</button>
+                    <button class="option-btn" data-answer="incorrect">Philadelphia collar</button>
+                    <button class="option-btn" data-answer="correct">Soft collar</button>
+                    <button class="option-btn" data-answer="incorrect">Aspen collar</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Soft collars are flexible and made of foam. They are usually worn after a more rigid collar to help gradually transition to not wearing a brace.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">49. True or False: Skin under the cervical collar should be inspected for redness and breakdown at least twice a day.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">True</button>
+                    <button class="option-btn" data-answer="incorrect">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> True. Always assess skin integrity, especially over bony prominences. You should inspect the patient's skin under and around the collar at least twice a day.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">50. A major potential complication of performing cardioversion on a patient in atrial fibrillation is:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Severe hypertension</button>
+                    <button class="option-btn" data-answer="incorrect">Bronchospasm</button>
+                    <button class="option-btn" data-answer="correct">Pulmonary or cerebral emboli</button>
+                    <button class="option-btn" data-answer="incorrect">Hypokalemia</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Atrial tachydysrhythmias (like A-fib) predispose the patient to the development of microemboli (clots) in the atria. Cardioversion can release these clots, causing pulmonary or cerebral emboli (stroke).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">51. According to the typical organization, Drawer 1 of a crash cart contains:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Breathing and Airway supplies</button>
+                    <button class="option-btn" data-answer="correct">Adult Medications</button>
+                    <button class="option-btn" data-answer="incorrect">IV solutions and tubing</button>
+                    <button class="option-btn" data-answer="incorrect">Suture kits and chest tubes</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Drawers are organized top to bottom. Drawer 1 typically contains Adult Medications (e.g., Epinephrine, Amiodarone, Atropine).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">52. True or False: The head hold person must be a registered nurse or medical officer.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">True</button>
+                    <button class="option-btn" data-answer="incorrect">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> True. The document specifies: "Head hold person: Must be a registered nurse or medical officer".
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">53. The "chest person" on the log roll team should ideally be:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">The person with the most experience</button>
+                    <button class="option-btn" data-answer="correct">The tallest person in the team</button>
+                    <button class="option-btn" data-answer="incorrect">The person at the patient's feet</button>
+                    <button class="option-btn" data-answer="incorrect">The person applying the backboard</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The "chest person" should be the tallest person in the team, who places hands over the patient's shoulder and lower back.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">54. What is the <span class="highlight-word">MAIN</span> purpose of a chest tube drainage system?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">To administer medication into the lungs</button>
+                    <button class="option-btn" data-answer="incorrect">To increase pressure in the pleural space</button>
+                    <button class="option-btn" data-answer="correct">To restore negative pressure to the pleural space</button>
+                    <button class="option-btn" data-answer="incorrect">To monitor for cardiac tamponade</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The system is designed to evacuate fluid, blood, and air from the pleural space and to restore negative pressure, promoting re-expansion of the lung.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">55. A "cardiac dose" of Dopamine, which improves contractility, is typically:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">&lt; 5 mcg/kg/min</button>
+                    <button class="option-btn" data-answer="correct">5 - 10 mcg/kg/min</button>
+                    <button class="option-btn" data-answer="incorrect">&gt; 10 mcg/kg/min</button>
+                    <button class="option-btn" data-answer="incorrect">&gt; 20 mcg/kg/min</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> At intermediate rates (5-10 mcg/kg/min), Dopamine affects beta1-adrenoceptors, resulting in improved myocardial contractility.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">56. True or False: Using the tools on a crash cart requires advanced medical skills, such as ACLS certification.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">True</button>
+                    <button class="option-btn" data-answer="incorrect">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> True. Using the tools on a crash cart requires advanced medical skills and certification in Advanced Cardiac Life Support (ACLS).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">57. True or False: It is safe for a patient to drive a car while wearing a cervical collar.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. Instruct the patient not to drive or operate equipment while in the collar, as they cannot turn their head to check blind spots.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">58. What is the key difference between defibrillation and cardioversion?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Cardioversion uses lower energy.</button>
+                    <button class="option-btn" data-answer="incorrect">Defibrillation is used for atrial rhythms.</button>
+                    <button class="option-btn" data-answer="correct">Cardioversion is *synchronized* with the R wave.</button>
+                    <button class="option-btn" data-answer="incorrect">Defibrillation requires sedation.</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Cardioversion is a *synchronized* electrical shock. The defibrillator is set to "sync" mode to sense the R wave and deliver the shock at a specific point, avoiding the vulnerable T wave period. Defibrillation is unsynchronized.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">59. What piece of equipment is typically found on the <span class="highlight-word">TOP</span> of the crash cart?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">IV solutions</button>
+                    <button class="option-btn" data-answer="correct">Portable monitor/defibrillator unit</button>
+                    <button class="option-btn" data-answer="incorrect">Airway supplies</button>
+                    <button class="option-btn" data-answer="incorrect">Cardiac board</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The top of the crash cart typically holds the portable monitor/defibrillator unit, suction apparatus, and check sheets.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">60. Which system uses a small, battery-operated transmitter to send the ECG signal via radiofrequency, allowing the patient to be mobile?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Hard-wire monitoring system</button>
+                    <button class="option-btn" data-answer="incorrect">A 12-lead ECG system</button>
+                    <button class="option-btn" data-answer="incorrect">Arterial line system</button>
+                    <button class="option-btn" data-answer="correct">Telemetry monitoring system</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> In telemetry monitoring, no direct wire is needed. Electrodes connect to a small battery-operated transmitter, and the ECG is sent by radiofrequency signals.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">61. What is the <span class="highlight-word">FIRST</span> thing you should do if a chest tube is accidentally dislodged from the patient's chest?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Clamp the tube immediately</button>
+                    <button class="option-btn" data-answer="incorrect">Run to get the physician</button>
+                    <button class="option-btn" data-answer="correct">Apply an occlusive dressing to the site</button>
+                    <button class="option-btn" data-answer="incorrect">Try to re-insert the tube</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> If the tube is dislodged, immediately apply an occlusive dressing to the tube site (to prevent air from entering the pleural space) and notify the physician.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">62. True or False: To maintain alignment, a pillow may be inserted between the patient's legs during a log roll.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">True</button>
+                    <button class="option-btn" data-answer="incorrect">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> True. A pillow may be inserted between the patient's legs to maintain alignment of the hips and spine.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">63. True or False: During nebulizer treatment, the patient should be instructed to breathe as quickly and shallowly as possible.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. The patient should be instructed to breathe slowly and deeply until all the medication is nebulized to ensure good inhalation.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">64. A normal PR interval is between:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">0.04 - 0.12 seconds</button>
+                    <button class="option-btn" data-answer="incorrect">0.20 - 0.24 seconds</button>
+                    <button class="option-btn" data-answer="correct">0.12 - 0.20 seconds</button>
+                    <button class="option-btn" data-answer="incorrect">Less than 0.08 seconds</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The normal PR interval is 0.12-0.20 seconds (3-5 small squares). It represents the time taken for the impulse to travel from the SA node to the ventricles.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">65. A five-electrode system adds an exploring "chest" electrode, which allows the nurse to view:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Only leads I, II, and III</button>
+                    <button class="option-btn" data-answer="incorrect">Only the V (chest) leads</button>
+                    <button class="option-btn" data-answer="correct">Any of the 12 ECG leads</button>
+                    <button class="option-btn" data-answer="incorrect">Only the augmented leads (aVL, aVR, aVF)</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The five-electrode monitor adds an exploring "chest" electrode that allows one to obtain any one of the six chest leads and the six limb leads, providing all the capabilities of a 12-lead ECG machine.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">66. A large volume nebulizer is <span class="highlight-word">MAINLY</span> used for:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Administering high-dose antibiotics</button>
+                    <button class="option-btn" data-answer="incorrect">Patients who are mechanically ventilated</button>
+                    <button class="option-btn" data-answer="correct">Hydrating the airway and reducing inflammation</button>
+                    <button class="option-btn" data-answer="incorrect">Delivering bronchodilators in small doses</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> A large volume nebulizer is primarily used to administer solution to hydrate the airway and reduce inflammation. A small volume nebulizer is used to administer drugs.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">67. True or False: The electrical impulse speeds up as it travels through the atrioventricular (AV) node.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. The impulse travels to the AV node, where impulses are *slowed down* for a very short period. This delay allows the atria to empty into the ventricles before the ventricles contract.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">68. True or False: The goal of defibrillation is to pass an electric current through the heart to *repolarize* all the muscle fibers simultaneously.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. The electric current results in *depolarization* of the myocardial muscle fibers. This disruption of chaotic impulses allows the heart's natural pacemaker (SA node) to resume control.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">69. True or False: The normal electrical axis of the heart ranges between -30° and +90°.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">True</button>
+                    <button class="option-btn" data-answer="incorrect">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> True. Normally, the axis is down and to the patient's left. The normal electrical axis ranges between -30° to +90°.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">70. An oxygen cylinder on the crash cart should be replaced when the tank has less than:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">2000 psi</button>
+                    <button class="option-btn" data-answer="incorrect">1000 psi</button>
+                    <button class="option-btn" data-answer="correct">500 psi</button>
+                    <button class="option-btn" data-answer="incorrect">100 psi</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Oxygen cylinders are replaced when the tank has less than 500 psi.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">71. What is the primary purpose of a cardiac monitor?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">To deliver electrical shocks</button>
+                    <button class="option-btn" data-answer="correct">To continuously display the cardiac EKG tracing</button>
+                    <button class="option-btn" data-answer="incorrect">To measure blood glucose</button>
+                    <button class="option-btn" data-answer="incorrect">To replace a 12-lead ECG</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The primary purpose is to continuously display the cardiac electrocardiogram (EKG) tracing, allowing for prompt identification of rhythm changes.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">72. Which type of monitoring system limits patient mobility because the patient is linked directly to the monitor via a cable?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Hard-wire monitoring system</button>
+                    <button class="option-btn" data-answer="incorrect">Telemetry monitoring system</button>
+                    <button class="option-btn" data-answer="incorrect">Holter monitoring system</button>
+                    <button class="option-btn" data-answer="incorrect">A 12-lead ECG system</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Hard-wire monitors require the patient to be linked directly to the cardiac monitor. Patients using this system are usually confined to bed rest or allowed up at the bedside only.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">73. True or False: Normal intrapleural pressure is positive during expiration, at approximately +4 cmH2O.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. Normal intrapleural pressure is *negative*, measuring approximately -4 cmH2O during expiration and -8 cmH2O at the end of inspiration.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">74. The leader (head hold person) initiates the coordinated roll after counting to:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">1</button>
+                    <button class="option-btn" data-answer="incorrect">1, 2</button>
+                    <button class="option-btn" data-answer="correct">1, 2, 3</button>
+                    <button class="option-btn" data-answer="incorrect">5</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> After the head person counts 1, 2, 3, a coordinated roll of the patient... is performed.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">75. True or False: During a log roll, the team members at the patient's side roll the patient *away* from themselves.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. A coordinated roll of the patient *towards* the hip & chest person is performed. This allows for better control and for the 5th person to place a backboard.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">76. What is the primary purpose of a crash cart?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">To store patient belongings</button>
+                    <button class="option-btn" data-answer="incorrect">To dispense daily medications</button>
+                    <button class="option-btn" data-answer="correct">To provide all equipment for cardiopulmonary resuscitation (CPR)</button>
+                    <button class="option-btn" data-answer="incorrect">To perform routine procedures like dressing changes</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> A crash cart is a portable trolley containing all equipment, supplies, and drugs required for cardiopulmonary resuscitation and emergency care.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">77. True or False: Log rolling must always be performed immediately, even if it takes precedence over life-saving procedures like securing an airway.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. The application of definitive immobilization devices should *not* take precedence over life-saving procedures, such as the need to obtain and secure an airway.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">78. What is the primary vasopressor used in the cardiac arrest algorithm (e.g., for VF/Pulseless VT)?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Epinephrine (Adrenaline)</button>
+                    <button class="option-btn" data-answer="incorrect">Dopamine</button>
+                    <button class="option-btn" data-answer="incorrect">Atropine</button>
+                    <button class="option-btn" data-answer="incorrect">Norepinephrine (Levophed)</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Epinephrine is a cardiac stimulant and vasopressor indicated for cardiac arrest. The standard dose is 1 mg IV every 3-5 minutes.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">79. Salbutamol and Terbutaline are examples of which class of nebulizer drugs?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Corticosteroids</button>
+                    <button class="option-btn" data-answer="incorrect">Anticholinergics</button>
+                    <button class="option-btn" data-answer="incorrect">Antibiotics</button>
+                    <button class="option-btn" data-answer="correct">Beta2 agonists</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Nebulizer drugs can be Beta2 agonists (for example salbutamol, terbutaline).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">80. At high "pressor" doses (>10 mcg/kg/min), Dopamine primarily stimulates alpha-adrenoceptors, resulting in:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Widespread vasodilation</button>
+                    <button class="option-btn" data-answer="incorrect">A decrease in blood pressure</button>
+                    <button class="option-btn" data-answer="correct">Vasoconstriction</button>
+                    <button class="option-btn" data-answer="incorrect">Increased urine output</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> At higher rates of infusion (>10 mcg/kg/min), Dopamine affects alpha-adrenoceptors, with consequent vasoconstrictor effects and a rise in blood pressure.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">81. In the "MONA" therapy for Acute Coronary Syndrome (ACS), what does the 'A' stand for?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Atropine</button>
+                    <button class="option-btn" data-answer="incorrect">Amiodarone</button>
+                    <button class="option-btn" data-answer="incorrect">Adenosine</button>
+                    <button class="option-btn" data-answer="correct">Aspirin</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> MONA therapy stands for M (Morphine), O (Oxygen), N (Nitroglycerin), A (Aspirin).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">82. True or False: When log rolling, the patient's head should be stabilized in a slightly flexed (chin-to-chest) position.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. The head hold person manually stabilizes the patient's head in the *neutral position* with both hands.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">83. True or False: A properly fitted cervical collar should be snug, but loose enough to allow the patient to nod their head downward.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. The collar should be snug enough to *keep* the patient from nodding their head downward (flexion). If it's too loose, it won't provide the necessary support.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">84. What item is typically found on the <span class="highlight-word">BACK</span> of a crash cart?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Oxygen cylinder</button>
+                    <button class="option-btn" data-answer="incorrect">Sharps container</button>
+                    <button class="option-btn" data-answer="incorrect">Defibrillator</button>
+                    <button class="option-btn" data-answer="correct">Cardiac board</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The cardiac board is typically stored on the back of the crash cart. The oxygen cylinder is usually on the side.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">85. What is the appropriate patient position to facilitate drainage of a hemothorax?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Supine</button>
+                    <button class="option-btn" data-answer="incorrect">Prone</button>
+                    <button class="option-btn" data-answer="correct">Semi-Fowler's position</button>
+                    <button class="option-btn" data-answer="incorrect">Trendelenburg</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The patient should be positioned in Semi-Fowler's (for pneumothorax) or high Fowler's (for hemothorax) to facilitate drainage. Supine or lateral may also be used during insertion.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">86. True or False: A log roll can be safely and effectively performed by a single trained first aider.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. A log roll is best performed using four to six first aiders. It should not be provided when there are not enough personnel to safely perform the technique.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">87. According to the typical organization, Drawer 2 of a crash cart contains:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Breathing and Airway supplies</button>
+                    <button class="option-btn" data-answer="incorrect">Adult Medications</button>
+                    <button class="option-btn" data-answer="incorrect">Circulation and IV supplies</button>
+                    <button class="option-btn" data-answer="incorrect">IV solutions</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Drawer 2 typically contains Breathing and Airway supplies, such as the Ambu bag, oral airways, laryngoscopes, and endotracheal tubes.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">88. What is one of the most common and serious complications of long-term cervical collar use?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Muscle hypertrophy (overgrowth)</button>
+                    <button class="option-btn" data-answer="correct">Skin damage and pressure ulcers</button>
+                    <button class="option-btn" data-answer="incorrect">Improved hearing</button>
+                    <button class="option-btn" data-answer="incorrect">Decreased intracranial pressure</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Complications include skin damage, especially at risk for pressure ulcers (on the chin, ears, shoulders, etc.), and a potential *increase* in intracranial pressure.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">89. True or False: A soft collar provides more motion restriction than a Philadelphia collar.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. The Philadelphia collar covers more area and is made of stiff foam, so it puts *greater* restrictions on range of motion than a soft collar.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">90. True or False: Persistent, continuous bubbling in the water seal chamber indicates the system is working normally.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. Intermittent bubbling (with coughing or exhalation) is normal. *Persistent* or *continuous* bubbling indicates an air leak in the patient's lung or the drainage system.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">91. To drain <span class="highlight-word">AIR</span> (pneumothorax), where is a chest tube typically inserted?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Near the apex of the lung (2nd intercostal space)</button>
+                    <button class="option-btn" data-answer="incorrect">Near the base of the lung (4th to 5th intercostal space)</button>
+                    <button class="option-btn" data-answer="incorrect">Below the xiphoid process</button>
+                    <button class="option-btn" data-answer="incorrect">In the 7th intercostal space</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> To drain air, the tube is placed high, near the apex of the lung (e.g., 2nd intercostal space, mid-clavicle line) because air rises.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">92. In the "MONA" therapy for Acute Coronary Syndrome (ACS), what does the 'M' stand for?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Magnesium</button>
+                    <button class="option-btn" data-answer="correct">Morphine</button>
+                    <button class="option-btn" data-answer="incorrect">Metoprolol</button>
+                    <button class="option-btn" data-answer="incorrect">Monitoring</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> MONA therapy stands for M (Morphine), O (Oxygen), N (Nitroglycerin), A (Aspirin).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">93. Which of these medications is commonly found in the <span class="highlight-word">FIRST</span> drawer?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Epinephrine</button>
+                    <button class="option-btn" data-answer="incorrect">Normal Saline 500ml</button>
+                    <button class="option-btn" data-answer="incorrect">Ambu bag</button>
+                    <button class="option-btn" data-answer="incorrect">Laryngoscope handle</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Drawer 1 contains adult emergency medications, including Adenosine, Amiodarone, Atropine, Dopamine, Epinephrine, Lidocaine, etc.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">94. True or False: Defibrillation must be synchronized with the patient's R wave to be effective.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. *Cardioversion* is synchronized with the R wave. *Defibrillation* is an unsynchronized shock, delivered randomly, because in rhythms like VF, there is no organized R wave to sync to.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">95. The physician should be notified if chest tube drainage is suddenly bloody or exceeds:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">25 cc per hour</button>
+                    <button class="option-btn" data-answer="incorrect">50 cc per hour</button>
+                    <button class="option-btn" data-answer="correct">100 cc per hour</button>
+                    <button class="option-btn" data-answer="incorrect">500 cc per hour</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Notify the physician if the drainage is more than 100 cc per hour (or >= 200 ml/hr as noted on Page 5). 100 cc/hr is a standard and safe threshold for reporting.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">96. Which medication is the drug of choice for treating Torsades de Pointes?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Amiodarone</button>
+                    <button class="option-btn" data-answer="correct">Magnesium Sulfate</button>
+                    <button class="option-btn" data-answer="incorrect">Lidocaine</button>
+                    <button class="option-btn" data-answer="incorrect">Calcium Chloride</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Magnesium Sulfate is indicated for Torsades de Pointes, as well as seizures associated with eclampsia and hypomagnesemia.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">97. Drawer 4 (Circulation and tubing) typically contains:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">IV solutions (e.g., Normal Saline, D5%)</button>
+                    <button class="option-btn" data-answer="incorrect">Emergency medications like Atropine</button>
+                    <button class="option-btn" data-answer="incorrect">Intubation tray</button>
+                    <button class="option-btn" data-answer="incorrect">ECG electrodes</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Drawer 4 contains IV solutions (Lactated Ringer's, Normal Saline, D5%) and IV tubing (blood tubing, extension tubing, micro/macro drips).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">98. True or False: Performing oral care after a nebulizer treatment is important to clean the mouth from the bad taste of medication.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">True</button>
+                    <button class="option-btn" data-answer="incorrect">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> True. Oral care should be performed as needed to clean the mouth from the bad taste of medication. This is especially important with corticosteroid inhalations to prevent thrush.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">99. A cervical collar is also known as a:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Spinal board</button>
+                    <button class="option-btn" data-answer="correct">Neck brace</button>
+                    <button class="option-btn" data-answer="incorrect">Back support</button>
+                    <button class="option-btn" data-answer="incorrect">Head immobilizer</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> A cervical collar, also known as a neck brace, is a medical device used to support a person's neck.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">100. On standard ECG paper, one small square (1 mm) horizontally represents what duration of time?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">0.20 seconds</button>
+                    <button class="option-btn" data-answer="correct">0.04 seconds</button>
+                    <button class="option-btn" data-answer="incorrect">1.0 second</button>
+                    <button class="option-btn" data-answer="incorrect">0.10 seconds</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Horizontally, one small square (1 mm) = 0.04 seconds. One large square (5 mm) = 0.20 seconds.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">101. Lead V1 (or MCL1) is particularly helpful for detecting:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">Right bundle branch block</button>
+                    <button class="option-btn" data-answer="incorrect">Inferior wall ischemia</button>
+                    <button class="option-btn" data-answer="incorrect">Lateral wall infarction</button>
+                    <button class="option-btn" data-answer="incorrect">Atrial fibrillation only</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Lead V1 or MCL1 is helpful for detecting right bundle branch block and differentiating ventricular ectopy from supraventricular rhythm.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">102. What is the <span class="highlight-word">MOST</span> effective therapy for the termination of ventricular fibrillation (VF) and ventricular tachydysrhythmias?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Chest compressions</button>
+                    <button class="option-btn" data-answer="incorrect">Atropine</button>
+                    <button class="option-btn" data-answer="correct">Defibrillation</button>
+                    <button class="option-btn" data-answer="incorrect">Cardioversion</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Defibrillation is the most effective therapy for the termination of ventricular fibrillation and ventricular tachydysrhythmias.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">103. In a three-bottle system, what is the purpose of the third bottle?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">To act as a secondary water seal</button>
+                    <button class="option-btn" data-answer="incorrect">To collect fluid separately from air</button>
+                    <button class="option-btn" data-answer="correct">To control the amount of suction</button>
+                    <button class="option-btn" data-answer="incorrect">To be a backup collection chamber</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The three-bottle system consists of the drainage collection bottle, the water seal bottle, and the addition of a suction control bottle.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">104. For an adult in Ventricular Fibrillation (VF), what is the recommended <span class="highlight-word">FIRST</span> energy-level shock using a Biphasic defibrillator?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">50 J</button>
+                    <button class="option-btn" data-answer="incorrect">360 J</button>
+                    <button class="option-btn" data-answer="correct">120-200 J</button>
+                    <button class="option-btn" data-answer="incorrect">100 J</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The AHA recommendation for a biphasic defibrillator for VF or pulseless VT is 120-200 J for the first attempt. (Note: The table on page 6 says 200J, while the table on page 15 says 200J. The text on page 4 says 150-200J. 120-200J is the standard ACLS guideline).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">105. When connecting a nebulizer to an oxygen source, the oxygen flow should be adjusted to at least:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">2 L/min</button>
+                    <button class="option-btn" data-answer="incorrect">6 L/min</button>
+                    <button class="option-btn" data-answer="correct">10 L/min</button>
+                    <button class="option-btn" data-answer="incorrect">15 L/min</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The oxygen flow should be adjusted to at least 10 L/min but not more than 14 L/min to change the medication into a mist.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">106. True or False: The height of an individual is a reliable and accurate method for determining the correct cervical collar size.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. It is crucial to note that the height of an individual has *no relationship* to the length of his or her neck. You must measure the neck.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">107. Which electrolyte is administered to treat acute hyperkalemia, acute hypocalcemia, or calcium channel blocker overdose?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Magnesium Sulfate</button>
+                    <button class="option-btn" data-answer="incorrect">Sodium Bicarbonate</button>
+                    <button class="option-btn" data-answer="correct">Calcium Chloride</button>
+                    <button class="option-btn" data-answer="incorrect">Potassium Chloride</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Calcium Chloride is indicated for acute hyperkalemia, acute hypocalcemia, and calcium channel overdose. It increases cardiac contractility.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">108. True or False: A cervical collar effectively restricts neck flexion, extension, and rotation, as well as axial loading.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">True</button>
+                    <button class="option-btn" data-answer="correct">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> False. A cervical collar restricts neck flexion, extension, and lateral tilt/rotation; however, it does *not* restrict axial loading (the force applied along the axis of the spine).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">109. What is a nebulizer?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">A device that measures lung capacity</button>
+                    <button class="option-btn" data-answer="correct">A device used to administer medication in the form of a mist</button>
+                    <button class="option-btn" data-answer="incorrect">A type of dry powder inhaler</button>
+                    <button class="option-btn" data-answer="incorrect">A tube inserted into the trachea</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> A nebulizer is a device used to administer medication in the form of a mist inhaled into the lungs.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">110. A common method for sizing a cervical collar is to use your fingers to measure the vertical distance between the base of the patient's shoulder (trapezius) and what other landmark?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">The tip of the nose</button>
+                    <button class="option-btn" data-answer="incorrect">The top of the ear</button>
+                    <button class="option-btn" data-answer="correct">The bottom of the chin</button>
+                    <button class="option-btn" data-answer="incorrect">The sternal notch</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> One common method involves measuring the space from the base of the shoulder (trapezius muscle) to an imaginary line sticking straight forward from the bottom of the patient's chin.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">111. Nitroglycerin is given in ACS primarily for its potent:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Anti-platelet effect</button>
+                    <button class="option-btn" data-answer="incorrect">Analgesic effect</button>
+                    <button class="option-btn" data-answer="correct">Vasodilator effect</button>
+                    <button class="option-btn" data-answer="incorrect">Inotropic effect</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Nitroglycerin is a potent vasodilator. It relaxes vascular smooth-muscle beds, including coronary arteries, improving blood flow and decreasing cardiac workload.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">112. True or False: Morphine is given during a myocardial infarction (MI) to relieve pain and reduce myocardial oxygen requirements.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">True</button>
+                    <button class="option-btn" data-answer="incorrect">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> True. Morphine relieves pain, relieves pulmonary congestion, lowers myocardial oxygen requirement, and reduces anxiety.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">113. When applying a cervical collar, which part is typically positioned <span class="highlight-word">FIRST</span>?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">The posterior (back) section</button>
+                    <button class="option-btn" data-answer="incorrect">The Velcro strap</button>
+                    <button class="option-btn" data-answer="correct">The anterior (chin) section</button>
+                    <button class="option-btn" data-answer="incorrect">The shoulder supports</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Often, the chin section of the collar is placed in the correct position first, with the rest of the collar carefully wrapped around the neck.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">114. Monophasic defibrillators deliver a single shock with energy levels typically ranging from:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">50-100 J</button>
+                    <button class="option-btn" data-answer="correct">200 to 360 J</button>
+                    <button class="option-btn" data-answer="incorrect">5-60 J</button>
+                    <button class="option-btn" data-answer="incorrect">120-200 J</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Monophasic machines need high joules to deliver a shock (from 200 to 360 J).
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">115. True or False: The chest tube drainage system must be kept lower than the patient's chest level.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">True</button>
+                    <button class="option-btn" data-answer="incorrect">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> True. The drainage system must be kept upright and below the chest tube insertion site to ensure adequate drainage by gravity and prevent reflux.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">116. The log rolling procedure is implemented for all patients with a suspected injury to:</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Only the cervical spine</button>
+                    <button class="option-btn" data-answer="incorrect">Only the lumbar spine</button>
+                    <button class="option-btn" data-answer="correct">The cervical and/or thoracolumbar spine</button>
+                    <button class="option-btn" data-answer="incorrect">The pelvis</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The procedure is implemented on all patients suspected of having a possible spinal injury, prior to the cervical spine and/or thoracolumbar spine being cleared.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">117. What is transthoracic impedance?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">The force of the heart's contraction</button>
+                    <button class="option-btn" data-answer="correct">The resistance of the thorax to the flow of electric current</button>
+                    <button class="option-btn" data-answer="incorrect">The time it takes to charge the defibrillator</button>
+                    <button class="option-btn" data-answer="incorrect">The electrical signal generated by the SA node</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> Transthoracic impedance is the resistance of the thorax to the flow of current. Poor technique (like insufficient gel or pressure) increases impedance.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">118. What is the recommended patient position for nebulizer therapy to improve lung expansion?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Supine</button>
+                    <button class="option-btn" data-answer="correct">Semi-Fowler's position</button>
+                    <button class="option-btn" data-answer="incorrect">Prone</button>
+                    <button class="option-btn" data-answer="incorrect">Left lateral</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> The patient should be put in a semi-Fowler's position to improve lung expansion.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">119. True or False: The crash cart and defibrillator must be checked at the beginning of every nursing shift.</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="correct">True</button>
+                    <button class="option-btn" data-answer="incorrect">False</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> True. At the beginning of a nursing shift, the responsible nurse should check that the defibrillator is charged and check the cart contents against the checklist.
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text">120. To drain <span class="highlight-word">FLUID</span> (hemothorax), where is a chest tube typically inserted?</p>
+                <div class="options-container">
+                    <button class="option-btn" data-answer="incorrect">Near the apex of the lung (2nd intercostal space)</button>
+                    <button class="option-btn" data-answer="incorrect">Below the xiphoid process</button>
+                    <button class="option-btn" data-answer="incorrect">In the 1st intercostal space</button>
+                    <button class="option-btn" data-answer="correct">Near the base of the lung (4th to 5th intercostal space)</button>
+                </div>
+                <div class="rationale">
+                    <strong>Rationale:</strong> To drain fluid, the tube is placed low, near the base of the lung (e.g., 4th to 5th intercostal spaces, mid-axillary line) because fluid pools with gravity.
+                </div>
+            </div>
+
+        </main>
+        
+                <div id="final-score" class="hidden">
+            <!-- Final score will be injected here by JavaScript -->
+        </div>
+
+    </div>
+
+    <script>
+        // This script is embedded in the HTML, so no external files are needed.
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Enable :active pseudo-class on buttons in iOS Safari
+            document.addEventListener("touchstart", function() {}, true);
+
+            // Select all necessary elements
+            const quizContainer = document.getElementById('quiz-container');
+            // We need to re-query the question cards inside this script after shuffling
+            const allQuestionCards = document.querySelectorAll('.question-card');
+            const scoreEl = document.getElementById('score');
+            const totalEl = document.getElementById('total-questions');
+            const finalScoreEl = document.getElementById('final-score');
+
+            // Initialize quiz state
+            let score = 0;
+            let questionsAnswered = 0;
+            const totalQuestions = allQuestionCards.length;
+            
+            // Set total questions display
+            totalEl.textContent = totalQuestions;
+            scoreEl.textContent = score;
+
+            // Function to handle when an option is clicked
+            function handleOptionClick(event) {
+                const clickedBtn = event.currentTarget;
+                const questionCard = clickedBtn.closest('.question-card');
+
+                // Prevent re-answering
+                if (questionCard.classList.contains('answered')) {
+                    return;
+                }
+
+                // Mark question as answered
+                questionCard.classList.add('answered');
+                questionsAnswered++;
+
+                // Get question-specific elements
+                const isCorrect = clickedBtn.dataset.answer === 'correct';
+                const rationale = questionCard.querySelector('.rationale');
+                const optionsInThisCard = questionCard.querySelectorAll('.option-btn');
+
+                // Process the answer
+                if (isCorrect) {
+                    score++;
+                    clickedBtn.classList.add('correct');
+                    rationale.classList.add('correct');
+                } else {
+                    clickedBtn.classList.add('incorrect');
+                    rationale.classList.add('incorrect');
+                    
+                    // Find and highlight the correct answer
+                    const correctBtn = questionCard.querySelector('[data-answer="correct"]');
+                    if (correctBtn) {
+                        correctBtn.classList.add('correct');
+                    }
+                }
+
+                // Update UI
+                rationale.classList.add('visible'); // Show rationale
+                scoreEl.textContent = score; // Update score display
+
+                // Disable all buttons in this card
+                optionsInThisCard.forEach(btn => {
+                    btn.disabled = true;
+                    // Add 'disabled' class to unselected options
+                    if (!btn.classList.contains('correct') && !btn.classList.contains('incorrect')) {
+                        btn.classList.add('disabled');
+                    }
+                });
+
+                // Check for quiz completion
+                if (questionsAnswered === totalQuestions) {
+                    showFinalScore();
+                }
+            }
+            
+            // Function to display final score
+            function showFinalScore() {
+                const percentage = Math.round((score / totalQuestions) * 100);
+                finalScoreEl.innerHTML = `Quiz Complete!<br>You answered ${score} out of ${totalQuestions} correctly — ${percentage}%`;
+                finalScoreEl.classList.remove('hidden');
+                
+                // Scroll to the final score
+                finalScoreEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            // --- Shuffling logic removed to keep the order static ---
+            // Now we just attach listeners to the buttons as they appear in the HTML.
+            
+            // Select all option buttons
+            const allOptions = document.querySelectorAll('.option-btn');
+
+            // Attach event listener to all option buttons
+            allOptions.forEach(btn => {
+                btn.addEventListener('click', handleOptionClick);
+            });
+        });
+    </script>
+
+</body>
+</html>

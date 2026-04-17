@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Emergency OSCE Quiz (Practical) - Verified</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        
+        .question-image {
+            max-height: 350px;
+            width: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            display: block;
+            margin-bottom: 1rem;
+        }
+        
+        .option-btn {
+            transition: all 0.2s;
+        }
+        .option-btn:disabled {
+            cursor: default;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10">
+                <i class="fas fa-user-md text-8xl text-blue-600"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo">Final Emergency OSCE Quiz</h1>
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> تم صنع هذا الامتحان بواسطة عبدالحليم رزق
+            </div>
+        </div>
+
+        <!-- Quiz Area -->
+        <div id="quiz-container"></div>
+
+        <!-- Result -->
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-check text-4xl text-blue-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        window.handleImageError = function(imgElement) {
+            imgElement.style.display = 'block';
+            imgElement.style.border = '2px dashed #f87171';
+            imgElement.style.background = '#fef2f2';
+            imgElement.style.padding = '20px';
+            
+            if (!imgElement.nextElementSibling || imgElement.nextElementSibling.className !== 'error-msg') {
+                const msg = document.createElement('p');
+                msg.className = 'error-msg text-sm text-red-500 mt-2 text-center font-bold';
+                msg.innerText = `Image not found. (Check internet or image source)`;
+                imgElement.parentElement.appendChild(msg);
+            }
+        };
+
+        const quizData = [
+            {
+                id: 3,
+                question: "During resuscitation of cardiac arrest patient the physician ask Mr. A to give the patient 1 mg epinephrine IV but the patient has no venous access and Mr. A inform the physician that he will give the patient epinephrine through the EET. What is the expected dose of epinephrine that will be given in this situation?",
+                options: [
+                    "0.5 mg epinephrine",
+                    "1 mg epinephrine",
+                    "2 mg epinephrine",
+                    "3 mg epinephrine"
+                ],
+                correct: 2,
+                rationale: "The medication administered through the Endotracheal Tube (ETT) dose is typically 2 to 2.5 times that of an IV dose. Since the IV dose is 1 mg, the expected ETT dose is 2 to 2.5 mg."
+            },
+            {
+                id: 4,
+                question: "Performing bag mask ventilation should be avoided in which of the following patients?",
+                options: [
+                    "Hypertensive patient",
+                    "Patient with undrained pneumothorax",
+                    "Patient with gasping respiration",
+                    "Patient attached with chest tube"
+                ],
+                correct: 1,
+                rationale: "Positive pressure ventilation (like Bag Mask Ventilation) in a patient with an undrained pneumothorax can convert a simple pneumothorax into a tension pneumothorax, which is life-threatening."
+            },
+            {
+                id: 5,
+                question: "A 45 years old farmer admitted to ED with severe respiratory distress secondary organophosphorus poisoning. what is the medication must be given to him immediately?",
+                options: [
+                    "Atrovent",
+                    "Atropine",
+                    "Adenosine",
+                    "Adrenaline"
+                ],
+                correct: 1,
+                rationale: "Atropine is indicated as an antidote for poisoning such as from organophosphorus insecticides."
+            },
+            {
+                id: 6,
+                question: "What is the first action that should be taken by the nurse as regards to this type of dysrhythmia shown in the attached ECG strip?",
+                image: "https://i.ibb.co/d4KgzvVH/Screenshot-2025-12-13-211947.png",
+                options: [
+                    "Start chest compression",
+                    "Use electrical cardioversion",
+                    "Use defibrillator",
+                    "Give antiarrhythmic medications"
+                ],
+                correct: 0,
+                rationale: "For VF or Pulseless VT, the first step in the implementation phase is to Initiate BCLS (Basic Cardiac Life Support/CPR) until ready to defibrillate. While defibrillation is the definitive treatment, chest compressions must be started immediately while the device is being prepared."
+            },
+            {
+                id: 7,
+                question: "Which one of the following statements is CORRECT regarding the maneuver shown in the attached picture?",
+                image: "https://i.ibb.co/Qv17xqZ6/Screenshot-2025-12-13-211501.png",
+                options: [
+                    "It is indicated to transport non-traumatic patient",
+                    "It allows free mobilization of the spine",
+                    "It is used to move the patient without flexing the spine",
+                    "It is used to perform ROM exercises to the neck joint"
+                ],
+                correct: 2,
+                rationale: "The log roll is a maneuver used to move a patient without flexing the spinal column. It is implemented on all patients suspected of having a possible spinal injury."
+            },
+            {
+                id: 8,
+                question: "Which of the following is the possible cause of stoppage of water fluctuation in water seal tube in chest tube?",
+                options: [
+                    "Attaching patient with mechanical ventilator",
+                    "The system is broken",
+                    "There is an air leak in the tubing system",
+                    "The lung may have been re-expanded"
+                ],
+                correct: 3,
+                rationale: "Decreased or absent drainage/fluctuation without respiratory distress may indicate lung re-expansion. Fluctuation stops when the lung has fully re-expanded."
+            },
+            {
+                id: 9,
+                question: "A 55 years old male admitted to emergency room with typical chest pain. ECG was done and revealed stable angina. What is the expected medication must be given immediately?",
+                options: [
+                    "Cordarone",
+                    "Atropin",
+                    "Nitroglycerin",
+                    "Adrenaline"
+                ],
+                correct: 2,
+                rationale: "Nitroglycerin is indicated to treat ACS and angina. It is an anti-anginal vasodilator that helps resolve chest pain."
+            },
+            {
+                id: 10,
+                question: "Which of the following statements is incorrect about performing high quality chest compressions?",
+                options: [
+                    "Minimize interruptions in chest compressions",
+                    "Extend the elbows and leans directly over the patient",
+                    "Press down patient's chest at least 2 inches in adults",
+                    "Allow partial recoil of the patient's chest"
+                ],
+                correct: 3,
+                rationale: "High-quality CPR requires allowing <strong>complete</strong> recoil of the chest after each compression to allow the heart to refill with blood. 'Partial recoil' is incorrect technique."
+            },
+            {
+                id: 11,
+                question: "Which of the following doses is the usual loading dose of amiodarone?",
+                options: [
+                    "10 mg per kg given intravenously over 30 minutes",
+                    "5 mg per kg given intravenously over 30 minutes",
+                    "10 mg per kg given intravenously over 60 minutes",
+                    "5 mg per kg given intravenously over 60 minutes"
+                ],
+                correct: 1,
+                rationale: "The usual loading dose of Amiodarone is 5 mg per kg given intravenously over 30 minutes."
+            },
+            {
+                id: 12,
+                question: "Which of the following types of nebulizer used in mechanically ventilated patient?",
+                options: [
+                    "Dry powder inhaler",
+                    "Vibrating mesh nebulizer",
+                    "Inline nebulizer",
+                    "Metered dose inhaler"
+                ],
+                correct: 2,
+                rationale: "'In-line nebulizer: It is used to deliver medication to patients who are being mechanically ventilated.' (Note: While vibrating mesh can be used inline, the book specifically defines the 'In-line nebulizer' for this purpose)."
+            },
+            {
+                id: 13,
+                question: "Which of the following statements represents what QRS complex in ECG refers to?",
+                options: [
+                    "Ventricular depolarization",
+                    "Ventricular repolarization",
+                    "Atrial depolarization",
+                    "Atrial repolarization"
+                ],
+                correct: 0,
+                rationale: "Electrical stimulation of the ventricles produces the QRS complex on an ECG and results in coordinated ventricular contraction (ventricular depolarization)."
+            },
+            {
+                id: 14,
+                question: "In cardiac monitor with five leads system the left arm (LA) lead should be placed in which position of the following?",
+                options: [
+                    "Right lower rib cage, 8th ICS",
+                    "Below right clavicle, 2nd ICS",
+                    "Below left clavicle, 2nd ICS",
+                    "Left lower rib cage, 8th ICS"
+                ],
+                correct: 2,
+                rationale: "In the five lead system, the LA (Left Arm) lead (black) is placed below the left clavicle, 2nd ICS, MCL."
+            },
+            {
+                id: 15,
+                question: "Which of the following clinical indicators needed to be assessed when patient on dopamine infusion on dose 3 mcg/kg/min?",
+                options: [
+                    "Heart rate",
+                    "Blood pressure",
+                    "Urine output",
+                    "DLC"
+                ],
+                correct: 2,
+                rationale: "At low rates of infusion (< 5 mcg/kg/min), known as the renal dose, Dopamine increases glomerular filtration rate and urine flow. Therefore, Urine Output is the key indicator."
+            },
+            {
+                id: 16,
+                question: "Mr. M admitted to emergency department with hemothorax. In which intercostal space the chest tube should be inserted for Mr. M?",
+                options: [
+                    "Second or third intercostal space",
+                    "Fourth or fifth intercostal space",
+                    "Sixth or seventh intercostal space",
+                    "Anterior mediastinum beneath the sternum"
+                ],
+                correct: 1,
+                rationale: "To drain fluid (as in Hemothorax), the tube can be placed near the base of the lung in the 4th to 5th intercostal spaces, mid-axillary line."
+            },
+            {
+                id: 17,
+                question: "In case of salicylates poisoning gastric lavage can be done for up to how much time?",
+                options: [
+                    "1-3 hrs",
+                    "2-4hrs",
+                    "5-8hrs",
+                    "6-12hrs"
+                ],
+                correct: 1,
+                rationale: "Salicylates cause delayed gastric emptying, so gastric lavage may be effective for a longer period than usual, typically cited up to 4 hours."
+            },
+            {
+                id: 18,
+                question: "ECG electrodes should be placed on which of the crash cart's drawers?",
+                options: [
+                    "Drawer 1",
+                    "Drawer 3",
+                    "Drawer 4",
+                    "Drawer 5"
+                ],
+                correct: 3,
+                rationale: "Drawer 5 (Large drawer - Others) contains items like ECG electrodes, chest tubes, and sutures."
+            },
+            {
+                id: 19,
+                question: "The height of T waves should not be [greater than] .... in the standard leads",
+                options: [
+                    ">0.30 mV",
+                    ">0.5 mV",
+                    ">0.7 mV",
+                    ">1.0 mV"
+                ],
+                correct: 1,
+                rationale: "The height of T waves should not be > 0.5 mV (5 small squares) in the standard leads."
+            },
+            {
+                id: 20,
+                question: "Which of the following is the recommended depth of chest compression during adult CPR?",
+                options: [
+                    "At least 0.5 inch",
+                    "At least 1 inch",
+                    "At least 1.5 inch",
+                    "At least 2 inches"
+                ],
+                correct: 3,
+                rationale: "The recommended compression depth for adults is at least 2 inches (5 cm)."
+            },
+            {
+                id: 21,
+                question: "What one of the following abnormal rhythms are treated with cardioversion?",
+                options: [
+                    "Pulseless ventricular tachycardia",
+                    "Atrial flutter",
+                    "Ventricular fibrillation",
+                    "Asystole"
+                ],
+                correct: 1,
+                rationale: "Synchronized cardioversion is recommended for termination of unstable Atrial Tachycardia, Atrial Fibrillation, and Atrial Flutter. (Pulseless VT and VF require Defibrillation)."
+            },
+            {
+                id: 22,
+                question: "In which position the V2 electrode of the ECG device should be place on patient's chest?",
+                options: [
+                    "Fourth intercostal space, just to the left of the sternum",
+                    "Fourth intercostal space, just to the right of the sternum",
+                    "On the anterior axillary line, on the same horizontal line as V3",
+                    "Midway between V1 and V3"
+                ],
+                correct: 0,
+                rationale: "V2 (white/yellow lead) is placed at the fourth intercostal space, just to the left of the sternum."
+            }
+        ];
+
+        const container = document.getElementById('quiz-container');
+        let score = 0;
+        let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            
+            container.innerHTML = quizData.map((q, index) => {
+                const imageHtml = q.image ? 
+                    `<div class="mb-4 text-center">
+                        <img src="${q.image}" class="question-image mx-auto" alt="Question Image" onerror="window.handleImageError(this)">
+                     </div>` : '';
+
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                    </div>
+                    
+                    ${imageHtml}
+
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    
+                    <div class="grid gap-3">
+                        ${q.options.map((opt, i) => `
+                            <button onclick="checkAnswer(${index}, ${i})" 
+                                class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white">
+                                <span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center group-hover:border-blue-400">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-blue-900 text-sm mb-1">Rationale</p>
+                                <p class="text-blue-800 text-sm leading-relaxed">${q.rationale}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const question = quizData[qIndex];
+            const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+            const buttons = document.querySelectorAll(`.option-btn-${qIndex}`);
+            
+            if (feedbackEl.classList.contains('block')) return; 
+
+            feedbackEl.classList.remove('hidden-content');
+            feedbackEl.classList.add('block');
+
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'bg-white');
+                
+                const iconContainer = btn.lastElementChild;
+                
+                if (i === question.correct) {
+                    btn.classList.add('correct-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-check text-green-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else if (i === optIndex) {
+                    btn.classList.add('wrong-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-times text-red-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            answeredCount++;
+            if (optIndex === question.correct) score++;
+
+            if (answeredCount === quizData.length) {
+                const resultDiv = document.getElementById('result-summary');
+                resultDiv.classList.remove('hidden-content');
+                document.getElementById('score-display').textContent = score;
+                document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+                
+                const messageEl = document.getElementById('score-message');
+                const percentage = (score / quizData.length) * 100;
+
+                if (percentage === 100) messageEl.textContent = "Perfect Score! Outstanding Medical Knowledge.";
+                else if (percentage >= 75) messageEl.textContent = "Great Job! You have a solid understanding.";
+                else if (percentage >= 50) messageEl.textContent = "Good effort. Review the rationales to improve.";
+                else messageEl.textContent = "Keep studying! Review the rationales carefully.";
+                
+                setTimeout(() => {
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 500);
+            }
+        };
+
+        renderQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport meta tag is essential for responsive design on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardiac Monitoring Quiz</title>
+    
+    <!-- All styles are inlined here to ensure the file works offline. No external CSS files. -->
+    <style>
+        /* Global resets and box-sizing */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* Basic body and typography styling */
+        html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            /* Applying the requested red-brown theme */
+            background-color: #3b0d0c;
+            color: #f9fafb;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Header and Title Styling */
+        header {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background-color: #4f0f0d;
+            border-bottom: 3px solid #6a1a17;
+        }
+
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+
+        /* Arabic credit line */
+        .credit {
+            font-size: 1rem;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+            direction: rtl; /* Ensures correct rendering of Arabic text */
+        }
+
+        /* Live Score Tracker Styling */
+        #score-tracker {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: rgba(79, 15, 13, 0.9);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid #6a1a17;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #f9fafb;
+        }
+
+        #score-value {
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            background: #3b0d0c;
+            border-radius: 8px;
+            border: 1px solid #6a1a17;
+        }
+
+        /* Main quiz container */
+        main {
+            max-width: 800px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Individual Question Card Styling */
+        .question-card {
+            background: #4f0f0d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border: 1px solid #6a1a17;
+            transition: all 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Keyword highlighting */
+        .highlight {
+            color: #facc15; /* Yellow */
+            font-weight: 800;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+
+        /* Options container */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        /* Individual Option Button Styling */
+        .option {
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 3rem; /* Padding to make room for the icon */
+            font-size: 1rem;
+            font-weight: 500;
+            color: #f9fafb;
+            text-align: left;
+            background: #3b0d0c;
+            border: 2px solid #6a1a17;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            -webkit-tap-highlight-color: transparent; /* Removes blue flash on tap (iOS) */
+        }
+
+        /* Hover state for non-disabled options */
+        .option:hover:not(:disabled) {
+            background: #6a1a17;
+            border-color: #a12b28;
+        }
+
+        /* Disabled state for all options after answering */
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 1; /* Keep opacity high to show colors */
+        }
+
+        /*
+         * Custom Checkmark (✓) and X (×) Icons
+         * These are hidden by default and shown with JS by adding classes.
+        */
+        .status-icon {
+            display: none;
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            line-height: 1; /* Ensures icon is centered */
+        }
+
+        /* Show the correct icon (✓) */
+        .option.answered.correct .correct-icon {
+            display: flex;
+            background: #22c55e; /* Bright Green */
+        }
+        
+        /* Show the incorrect icon (×) */
+        .option.answered.incorrect .incorrect-icon {
+            display: flex;
+            background: #ef4444; /* Bright Red */
+            font-size: 1.2rem; /* Make the '×' slightly larger */
+        }
+
+
+        /* Styling for the *chosen* correct answer */
+        .option.correct {
+            background: #22c55e; /* Bright Green */
+            border-color: #16a34a;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Styling for the *chosen* incorrect answer */
+        .option.incorrect {
+            background: #ef4444; /* Bright Red */
+            border-color: #dc2626;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Styling for unselected, disabled options */
+        .option.disabled:not(.correct):not(.incorrect) {
+            background: #4b5563; /* Muted Gray */
+            color: #d1d5db;
+            opacity: 0.7;
+            border-color: #4b5563;
+        }
+
+        /* Rationale Box Styling */
+        .rationale {
+            display: none; /* Hidden by default */
+            margin-top: 1.25rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        /* Rationale for a correct answer */
+        .rationale.correct {
+            display: block;
+            background: #dcfce7; /* Light Green */
+            color: #14532d;
+            border: 1px solid #22c55e;
+        }
+        
+        /* Rationale for an incorrect answer */
+        .rationale.incorrect {
+            display: block;
+            background: #fee2e2; /* Light Red */
+            color: #7f1d1d;
+            border: 1px solid #ef4444;
+        }
+
+        .rationale strong {
+            color: #1f2937;
+        }
+
+        /* Final Score Container */
+        #final-score-container {
+            text-align: center;
+            background: #4f0f0d;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem auto;
+            border: 1px solid #6a1a17;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        #final-score-container h2 {
+            margin-top: 0;
+            font-size: 1.75rem;
+            color: #facc15;
+        }
+
+        #final-score-message {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        /* Utility class to hide elements */
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive design for smaller screens (e.g., iPhones) */
+        @media (max-width: 600px) {
+            body {
+                font-size: 16px; /* Ensures readability on mobile */
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .credit {
+                font-size: 0.9rem;
+            }
+
+            main {
+                margin-top: 1rem;
+            }
+
+            .question-card {
+                padding: 1rem;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .option {
+                padding: 0.75rem 0.75rem 0.75rem 3rem; /* Adjust padding for mobile */
+                font-size: 0.95rem;
+            }
+
+            #final-score-container {
+                padding: 1.5rem;
+            }
+
+            #final-score-message {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Cardiac Monitoring Quiz</h1>
+        <div class="credit">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</div>
+    </header>
+
+    <!-- Live Score Tracker (Sticky) -->
+    <div id="score-tracker">
+        Score: <span id="score-value">0 / 35</span>
+    </div>
+
+    <!-- Main Quiz Content Area -->
+    <main id="quiz-container">
+
+        <!-- Question 1 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">1. What is the primary purpose of cardiac monitoring?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To continuously monitor heart activity and assess the patient's condition relative to their cardiac rhythm.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To administer electrical shocks for defibrillation automatically.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To provide nutritional information based on heart rate.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To replace the need for a physical nursing assessment.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Cardiac monitoring refers to the continuous or intermittent monitoring of heart activity by electrocardiography, with assessment of the patient's condition relative to their cardiac rhythm.
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">2. All of the following are purposes of a cardiac monitor <strong class="highlight">EXCEPT</strong>:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Displaying the cardiac (ECG) tracing.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Monitoring oxygen saturation of arterial blood.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Delivering intravenous medications.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Monitoring cardiovascular pressures and cardiac output.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Cardiac monitors are diagnostic and monitoring tools. They display ECG, pressures, and O2 saturation, but they do not administer medications.
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">3. Which type of monitoring system requires the patient to be linked directly to the monitor via an ECG cable and is common in ICUs?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Telemetry Monitoring
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Hard-wire Monitoring
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Holter Monitoring
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Wireless Pressure Monitoring
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Hard-wire monitors, commonly used in ICU settings, require the patient to be linked directly to the cardiac monitor through the ECG cable, which limits patient mobility.
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">4. What is the <strong class="highlight">MAIN</strong> advantage of a telemetry monitoring system?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. It provides higher quality and more stable ECG tracings.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. It operates on electricity, removing battery concerns.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. It allows the patient to be mobile.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. It is only used for monitoring in the operating room.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Telemetry systems use a battery-operated transmitter and radiofrequency signals, so no direct wire is needed. This is used in areas where the patient is fairly mobile.
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">5. True or False: In telemetry monitoring, stable ECG tracings are often *more* difficult to obtain because the patient is mobile.</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. True
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. False
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> True. The document states, "Because the patient is mobile, stable ECG tracings often are more difficult to obtain" with telemetry systems.
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">6. A standard 12-lead ECG uses how many lead wires and electrodes?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. 12 lead wires with 12 electrodes
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. 10 lead wires with 12 electrodes
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. 10 lead wires with 10 electrodes (4 limb, 6 chest)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. 12 lead wires with 10 electrodes (6 limb, 4 chest)
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A standard ECG uses 10 lead wires with electrodes at the ends (4 placed on the limbs, and 6 placed on the chest) to produce 12 electrical views (leads).
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">7. What is a key difference between a 3-electrode and a 5-electrode monitoring system?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. A 3-electrode system is wireless, while a 5-electrode system is hard-wired.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. A 5-electrode system allows viewing of all 12 leads, while a 3-electrode system is limited (e.g., Leads I, II, or III).
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. A 3-electrode system is for adults, and a 5-electrode system is for pediatrics.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. A 5-electrode system does not require a ground electrode.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A 3-electrode system produces a limited selection (Leads I, II, or III). A 5-electrode system adds a chest electrode, allowing viewing of any of the 12 ECG leads.
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">8. Which monitoring lead is commonly used because it records clear, upright P waves and QRS complexes?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Lead I
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Lead II
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. V1 (or MCL1)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. aVL
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Lead II is used commonly because it records clear upright P waves and QRS complexes, which are helpful in determining the underlying rhythm.
+            </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">9. A nurse wants to monitor a patient for ischemia in the <strong class="highlight">anterior wall</strong> of the heart. Which leads would be most helpful?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. II, III, aVF
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. I, aVL, V5, V6
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. V1 through V4
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. V1 or MCL1
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Leads V1 through V4 are helpful in detecting ischemia, injury, and infarction in the anterior wall.
+            </div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">10. Leads II, III, and aVF are most useful for detecting ischemia in which wall of the heart?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Anterior wall
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Inferior wall
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Lateral wall
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Posterior wall
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Leads II, III, and aVF are helpful in detecting ischemia, injury, and infarction in the inferior wall.
+            </div>
+        </div>
+
+        <!-- Question 11 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">11. Which leads are helpful for detecting ischemia in the <strong class="highlight">lateral wall</strong>?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. I, aVL, V5, V6
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. II, III, aVF
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. V1 through V4
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. V1 and V2 only
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Leads I, aVL, V5, and V6 are helpful in detecting ischemia, injury, and infarction in the lateral wall.
+            </div>
+        </div>
+
+        <!-- Question 12 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">12. Leads V1 (or MCL1) are particularly useful for differentiating ventricular ectopy from what?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Atrial fibrillation
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Sinus bradycardia
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Supraventricular rhythm with aberrancy
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Inferior wall ischemia
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Lead V1 (or MCL1) is helpful to differentiate ventricular ectopy from supraventricular rhythm aberrantly conducted in the ventricles.
+            </div>
+        </div>
+
+        <!-- Question 13 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">13. What is the <strong class="highlight">FIRST</strong> step in the assessment phase of the cardiac monitoring procedure?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Assess landmarks for electrode placement.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Assess peripheral pulse, vital signs, heart sounds, and LOC.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Assess the patient's readiness to learn.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Assess history of cardiac dysrhythmias.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The procedure lists assessing pulse, vital signs, heart/lung sounds, LOC, etc., as the first step "to provide baseline assessment data."
+            </div>
+        </div>
+
+        <!-- Question 14 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">14. Why is it important to explain the monitoring procedure to the patient and family?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To ensure they can operate the monitor themselves.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To get verbal consent for the procedure.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To make sure the patient stays perfectly still.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To decrease fear and anxiety.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The rationale for explaining the procedure is "To decrease fear and anxiety."
+            </div>
+        </div>
+
+        <!-- Question 15 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">15. What position should the patient be assisted into for electrode placement?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Prone position
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Left lateral position
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Supine position
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. High-Fowler's position
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The nurse should "Assist the patient in supine position" to "enable easy access to the chest for electrodes placement."
+            </div>
+        </div>
+
+        <!-- Question 16 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">16. True or False: Electrodes should be connected to the lead wires *after* placing them on the patient's skin to ensure a good connection.</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. True
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. False
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> False. The procedure is to "Connect the electrodes to the lead wires *before* placing the electrodes on the patient" to "prevent discomfort and development of air bubbles in the electrode gel."
+            </div>
+        </div>
+
+        <!-- Question 17 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">17. In a 3-lead system, which electrode is placed on the left lower rib cage (8th ICS, MCL)?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. RA (white)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. LA (black)
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. LL (red)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. RL (green)
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> For a 3-lead system, the LL (red) electrode is placed on the left lower rib cage (8th ICS, MCL).
+            </div>
+        </div>
+
+        <!-- Question 18 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">18. In a 5-lead system, the RA (white) electrode is placed where?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Below right clavicle, 2nd ICS, MCL
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Right lower rib cage, 8th ICS, MCL
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Below left clavicle, 2nd ICS, MCL
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Left lower rib cage, 8th ICS, MCL
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> In a 5-lead system, the RA (white) electrode is placed "below right clavicle, 2nd ICS, MCL."
+            </div>
+        </div>
+
+        <!-- Question 19 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">19. In a 5-lead system, which electrode is placed on the right lower rib cage (8th ICS, MCL)?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. LL (red)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. RA (white)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. LA (black)
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. RL (green)
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The RL (green) electrode is placed on the "right lower rib cage, 8th ICS, MCL."
+            </div>
+        </div>
+
+        <!-- Question 20 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">20. What is the color of the LA electrode in *both* a 3-lead and 5-lead system?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. White
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Black
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Red
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Green
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The LA (black) electrode is placed "below left clavicle, 2nd ICS, MCL" in both 3-lead and 5-lead systems.
+            </div>
+        </div>
+
+        <!-- Question 21 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">21. In a 5-lead system, the "Chest" electrode is what color and is usually placed at which V lead position?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Green, V4
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Red, V2
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Brown, V1
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Black, V6
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The 5th electrode is the Chest (brown) lead, which can be placed at "any V lead, usually V1."
+            </div>
+        </div>
+
+        <!-- Question 22 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">22. What is the purpose of setting alarms on the cardiac monitor?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To activate the monitor's alarm system based on the patient's current status and heart rate.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To remind the nurse to check on the patient every hour.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To automatically print an ECG strip when the alarm sounds.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To alert the patient to remain still.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The rationale for setting alarms is "To activate monitor alarm system," with limits set based on the "patient's current clinical status and heart rate."
+            </div>
+        </div>
+
+        <!-- Question 23 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">23. All of the following should be documented after the procedure <strong class="highlight">EXCEPT</strong>:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Date and time
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Type of lead system used
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Patient's vital signs
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The nurse's personal opinion of the patient
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Documentation should include objective data like the date/time, lead system, and vital signs. Personal opinions are not part of professional documentation.
+            </div>
+        </div>
+
+        <!-- Question 24 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">24. Which of the following is an "unexpected outcome" that should be reported?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. A clear ECG tracing
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Altered skin integrity under an electrode
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. The patient resting comfortably
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Normal sinus rhythm
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The document lists "Altered skin integrity," "False alarm," "Abnormal ECG," and "Hemodynamic instability" as unexpected outcomes to be reported.
+            </div>
+        </div>
+
+        <!-- Question 25 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">25. True or False: It is safe to use ungrounded electrical equipment as long as the patient is dry.</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. True
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. False
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> False. A special consideration is to "Make sure all electrical equipment and outlets are grounded to avoid electric shock and interference."
+            </div>
+        </div>
+
+        <!-- Question 26 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">26. Why should electrode packages <strong class="highlight">NOT</strong> be opened until just before use?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To keep them sterile.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To prevent the gel from drying out.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To prevent them from getting too cold.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To ensure the battery is not activated.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Electrode packages should be kept sealed "to prevent the gel from drying out," as dry gel leads to poor signal conduction.
+            </div>
+        </div>
+
+        <!-- Question 27 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">27. Electrodes should <strong class="highlight">NOT</strong> be placed on which of the following areas?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Bony prominences
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Hairy locations
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Areas for defibrillator pads
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. All of the above
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> It is important to "Avoid placing the electrodes on bony prominences, hairy locations, areas where defibrillator pads will be placed, or areas for chest compression."
+            </div>
+        </div>
+
+        <!-- Question 28 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">28. What should be done if the patient's skin is very oily or diaphoretic?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Rub the site with a dry gauze pad before applying the electrode.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Apply a layer of alcohol to clean the skin.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Use tape to secure the electrode more firmly.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Do not apply electrodes until the skin is dry.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "If the patient skin is very oily or diaphoretic, rub the electrode site with a dry gauze pad before applying the electrode to help reduce interference."
+            </div>
+        </div>
+
+        <!-- Question 29 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">29. The three basic components of a monitoring system include electrodes, a monitoring cable, and a:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Defibrillator
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Printer
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Display screen
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Battery pack
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The three basic components are: 1. Electrodes, 2. The monitoring cable, and 3. The display screen.
+            </div>
+        </div>
+
+        <!-- Question 30 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">30. Indications for cardiac monitoring include all of the following <strong class="highlight">EXCEPT</strong>:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Patients in critical care units (ICUs).
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Patients in post-anesthesia areas.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Patients in emergency departments.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. All stable patients on a general medical floor.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Monitoring is indicated for "All patients in critical care units" and "patients in selected acute care settings, post-anesthesia areas, operating rooms & emergency departments," not necessarily all stable patients on a general floor.
+            </div>
+        </div>
+        
+        <!-- Question 31 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">31. True or False: A 5-electrode system can only view one lead at a time (single-channel recording).</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. True
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. False
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> False. A 3-electrode system is limited to a single-channel recording. A 5-electrode system permits the nurse to "view two or more leads on the monitor screen simultaneously (multichannel recording)."
+            </div>
+        </div>
+
+        <!-- Question 32 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">32. The normal route of depolarization moves from the SA node, downward through the AV node, and to the left because:</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The muscle mass in the left side of the heart is greater.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. The right side of the heart is non-conductive.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. The SA node is located on the left side of the heart.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The patient is always in the left lateral position.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Depolarization moves "downward" and "to the left because the muscle mass in the left side of the heart is greater than the muscle mass of the right side."
+            </div>
+        </div>
+
+        <!-- Question 33 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">33. Why is it important for the patient to report symptoms like pain, palpitation, or chest discomfort?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To test if the monitor's alarms are working.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To ensure appropriate and timely assessment and intervention.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To see if the patient is anxious.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To document them for the next shift only.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The rationale is "To ensure appropriate and timely assessment and intervention" when symptoms occur, as they may correlate with ECG changes.
+            </div>
+        </div>
+
+        <!-- Question 34 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">34. A "hard-wire" monitor operates on electricity but is isolated so that fluids do <strong class="highlight">NOT</strong> pose an electrical hazard, as long as:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. The patient is on bed rest.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. The monitor is unplugged daily.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. The machine is maintained properly.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The patient is clean and dry.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The document states that hard-wire monitors are well isolated "as long as the machine is maintained properly."
+            </div>
+        </div>
+
+        <!-- Question 35 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">35. Which action helps reduce the transmission of microorganisms after the procedure?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Removing gloves and performing hand washing.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Putting the patient in a comfortable position.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Discarding supplies in any trash bin.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Documenting the vital signs.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> In the post-care (Nurse) section, the rationale for removing gloves and hand washing is "To reduce the transmission of microorganism."
+            </div>
+        </div>
+
+
+        <!-- Final Score Section -->
+        <div id="final-score-container" class="hidden">
+            <h2>Quiz Complete!</h2>
+            <p id="final-score-message">You answered 0 out of 0 correctly — 0%</p>
+        </div>
+
+    </main>
+
+    <!-- 
+      All JavaScript is inlined here to ensure the file works offline.
+      No external .js files or CDN links are used.
+    -->
+    <script>
+        // Wait for the DOM to be fully loaded before running scripts
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Enable :active pseudo-class on iOS Safari for touch feedback ---
+            // This is a common fix to make touch events feel more responsive on iOS
+            document.addEventListener("touchstart", function() {}, true);
+
+            // --- Element Selections ---
+            const quizContainer = document.getElementById('quiz-container');
+            const scoreTracker = document.getElementById('score-value');
+            const finalScoreContainer = document.getElementById('final-score-container');
+            const finalScoreMessage = document.getElementById('final-score-message');
+            const allQuestions = document.querySelectorAll('.question-card');
+
+            // --- State Variables ---
+            const totalQuestions = allQuestions.length;
+            let score = 0;
+            let questionsAnswered = 0;
+
+            // --- Function to Highlight Keywords ---
+            // Wraps specified keywords in a <strong class="highlight"> tag
+            function highlightKeywords() {
+                const keywords = ['NOT', 'EXCEPT', 'FIRST', 'MAINLY'];
+                const questionTexts = document.querySelectorAll('.question-text');
+
+                questionTexts.forEach(element => {
+                    let html = element.innerHTML;
+                    // Use a RegExp to find whole words, case-insensitive, but replace with uppercase
+                    keywords.forEach(kw => {
+                        const regex = new RegExp(`\\b(${kw})\\b`, 'gi');
+                        html = html.replace(regex, `<strong class="highlight">${kw.toUpperCase()}</strong>`);
+                    });
+                    element.innerHTML = html;
+                });
+            }
+
+            // --- Function to Update Live Score ---
+            function updateScore() {
+                scoreTracker.textContent = `${score} / ${totalQuestions}`;
+            }
+
+            // --- Function to Show Final Score ---
+            function showFinalScore() {
+                const percentage = Math.round((score / totalQuestions) * 100);
+                finalScoreMessage.innerHTML = `You answered <strong>${score}</strong> out of <strong>${totalQuestions}</strong> correctly — <strong>${percentage}%</strong>`;
+                finalScoreContainer.classList.remove('hidden');
+                // Scroll to the final score box for a better user experience
+                finalScoreContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // --- Main Quiz Logic (Event Delegation) ---
+            // A single event listener on the main container is more efficient
+            // than adding one to every single button.
+            quizContainer.addEventListener('click', (e) => {
+                // Check if the clicked element is an option button
+                if (e.target.classList.contains('option')) {
+                    const selectedOption = e.target;
+                    const questionCard = selectedOption.closest('.question-card');
+
+                    // --- Prevent Re-answering ---
+                    // If the 'data-answered' attribute is 'true', do nothing.
+                    if (questionCard.dataset.answered === 'true') {
+                        return;
+                    }
+                    
+                    // Mark the question as answered
+                    questionCard.dataset.answered = 'true';
+                    questionsAnswered++;
+
+                    // --- Check Answer ---
+                    const isCorrect = selectedOption.dataset.answer === 'correct';
+                    const rationale = questionCard.querySelector('.rationale');
+                    const allOptions = questionCard.querySelectorAll('.option');
+
+                    // Add 'answered' class to the selected option to trigger icon display
+                    selectedOption.classList.add('answered');
+
+                    if (isCorrect) {
+                        score++;
+                        selectedOption.classList.add('correct');
+                        rationale.classList.add('correct');
+                    } else {
+                        selectedOption.classList.add('incorrect');
+                        rationale.classList.add('incorrect');
+                        
+                        // If wrong, find and highlight the correct answer
+                        const correctOption = questionCard.querySelector('[data-answer="correct"]');
+                        correctOption.classList.add('correct');
+                    }
+
+                    // --- Disable All Options for this Question ---
+                    allOptions.forEach(opt => {
+                        opt.disabled = true;
+                        // Add 'disabled' class to unselected options for graying out
+                        if (opt !== selectedOption && opt.dataset.answer !== 'correct') {
+                            opt.classList.add('disabled');
+                        }
+                    });
+
+                    // --- Update UI ---
+                    updateScore();
+
+                    // --- Check for Quiz Completion ---
+                    if (questionsAnswered === totalQuestions) {
+                        // Use a short delay to allow the user to see the last answer
+                        setTimeout(showFinalScore, 1000);
+                    }
+                }
+            });
+
+            // --- Initialization ---
+            // Run the keyword highlighter and set the initial score on load.
+            highlightKeywords();
+            updateScore(); // Sets the initial score to "0 / 35"
+        });
+    </script>
+
+</body>
+</html>

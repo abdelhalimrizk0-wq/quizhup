@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">First Aid in Drowning</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "What is the priority nursing intervention when a drowning patient presents with gastric distention interfering with ventilation?",
+                options: ["Perform the Heimlich maneuver immediately", "Place the patient on their left side and apply epigastric pressure", "Insert a nasogastric tube to decompress the stomach", "Increase the positive pressure ventilation force"],
+                correct: 1,
+                rationale: "If gastric distention interferes with ventilation, the patient should be placed on their side, and firm pressure applied to the epigastric area with suction available."
+            },
+            {
+                id: 2,
+                question: "Which physiological consequence results directly from the washing out of surfactant in a drowning victim?",
+                options: ["Laryngeal spasm", "Atelectasis", "Metabolic alkalosis", "Hyperinflation of alveoli"],
+                correct: 1,
+                rationale: "Surfactant loss increases surface tension, leading to alveolar collapse (atelectasis) and subsequent pulmonary edema."
+            },
+            {
+                id: 3,
+                question: "According to the Orlowski predictors, which arterial blood pH level indicates a poor chance of survival?",
+                options: ["Less than 7.10", "Between 7.35 and 7.45", "Greater than 7.20", "Exactly 7.25"],
+                correct: 0,
+                rationale: "Severe acidosis with a pH of less than 7.10 is one of the Orlowski predictors associated with a poor prognosis."
+            },
+            {
+                id: 4,
+                question: "What is the primary definition of secondary drowning?",
+                options: ["Death occurring immediately upon submersion due to spasm", "Aspiration of fluid leading to death within 72 hours", "Loss of consciousness due to hypothermia in cold water", "Cardiac arrest caused by panic during the incident"],
+                correct: 1,
+                rationale: "Secondary drowning occurs when a resuscitated victim dies within 72 hours of the incident, typically due to aspiration pneumonia."
+            },
+            {
+                id: 5,
+                question: "Routine abdominal thrusts are recommended for all drowning victims to clear airway water.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Abdominal thrusts are not necessary and may cause regurgitation. They should only be used if a foreign body obstruction is suspected."
+            },
+            {
+                id: 6,
+                question: "At what body core temperature do defibrillation and ALS medications become ineffective?",
+                options: ["Below 30 degrees Celsius", "Below 35 degrees Celsius", "Below 32 degrees Celsius", "Below 37 degrees Celsius"],
+                correct: 0,
+                rationale: "If the body core temperature is less than 86°F (30°C), defibrillation and medications are generally ineffective until rewarming occurs."
+            },
+            {
+                id: 7,
+                question: "Which patient position is recommended to allow drainage of secretions if no spine injury is suspected?",
+                options: ["Supine position", "Prone position", "Left lateral position", "High Fowler position"],
+                correct: 2,
+                rationale: "Placing the patient on their left side allows water, vomitus, and secretions to drain from the upper airway."
+            },
+            {
+                id: 8,
+                question: "Which age group accounts for approximately 40 percent of drowning deaths?",
+                options: ["Teenagers", "Children under 5 years", "Adults over 65 years", "Young adults"],
+                correct: 1,
+                rationale: "Approximately 40 percent of drowning deaths occur in children less than 5 years of age."
+            },
+            {
+                id: 9,
+                question: "What is the single most critical factor determining the prognosis of a drowning victim?",
+                options: ["The temperature of the water", "The duration of submersion", "The age of the victim", "The salinity of the water"],
+                correct: 1,
+                rationale: "The duration of submersion has the greatest impact on the patient's prognosis, as it dictates the severity of hypoxia."
+            },
+            {
+                id: 10,
+                question: "What is the correct definition of dry drowning?",
+                options: ["Suffocation caused by laryngeal spasms without fluid aspiration", "Drowning that occurs in shallow water", "Death resulting from hypothermia without submersion", "Aspiration of a small amount of water"],
+                correct: 0,
+                rationale: "Dry drowning occurs when laryngeal spasms prevent fluid from entering the lungs, but the person still suffocates."
+            },
+            {
+                id: 11,
+                question: "You should avoid transporting a drowning patient if they appear fully recovered at the scene.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "All drowning patients must be transported because complications like secondary drowning can lead to death up to 72 hours later."
+            },
+            {
+                id: 12,
+                question: "When removing a victim with a suspected spine injury from the water, which device is essential for stabilization?",
+                options: ["Scoop stretcher", "Long backboard", "Stair chair", "Basket stretcher"],
+                correct: 1,
+                rationale: "A long backboard is used to secure the torso and legs while maintaining in-line stabilization of the head and spinal column."
+            },
+            {
+                id: 13,
+                question: "How frequently should you reassess an unstable drowning patient during transport?",
+                options: ["Every 5 minutes", "Every 10 minutes", "Every 15 minutes", "Every 30 minutes"],
+                correct: 0,
+                rationale: "Unstable patients require reassessment every 5 minutes to monitor for deterioration into respiratory or cardiac arrest."
+            },
+            {
+                id: 14,
+                question: "Which oxygen delivery method is indicated for a patient with signs of severe hypoxia?",
+                options: ["Nasal cannula at 2 liters per minute", "Simple face mask at 6 liters per minute", "Nonrebreather mask at 15 liters per minute", "Venturi mask at 24 percent"],
+                correct: 2,
+                rationale: "If signs of severe hypoxia are present, a nonrebreather mask at 15 L/m should be used to maximize oxygen delivery."
+            },
+            {
+                id: 15,
+                question: "What is the primary cause of cardiac arrest in drowning victims?",
+                options: ["Hypothermia and shock", "Hypoxia and acidosis", "Electrolyte imbalance", "Myocardial infarction"],
+                correct: 1,
+                rationale: "The combined effects of severe hypoxia and acidosis typically lead to brain injury and cardiac arrest in drowning patients."
+            },
+            {
+                id: 16,
+                question: "Approximately 85 percent of drowning victims belong to which demographic?",
+                options: ["Females", "Males", "Elderly", "Infants"],
+                correct: 1,
+                rationale: "Statistics indicate that approximately 85 percent of drowning victims are males."
+            },
+            {
+                id: 17,
+                question: "Drowning is the third most common cause of accidental death in the United States.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The text states that drowning is the third most common cause of accidental death, with about 4,500 deaths per year."
+            },
+            {
+                id: 18,
+                question: "Which finding is considered an Orlowski predictor of poor survival?",
+                options: ["Patient age over 10 years", "Submersion duration less than 2 minutes", "Resuscitation delay greater than 10 minutes", "Patient alert upon arrival"],
+                correct: 2,
+                rationale: "A delay in starting resuscitation of more than 10 minutes after rescue is a significant predictor of poor survival."
+            },
+            {
+                id: 19,
+                question: "What is the first action a rescuer should take upon arriving at a drowning scene?",
+                options: ["Jump into the water immediately", "Assess for scene safety", "Call for a helicopter", "Prepare the AED"],
+                correct: 1,
+                rationale: "The first priority in any emergency, including drowning, is to ensure scene safety to prevent the rescuer from becoming a victim."
+            },
+            {
+                id: 20,
+                question: "What physical exam finding is common in the eyes of a drowning victim?",
+                options: ["Constricted and reactive pupils", "Dilated and sluggish pupils", "Unequal pupil size", "Normal pupil response"],
+                correct: 1,
+                rationale: "Pupils in a drowning victim may be dilated and sluggish to respond to light due to hypoxia."
+            },
+            {
+                id: 21,
+                question: "If a patient has an SpO2 less than 94 percent, what is the appropriate intervention?",
+                options: ["Administer oxygen via nasal cannula", "Withhold oxygen", "Begin chest compressions", "Place in Trendelenburg position"],
+                correct: 0,
+                rationale: "For SpO2 levels less than 94% or signs of distress, supplemental oxygen via nasal cannula is indicated to maintain saturation."
+            },
+            {
+                id: 22,
+                question: "Defibrillation should be attempted only once if the patient's body temperature is below 30 degrees Celsius.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "If the core temperature is below 86°F (30°C), you should not proceed with more than one defibrillation until the patient is rewarmed."
+            },
+            {
+                id: 23,
+                question: "What typically causes Acute Respiratory Distress Syndrome in drowning patients?",
+                options: ["Damage to alveolar-capillary structures", "Obstruction of the upper airway", "Paralysis of the diaphragm", "Collapse of the bronchial tubes"],
+                correct: 0,
+                rationale: "Alveolar-capillary damage impairs gas exchange and causes fluid leakage, leading to ARDS."
+            },
+            {
+                id: 24,
+                question: "Which technique is used to stabilize the head and neck of a prone patient in the water?",
+                options: ["Chin lift maneuver", "Head splint technique", "Jaw thrust maneuver", "Neck traction method"],
+                correct: 1,
+                rationale: "The head splint technique uses the patient's own arms to stabilize the head and neck while rolling them over in the water."
+            },
+            {
+                id: 25,
+                question: "A drowning victim who is comatose upon delivery to the emergency department has a poor prognosis.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Being comatose on delivery to the emergency department is one of the Orlowski predictors of poor survival."
+            },
+            {
+                id: 26,
+                question: "What percentage of drowning patients experience 'dry drowning'?",
+                options: ["10 to 15 percent", "40 to 50 percent", "1 to 2 percent", "85 to 90 percent"],
+                correct: 0,
+                rationale: "Approximately 10-15 percent of drowning patients do not aspirate water due to laryngospasm, known as dry drowning."
+            },
+            {
+                id: 27,
+                question: "Which acid-base imbalance is most likely to develop in a drowning victim?",
+                options: ["Respiratory alkalosis", "Metabolic alkalosis", "Severe acidosis", "Neutral pH"],
+                correct: 2,
+                rationale: "Hypoxia and CO2 accumulation lead to severe acid buildup (acidosis) in the body."
+            },
+            {
+                id: 28,
+                question: "What is the priority when a patient is found face down in the water with a suspected spine injury?",
+                options: ["Drag them to shore immediately", "Roll them over while stabilizing the head", "Apply a cervical collar before touching them", "Wait for a backboard before moving"],
+                correct: 1,
+                rationale: "The rescuer must stabilize the head and neck with their arms and then roll the patient over while maintaining that stabilization."
+            },
+            {
+                id: 29,
+                question: "What is the definition of wet drowning?",
+                options: ["Sudden cardiac arrest in water", "Aspiration of fluid into the lungs", "Spasm of the larynx without fluid entry", "Drowning in fresh water only"],
+                correct: 1,
+                rationale: "Wet drowning is defined as an incident where the victim has aspirated fluid into the lungs."
+            },
+            {
+                id: 30,
+                question: "How does panic contribute to drowning incidents?",
+                options: ["It increases buoyancy", "It leads to inefficient breathing and exhaustion", "It triggers the diving reflex", "It prevents laryngospasm"],
+                correct: 1,
+                rationale: "Panic leads to inefficient breathing, loss of concentration, and exhaustion, which can contribute to the drowning death."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

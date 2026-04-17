@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">First Aid in Fractures</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "According to the DRSABCD protocol, what is the first priority before assessing the patient's response?",
+                options: ["Check for danger to yourself and others", "Call for an ambulance immediately", "Open the airway", "Start chest compressions"],
+                correct: 0,
+                rationale: "The 'D' in DRSABCD stands for Danger. You must check for danger to yourself, the patient, and bystanders before proceeding."
+            },
+            {
+                id: 2,
+                question: "What type of fracture involves the bone being shattered into three or more pieces?",
+                options: ["Comminuted fracture", "Greenstick fracture", "Transverse fracture", "Oblique fracture"],
+                correct: 0,
+                rationale: "A comminuted fracture is defined as a break where the bone is shattered into three or more pieces."
+            },
+            {
+                id: 3,
+                question: "Which intervention must be avoided when treating a patient with a suspected pelvic injury and signs of shock?",
+                options: ["Raising the legs", "Keeping the patient still", "Covering with a blanket", "Monitoring vital signs"],
+                correct: 0,
+                rationale: "Do not raise the legs if there is a suspected injury to the pelvis or hip, or if legs are broken, as this can worsen the injury."
+            },
+            {
+                id: 4,
+                question: "What is the primary purpose of elevating an injured limb following a fracture?",
+                options: ["To minimize swelling", "To increase blood flow", "To reset the bone alignment", "To reduce pain sensation"],
+                correct: 1,
+                rationale: "Elevation of the affected extremity helps to minimize swelling."
+            },
+            {
+                id: 5,
+                question: "How frequently should you check for signs of loss of circulation in an immobilized limb?",
+                options: ["Every 15 minutes", "Every 30 minutes", "Every 60 minutes", "Every 2 hours"],
+                correct: 0,
+                rationale: "You should watch for signs of loss of circulation to the limb every 15 minutes."
+            },
+            {
+                id: 6,
+                question: "What is the correct definition of a greenstick fracture?",
+                options: ["An incomplete break where the bone bends and cracks", "A break that spirals around the bone", "A complete break in a straight line", "A bone shattered into multiple fragments"],
+                correct: 0,
+                rationale: "A greenstick fracture is an incomplete break, common in children, where the bone bends and cracks but doesn't break all the way through."
+            },
+            {
+                id: 7,
+                question: "When a patient is unresponsive, what is the immediate next step after checking for a response?",
+                options: ["Shout for help immediately", "Open the airway", "Start CPR", "Check for a pulse"],
+                correct: 0,
+                rationale: "Under 'R' (Response), the text states: If unresponsive, shout for help immediately."
+            },
+            {
+                id: 8,
+                question: "Which sign is most indicative of significant internal bleeding following a fracture?",
+                options: ["Hypotension and tachycardia", "Hypertension and bradycardia", "Flushed skin and fever", "Slow breathing rate"],
+                correct: 0,
+                rationale: "Assess for hypotension (low blood pressure) and tachycardia (fast heart rate) which can indicate significant internal bleeding."
+            },
+            {
+                id: 9,
+                question: "What is the correct method for controlling bleeding in an open fracture?",
+                options: ["Apply pressure around the wound", "Apply pressure directly on the bone", "Apply a tourniquet immediately", "Pour water into the wound"],
+                correct: 0,
+                rationale: "Apply pressure around the wound and not over the protruding bone or suspected fracture site."
+            },
+            {
+                id: 10,
+                question: "Which condition puts a person at a significantly higher risk for experiencing a fracture?",
+                options: ["Osteoporosis", "Arthritis", "Tendonitis", "Muscle strain"],
+                correct: 0,
+                rationale: "The risk of experiencing a fracture is greatly increased if the person has osteoporosis."
+            },
+            {
+                id: 11,
+                question: "What characterizes an oblique fracture?",
+                options: ["The break is diagonal across the bone", "The break is in a straight line across the bone", "The bone is crushed", "A small piece of bone is pulled away"],
+                correct: 0,
+                rationale: "An oblique fracture is defined as a break that is diagonal across the bone."
+            },
+            {
+                id: 12,
+                question: "What clinical sign suggests nerve damage in a fractured limb?",
+                options: ["Numbness or tingling", "Swelling and bruising", "Deformity of the limb", "Warmth in the skin"],
+                correct: 0,
+                rationale: "Check for numbness or tingling (Paresthesia) which indicates nerve damage."
+            },
+            {
+                id: 13,
+                question: "What is the correct compression-to-breath ratio for CPR according to the text?",
+                options: ["30 compressions to 2 breaths", "15 compressions to 2 breaths", "30 compressions to 1 breath", "15 compressions to 1 breath"],
+                correct: 0,
+                rationale: "CPR involves beginning chest compressions with a ratio of 30 compressions to 2 breaths."
+            },
+            {
+                id: 14,
+                question: "Which type of fracture involves a bone segment being pulled away by a muscle or tendon?",
+                options: ["Avulsion fracture", "Compression fracture", "Spiral fracture", "Stress fracture"],
+                correct: 0,
+                rationale: "An avulsion fracture occurs when a small piece of bone is pulled away from the main bone by a muscle or tendon."
+            },
+            {
+                id: 15,
+                question: "What should be removed immediately from an upper limb if a fracture is suspected?",
+                options: ["Rings and watches", "All clothing", "The splint", "Bandages"],
+                correct: 0,
+                rationale: "For upper limb fractures, remove any rings, watches or anything that wraps around the limb as soon as possible."
+            },
+            {
+                id: 16,
+                question: "A spiral fracture is typically caused by what type of force?",
+                options: ["Twisting force", "Direct blow", "Crushing force", "Repetitive stress"],
+                correct: 0,
+                rationale: "A spiral fracture is where the break spirals around the bone, typically caused by twisting forces."
+            },
+            {
+                id: 17,
+                question: "What is a 'stress fracture' primarily caused by?",
+                options: ["Repetitive forces over time", "A single traumatic impact", "A twisting injury", "A crushing injury"],
+                correct: 0,
+                rationale: "Stress fractures are small cracks caused by repetitive forces, such as running, without experiencing acute trauma."
+            },
+            {
+                id: 18,
+                question: "Which severe complication is specifically mentioned as a risk for open fractures?",
+                options: ["Fat embolism", "Hypoglycemia", "Dehydration", "Hypothermia"],
+                correct: 0,
+                rationale: "Assess and monitor signs of complications such as fat embolism, especially with open fractures."
+            },
+            {
+                id: 19,
+                question: "When immobilizing a limb, which rule regarding joints must be followed?",
+                options: ["Hold the joint above and below the injury", "Hold only the joint below the injury", "Hold only the joint above the injury", "Hold directly over the fracture"],
+                correct: 0,
+                rationale: "Immobilize by holding the joint above and below the injured area."
+            },
+            {
+                id: 20,
+                question: "What skin sign indicates poor circulation in an injured limb?",
+                options: ["Pale, blue, or purple tone", "Red and flushed tone", "Warm and pink tone", "Sweaty and clammy tone"],
+                correct: 0,
+                rationale: "Note any pale, blue, or purple skin tone, which can signal poor circulation."
+            },
+            {
+                id: 21,
+                question: "Which term describes a fracture where the bone breaks in a straight line across?",
+                options: ["Transverse fracture", "Oblique fracture", "Spiral fracture", "Linear fracture"],
+                correct: 0,
+                rationale: "A transverse fracture occurs in a straight line across the bone."
+            },
+            {
+                id: 22,
+                question: "What is the correct definition of an open (compound) fracture?",
+                options: ["The broken bone pierces the skin", "The bone remains within the skin", "The bone is cracked but not broken", "The bone is compressed"],
+                correct: 0,
+                rationale: "An open fracture (compound) is where the broken bone pierces the skin, creating a wound."
+            },
+            {
+                id: 23,
+                question: "Compression fractures are most commonly associated with which part of the body?",
+                options: ["Vertebrae in the spine", "The femur", "The skull", "The wrist"],
+                correct: 0,
+                rationale: "Compression fractures occur when bones, often vertebrae in the spine, are forced against each other and collapse."
+            },
+            {
+                id: 24,
+                question: "If a patient is not breathing normally after opening the airway, what is the next step?",
+                options: ["Start CPR immediately", "Place in recovery position", "Check for responsiveness", "Wait for an ambulance"],
+                correct: 0,
+                rationale: "If not breathing or abnormal (gasping), start CPR."
+            },
+            {
+                id: 25,
+                question: "Which physical sensation indicates the ends of broken bones are rubbing together?",
+                options: ["Grating noise", "Throbbing pain", "Sharp sting", "Burning sensation"],
+                correct: 0,
+                rationale: "Signs include a grating noise or feeling from the ends of the broken bones."
+            },
+            {
+                id: 26,
+                question: "A simple fracture is another term for a closed fracture where the skin remains intact.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Closed fracture (Simple): The bone is broken, but the skin remains intact."
+            },
+            {
+                id: 27,
+                question: "You should move the casualty to a more comfortable spot before immobilizing the fracture.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Do not move the casualty until the injured part is secured, unless they are in immediate danger."
+            },
+            {
+                id: 28,
+                question: "You should apply pressure directly over the protruding bone to stop bleeding in an open fracture.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Apply pressure around the wound and NOT over the protruding bone."
+            },
+            {
+                id: 29,
+                question: "If a patient is breathing normally, you should place them in the recovery position.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "If normal breathing -> place in recovery position."
+            },
+            {
+                id: 30,
+                question: "Pain, swelling, and deformity are common signs of a bone fracture.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Signs and symptoms include deformity, swelling, bruising, pain, and tenderness."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

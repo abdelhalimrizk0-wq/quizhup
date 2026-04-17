@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Epilepticus & Seizure Management Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .correct { background-color: #22c55e !important; color: #ffffff !important; border-color: #16a34a !important; }
+        .incorrect { background-color: #ef4444 !important; color: #ffffff !important; border-color: #dc2626 !important; }
+        .rationale-correct { background-color: #dcfce7; border-color: #22c55e; color: #14532d; }
+        .rationale-incorrect { background-color: #fee2e2; border-color: #ef4444; color: #7f1d1d; }
+        .option-btn:disabled:not(.correct):not(.incorrect) { background-color: #4b5563; opacity: 0.6; cursor: not-allowed; }
+        .option-btn:disabled { cursor: not-allowed; }
+        #score-container { position: sticky; top: 0; z-index: 10; }
+    </style>
+</head>
+<body class="bg-red-950 text-gray-100 p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-2">Status Epilepticus & Seizure Management</h1>
+        <p class="text-center text-red-300 mb-6">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</p>
+
+        <div id="score-container" class="bg-red-950 py-4 mb-8 border-b-2 border-red-700">
+            <div class="flex justify-between items-center max-w-2xl mx-auto px-4">
+                <div class="text-lg">Score: <span id="score" class="font-bold text-xl text-green-400">0</span></div>
+                <div class="text-lg">Attempted: <span id="attempted" class="font-bold text-xl text-yellow-400">0</span></div>
+                <div class="text-lg">Total: <span id="total-questions" class="font-bold text-xl">0</span></div>
+            </div>
+        </div>
+
+        <div id="quiz-container">
+            <!-- Question 1 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="1">
+                <h2 class="text-xl font-semibold mb-4">1. How is Status Epilepticus primarily defined regarding duration?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 1)">A. Seizure activity lasting more than 5 minutes</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 1)">B. Two seizures occurring within 24 hours</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 1)">C. Continuous seizure activity or repetitive seizures without recovery > 30 minutes</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 1)">D. Any generalized tonic-clonic seizure resulting in loss of consciousness</button>
+                </div>
+                <div id="rationale-1" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Status epilepticus is defined as a condition of either continued seizure activity or repetitive seizures without interictal recovery over a period exceeding 30 minutes.
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="2">
+                <h2 class="text-xl font-semibold mb-4">2. Which areas of the brain are identified as the most common sites of seizure origin?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 2)">A. Frontal and temporal lobes</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 2)">B. Occipital and parietal lobes</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 2)">C. Cerebellum and brainstem</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 2)">D. Thalamus and hypothalamus</button>
+                </div>
+                <div id="rationale-2" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The text states that the most common sites of seizure origin are the frontal and temporal lobes, particularly the hippocampus in the medial temporal lobe.
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="3">
+                <h2 class="text-xl font-semibold mb-4">3. A patient presents with "side-to-side head movements" and "purposeful activity" during an episode. There is no postictal phase. This clinical presentation is most consistent with:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 3)">A. Generalized convulsive status epilepticus</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 3)">B. Complex partial seizures</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 3)">C. Psychogenic nonepileptic seizures (Pseudo-seizures)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 3)">D. Absence seizures</button>
+                </div>
+                <div id="rationale-3" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Psychogenic nonepileptic seizures are differentiated from epilepsy by asymmetrical motor activity, side-to-side head movements, purposeful activity, gradual onset, and the lack of a "postictal" phase.
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="4">
+                <h2 class="text-xl font-semibold mb-4">4. During a generalized seizure, the brain's metabolic demand for oxygen increases. If this demand is not met, what is the direct consequence?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 4)">A. Hyperglycemia and alkalosis</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 4)">B. Hypoxia and brain damage</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 4)">C. Decrease in intracellular sodium</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 4)">D. Immediate cessation of the seizure</button>
+                </div>
+                <div id="rationale-4" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The brain's metabolic demand for oxygen increases dramatically during a seizure. If this demand isn't met, hypoxia and brain damage result.
+                </div>
+            </div>
+
+            <!-- Question 5 (NCLEX Style - Priority) -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="5">
+                <h2 class="text-xl font-semibold mb-4">5. A nurse is caring for a patient experiencing status epilepticus. What are the priority goals of management?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 5)">A. Obtain an MRI and EEG immediately</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 5)">B. Administer long-term oral anticonvulsants</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 5)">C. Maintain airway/breathing/circulation and stop seizures</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 5)">D. Restrain the patient to prevent injury</button>
+                </div>
+                <div id="rationale-5" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The stated goals for management are: maintain airway, breathing, circulation; stop seizures; stabilize patient; and identify/treat causes.
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="6">
+                <h2 class="text-xl font-semibold mb-4">6. Which class of medications is typically administered FIRST as an emergency treatment for status epilepticus to stop the seizure activity?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 6)">A. Barbiturates (e.g., Pentobarbital)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 6)">B. Benzodiazepines (e.g., Lorazepam, Diazepam)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 6)">C. Opioids (e.g., Morphine)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 6)">D. Neuromuscular blockers</button>
+                </div>
+                <div id="rationale-6" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Administration of diazepam (Valium) or lorazepam (Ativan) is the emergency treatment to halt seizures. They are short-acting drugs used as a starting dose.
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="7">
+                <h2 class="text-xl font-semibold mb-4">7. While administering Benzodiazepines, the nurse understands that simultaneous loading with which medication is necessary because Benzodiazepines are short-acting?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 7)">A. Magnesium Sulfate</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 7)">B. Phenytoin or Fosphenytoin</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 7)">C. Thiamine</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 7)">D. Glucose</button>
+                </div>
+                <div id="rationale-7" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Because Benzodiazepines are short-acting, simultaneous loading with phenytoin or fosphenytoin is necessary for longer-term control.
+                </div>
+            </div>
+
+            <!-- Question 8 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="8">
+                <h2 class="text-xl font-semibold mb-4">8. Which of the following describes "Refractory status epilepticus"?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 8)">A. Seizures that resolve spontaneously within 5 minutes</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 8)">B. Seizures caused by a specific drug withdrawal</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 8)">C. A single seizure episode that requires surgery</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 8)">D. Continuing seizures despite appropriate antiepileptic drugs</button>
+                </div>
+                <div id="rationale-8" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Refractory status epilepticus refers to continuing seizures (convulsive or non-convulsive) despite appropriate antiepileptic drugs. It often requires continuous infusion treatment.
+                </div>
+            </div>
+
+            <!-- Question 9 (NCLEX Style - Safety) -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="9">
+                <h2 class="text-xl font-semibold mb-4">9. A nurse witnesses a patient having a tonic-clonic seizure. What is the most appropriate INITIAL nursing action?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 9)">A. Insert a tongue blade to prevent tongue biting</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 9)">B. Restrain the patient's limbs to prevent fractures</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 9)">C. Ease the patient to the floor (if possible) and protect the head</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 9)">D. Attempt to administer oral medication immediately</button>
+                </div>
+                <div id="rationale-9" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The nurse should ease the patient to the floor and protect the head with a pad to prevent injury. Insertion of objects or restraints can cause injury (broken teeth, fractures) and is contraindicated.
+                </div>
+            </div>
+
+            <!-- Question 10 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="10">
+                <h2 class="text-xl font-semibold mb-4">10. Why is Thiamine I.V. specifically indicated in the management of status epilepticus for certain patients?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 10)">A. To treat hypoglycemia</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 10)">B. For patients with chronic alcoholism or withdrawal</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 10)">C. To reduce intracranial pressure</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 10)">D. It acts as a direct muscle relaxant</button>
+                </div>
+                <div id="rationale-10" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Thiamine I.V. is indicated specifically in cases of chronic alcoholism or withdrawal as part of the management protocol.
+                </div>
+            </div>
+
+            <!-- Question 11 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="11">
+                <h2 class="text-xl font-semibold mb-4">11. Which diagnostic test is used to confirm the diagnosis of epilepsy by providing evidence of the continuing tendency to have seizures?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 11)">A. MRI (Magnetic Resonance Imaging)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 11)">B. CT (Computed Tomography) Scan</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 11)">C. EEG (Electroencephalogram)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 11)">D. PET (Positron Emission Tomography) Scan</button>
+                </div>
+                <div id="rationale-11" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The EEG is used to confirm the diagnosis of epilepsy by providing evidence of the continuing tendency to have seizures (detecting electrical activity).
+                </div>
+            </div>
+
+            <!-- Question 12 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="12">
+                <h2 class="text-xl font-semibold mb-4">12. What distinguishes a "Partial Seizure" from a "Generalized Seizure"?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 12)">A. Partial seizures always involve loss of consciousness.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 12)">B. Partial seizures cascade to one side of the brain (one hemisphere), while generalized seizures involve both sides.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 12)">C. Partial seizures are life-threatening, while generalized are not.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 12)">D. Generalized seizures last less than 5 minutes.</button>
+                </div>
+                <div id="rationale-12" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The text explains that the impulse cascades to one side of the brain in a partial seizure, whereas it cascades to both sides of the brain in a generalized seizure.
+                </div>
+            </div>
+
+            <!-- Question 13 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="13">
+                <h2 class="text-xl font-semibold mb-4">13. Which type of seizure is characterized by tonic-clonic convulsions associated with increased body temperature and is more common in children?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 13)">A. Absence seizures</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 13)">B. Febrile epileptic seizures</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 13)">C. Myoclonic seizures</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 13)">D. Atonic seizures</button>
+                </div>
+                <div id="rationale-13" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Febrile epileptic seizures are defined as tonic-clonic convulsions associated with increased body temperature and are more common in children.
+                </div>
+            </div>
+
+            <!-- Question 14 (NCLEX Style - Assessment) -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="14">
+                <h2 class="text-xl font-semibold mb-4">14. Following the "ictal" period of a seizure, the nurse assesses the patient in the "postictal" phase. What findings are expected?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 14)">A. Lethargy and disorientation</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 14)">B. Immediate return to full alertness</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 14)">C. Hypertension and tachycardia</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 14)">D. Manic behavior and insomnia</button>
+                </div>
+                <div id="rationale-14" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The actual period of the seizure (ictal period) may be followed by a postictal phase of lethargy and disorientation.
+                </div>
+            </div>
+
+            <!-- Question 15 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="15">
+                <h2 class="text-xl font-semibold mb-4">15. Primary causes of status epilepticus are often idiopathic and occur most often in which age group?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 15)">A. Elderly (>65 years)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 15)">B. Adults (20-40 years)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 15)">C. Children younger than 10 years</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 15)">D. Neonates only</button>
+                </div>
+                <div id="rationale-15" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Primary causes are idiopathic without apparent structural changes and occur most often in children younger than 10 years.
+                </div>
+            </div>
+
+            <!-- Question 16 (NCLEX Style - Contraindication) -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="16">
+                <h2 class="text-xl font-semibold mb-4">16. The nurse finds a patient with clenched jaws during a seizure. What should the nurse AVOID doing?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 16)">A. Pushing aside furniture</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 16)">B. Prying open the jaws to insert an object</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 16)">C. Loosening constrictive clothing</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 16)">D. Raising side rails if the patient is in bed</button>
+                </div>
+                <div id="rationale-16" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Do not attempt to pry open jaws that are clenched in a spasm or to insert anything. Broken teeth and injury to the lips/tongue may result.
+                </div>
+            </div>
+
+            <!-- Question 17 (NCLEX Style - Monitoring) -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="17">
+                <h2 class="text-xl font-semibold mb-4">17. When administering antiseizure medications and sedatives to halt seizures, what is the nurse's specific monitoring priority due to side effects?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 17)">A. Urinary output and renal function</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 17)">B. Delayed depression of respiration and blood pressure</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 17)">C. Skin rashes and allergic reactions only</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 17)">D. Hyperactivity and agitation</button>
+                </div>
+                <div id="rationale-17" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The nurse initiates ongoing assessment of respiratory and cardiac function because of the risk for delayed depression of respiration and blood pressure secondary to these medications.
+                </div>
+            </div>
+
+            <!-- Question 18 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="18">
+                <h2 class="text-xl font-semibold mb-4">18. During a seizure, how should the patient be positioned if possible, and why?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 18)">A. Supine, to monitor chest rise</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 18)">B. Prone, to prevent movement</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 18)">C. Side-lying, to drain pharyngeal secretions and prevent aspiration</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 18)">D. Sitting upright, to improve airflow</button>
+                </div>
+                <div id="rationale-18" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The patient is turned to a side-lying position (with head flexed forward) to assist in draining pharyngeal secretions (saliva/mucus) and prevent aspiration.
+                </div>
+            </div>
+
+            <!-- Question 19 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="19">
+                <h2 class="text-xl font-semibold mb-4">19. Vagus nerve stimulation is a nonpharmacologic approach that acts similarly to:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 19)">A. A pacemaker for the heart</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 19)">B. A dialysis machine for kidneys</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 19)">C. An insulin pump</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 19)">D. A hearing aid</button>
+                </div>
+                <div id="rationale-19" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The vagus nerve stimulation device acts on the brain the way a pacemaker acts on the heart, sending electrical signals to inhibit seizure activity.
+                </div>
+            </div>
+
+            <!-- Question 20 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="20">
+                <h2 class="text-xl font-semibold mb-4">20. Patients on long-term antiseizure therapy are at significant risk for which specific side effect, requiring injury protection?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 20)">A. Diabetes Mellitus</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 20)">B. Fractures</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 20)">C. Hypertension</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 20)">D. Asthma</button>
+                </div>
+                <div id="rationale-20" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> A person who has received long-term antiseizure therapy has a significant risk for fractures as a side effect of therapy.
+                </div>
+            </div>
+
+            <!-- Question 21 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="21">
+                <h2 class="text-xl font-semibold mb-4">21. Which type of generalized seizure is described as "brief staring, usually without motor involvement" and is also known as petit mal?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 21)">A. Myoclonic</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 21)">B. Atonic</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 21)">C. Absence</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 21)">D. Tonic</button>
+                </div>
+                <div id="rationale-21" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Absence (petit mal) seizures are characterized by brief staring, usually without motor involvement.
+                </div>
+            </div>
+
+            <!-- Question 22 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="22">
+                <h2 class="text-xl font-semibold mb-4">22. If an "aura" precedes the seizure, what specific nursing intervention may be possible to reduce injury?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 22)">A. Administer oral fluids</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 22)">B. Insert an oral airway (if time permits before seizure starts)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 22)">C. Restrain the patient tightly</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 22)">D. Call for an immediate MRI</button>
+                </div>
+                <div id="rationale-22" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> If an aura precedes the seizure, the nurse may insert an oral airway to reduce the possibility of the patient's biting the tongue or cheek. (Note: This is only if it precedes the seizure; never force during a seizure).
+                </div>
+            </div>
+
+            <!-- Question 23 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="23">
+                <h2 class="text-xl font-semibold mb-4">23. In the management of status epilepticus, why might 50% dextrose I.V. be administered?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 23)">A. To restore electrolyte balance</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 23)">B. When seizures are secondary to hypoglycemia</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 23)">C. To sedate the patient</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 23)">D. To lower blood pressure</button>
+                </div>
+                <div id="rationale-23" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> 50% dextrose I.V. is indicated when seizures are secondary to hypoglycemia (low blood sugar), which can be a cause of seizures.
+                </div>
+            </div>
+
+            <!-- Question 24 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="24">
+                <h2 class="text-xl font-semibold mb-4">24. Which of the following are characteristic features of Generalized Convulsive Status Epilepticus?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 24)">A. Consciousness is maintained throughout</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 24)">B. Local onset in the cerebrum</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 24)">C. Complete loss of consciousness, incontinence, and tongue biting</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 24)">D. Only one hemisphere is involved</button>
+                </div>
+                <div id="rationale-24" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Generalized convulsive SE involves both hemispheres and is characterized by complete loss of consciousness, incontinence, and tongue biting.
+                </div>
+            </div>
+
+            <!-- Question 25 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="25">
+                <h2 class="text-xl font-semibold mb-4">25. What is the key difference between Simple Partial and Complex Partial seizures regarding consciousness?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 25)">A. Simple partial has no change in LOC; Complex partial has altered LOC</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 25)">B. Simple partial has altered LOC; Complex partial has no change</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 25)">C. Both involve complete loss of consciousness</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 25)">D. Neither involves any change in consciousness</button>
+                </div>
+                <div id="rationale-25" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Simple partial seizures (like Jacksonian) present with no change in LOC, while Complex partial seizures involve altered LOC.
+                </div>
+            </div>
+
+            <!-- Question 26 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="26">
+                <h2 class="text-xl font-semibold mb-4">26. Epilepsy is defined as a condition where seizures are:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 26)">A. Caused only by fever</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 26)">B. Isolated, single events</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 26)">C. Spontaneous and recurrent</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 26)">D. Strictly psychogenic</button>
+                </div>
+                <div id="rationale-26" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The text defines epilepsy as a condition in which seizures are spontaneous and recurrent.
+                </div>
+            </div>
+
+            <!-- Question 27 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="27">
+                <h2 class="text-xl font-semibold mb-4">27. Which ions are regulated by receptor channels and determine the electrical activity of the neuronal membrane?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 27)">A. Iron, Zinc, and Copper</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 27)">B. Sodium (Na+), Potassium (K+), Calcium (Ca2+), and Chloride (Cl-)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 27)">C. Lithium and Nitrogen</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 27)">D. Glucose and Insulin</button>
+                </div>
+                <div id="rationale-27" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The electrical activity of the neuronal membrane is determined by the flow of Na+, K+, Ca2+, and Cl- between intracellular and extracellular spaces.
+                </div>
+            </div>
+
+            <!-- Question 28 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="28">
+                <h2 class="text-xl font-semibold mb-4">28. A "Jacksonian" seizure is an example of which type of seizure?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 28)">A. Generalized tonic-clonic</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 28)">B. Simple partial</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 28)">C. Complex partial</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 28)">D. Absence</button>
+                </div>
+                <div id="rationale-28" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The text categorizes Jacksonian seizures under Simple Partial seizures (specifically involving the frontal lobe motor area).
+                </div>
+            </div>
+
+            <!-- Question 29 (NCLEX Style - Post-seizure) -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="29">
+                <h2 class="text-xl font-semibold mb-4">29. If a patient becomes agitated in the postictal phase, what is the best nursing approach?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 29)">A. Apply strict 4-point restraints immediately</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 29)">B. Sedate the patient heavily</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 29)">C. Use calm persuasion and gentle restraint</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 29)">D. Leave the room to let them calm down</button>
+                </div>
+                <div id="rationale-29" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> If the patient becomes agitated after a seizure (postictal), the nurse should use calm persuasion and gentle restraint to ensure safety without escalating agitation.
+                </div>
+            </div>
+
+            <!-- Question 30 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="30">
+                <h2 class="text-xl font-semibold mb-4">30. What specialized diet is appropriate for children with intractable seizures?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 30)">A. Low-fat, high-carbohydrate</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 30)">B. High-protein, high-carbohydrate</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 30)">C. Gluten-free diet</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 30)">D. Ketogenic (high-fat, low-carbohydrate) diet</button>
+                </div>
+                <div id="rationale-30" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The text mentions knowing the specifics of a ketogenic (high-fat, low-carbohydrate) diet, when appropriate, for children with intractable seizures.
+                </div>
+            </div>
+
+            <!-- Completion Section -->
+            <div id="quiz-complete" class="text-center p-8 bg-red-900 rounded-lg shadow-lg border border-red-700" style="display: none;">
+                <h2 class="text-3xl font-bold text-green-400 mb-4">Quiz Complete!</h2>
+                <p class="text-xl mb-4">Your final score is: <span id="final-score" class="font-bold"></span> / <span id="final-total"></span></p>
+                <p class="text-2xl font-bold text-yellow-400">Percentage: <span id="final-percentage"></span>%</p>
+            </div>
+        </div>
+
+        <p class="text-center text-sm text-red-400 mt-8">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</p>
+    </div>
+
+    <script>
+        let score = 0;
+        let attempted = 0;
+        // Auto-calculate total based on generated questions
+        const totalQuestions = document.querySelectorAll('[data-question-id]').length;
+        document.getElementById('total-questions').innerText = totalQuestions;
+        document.getElementById('final-total').innerText = totalQuestions;
+
+        function checkAnswer(selectedOption, questionId) {
+            const questionBlock = selectedOption.closest('[data-question-id]');
+            const options = questionBlock.querySelectorAll('.option-btn');
+            const rationaleBox = document.getElementById('rationale-' + questionId);
+            const isCorrect = selectedOption.getAttribute('data-answer') === 'correct';
+
+            attempted++;
+            document.getElementById('attempted').innerText = attempted;
+
+            options.forEach(btn => { btn.disabled = true; });
+            rationaleBox.style.display = 'block';
+
+            if (isCorrect) {
+                selectedOption.classList.add('correct');
+                rationaleBox.classList.add('rationale-correct');
+                score++;
+                document.getElementById('score').innerText = score;
+            } else {
+                selectedOption.classList.add('incorrect');
+                rationaleBox.classList.add('rationale-incorrect');
+                const correctOption = questionBlock.querySelector('[data-answer="correct"]');
+                correctOption.classList.add('correct');
+            }
+
+            if (attempted === totalQuestions) {
+                document.getElementById('quiz-complete').style.display = 'block';
+                document.getElementById('final-score').innerText = score;
+                
+                // Calculate percentage
+                const percentage = Math.round((score / totalQuestions) * 100);
+                document.getElementById('final-percentage').innerText = percentage;
+
+                setTimeout(() => {
+                    document.getElementById('quiz-complete').scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>

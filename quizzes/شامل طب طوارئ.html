@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Comprehensive Emergency Medicine Exam</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            // Principles & General
+            { id: 1, question: "What is the first and most critical step in the scene size-up process?", options: ["Checking patient responsiveness", "Ensuring scene safety", "Calling for additional resources", "Checking the airway"], correct: 1, rationale: "Scene safety is the first and most critical step. Responders must never enter a scene until hazards are controlled." },
+            { id: 2, question: "Which term refers to the physical force or event responsible for a trauma injury?", options: ["Nature of Illness", "Mechanism of Injury", "Chief Complaint", "General Impression"], correct: 1, rationale: "Mechanism of Injury (MOI) describes the physical force or event responsible for the trauma." },
+            
+            // Shock Basics
+            { id: 3, question: "Which type of shock results from the loss of sympathetic tone causing vasodilation?", options: ["Hypovolemic shock", "Cardiogenic shock", "Neurogenic shock", "Septic shock"], correct: 2, rationale: "Neurogenic shock is caused by loss of sympathetic tone, leading to vasodilation and bradycardia." },
+            { id: 4, question: "What is the primary physiological problem in all types of shock?", options: ["High blood pressure", "Inadequate tissue perfusion", "Low heart rate", "Excessive oxygen delivery"], correct: 1, rationale: "Shock is defined as inadequate tissue perfusion where cells do not receive enough oxygen to meet their needs." },
+
+            // Hypertension
+            { id: 5, question: "A hypertensive crisis is defined as a systolic blood pressure greater than or equal to which value?", options: ["140 mm Hg", "160 mm Hg", "180 mm Hg", "200 mm Hg"], correct: 2, rationale: "A hypertensive crisis is a severe increase in blood pressure with systolic ≥180 mm Hg and/or diastolic ≥110 mm Hg." },
+            { id: 6, question: "Which condition distinguishes a hypertensive emergency from a hypertensive urgency?", options: ["Headache severity", "Height of blood pressure", "Presence of end-organ damage", "Anxiety levels"], correct: 2, rationale: "A hypertensive emergency is accompanied by end-organ damage, whereas urgency is not." },
+
+            // Acute Abdomen
+            { id: 7, question: "Which type of pain is typically described as vague, dull, and nauseating?", options: ["Somatic pain", "Visceral pain", "Referred pain", "Parietal pain"], correct: 1, rationale: "Visceral pain comes from abdominal viscera and is typically vague, dull, and nauseating." },
+            { id: 8, question: "Where does pain from appendicitis typically start before moving to the lower right abdomen?", options: ["Upper right quadrant", "Middle abdomen around belly button", "Lower left quadrant", "Upper left quadrant"], correct: 1, rationale: "Appendicitis pain starts in the middle abdominal pain area (peri-umbilical) before moving to the lower right." },
+
+            // Chest Trauma
+            { id: 9, question: "What is the characteristic movement of the chest wall seen in flail chest?", options: ["Symmetrical expansion", "Paradoxical motion", "Rapid shallow movement", "Rigid immobility"], correct: 1, rationale: "Flail chest causes paradoxical breathing where the flail segment moves in the opposite direction of the rest of the chest wall." },
+            { id: 10, question: "Which condition is caused by air entering the pleural space and becoming trapped without an exit?", options: ["Simple pneumothorax", "Hemothorax", "Tension pneumothorax", "Open pneumothorax"], correct: 2, rationale: "Tension pneumothorax is caused by air entering the pleural space and becoming trapped without an exit, forming a one-way valve." },
+
+            // Abdominal Trauma
+            { id: 11, question: "Which organ is most frequently injured in abdominal trauma?", options: ["Spleen", "Kidney", "Liver", "Pancreas"], correct: 2, rationale: "The liver is the most injured abdominal organ in abdominal trauma." },
+            { id: 12, question: "What does Kehr sign indicate in the context of abdominal trauma?", options: ["Liver laceration", "Splenic injury", "Kidney failure", "Appendicitis"], correct: 1, rationale: "Kehr sign is left upper quadrant pain radiating to the left shoulder, indicating splenic injury." },
+
+            // Principles - Assessment
+            { id: 13, question: "In the AVPU scale for mental status, what does the letter 'P' stand for?", options: ["Passive", "Painful", "Partial", "Pulse"], correct: 1, rationale: "P stands for Painful: the patient responds only to painful stimuli." },
+            { id: 14, question: "What is the recommended minimum radius for a danger zone around an incident site?", options: ["20 feet", "50 feet", "100 feet", "10 feet"], correct: 1, rationale: "A minimum radius of 50 feet should be kept around the incident." },
+
+            // Shock - Management
+            { id: 15, question: "Which medication is administered immediately for anaphylactic shock?", options: ["Dopamine", "Nitroglycerin", "Epinephrine", "Atropine"], correct: 2, rationale: "Epinephrine IM is administered immediately for anaphylactic shock." },
+            { id: 16, question: "What is the first-line vasopressor recommended for septic shock?", options: ["Epinephrine", "Dobutamine", "Norepinephrine", "Vasopressin"], correct: 2, rationale: "Norepinephrine is the recommended first-line vasopressor for septic shock." },
+
+            // Hypertension - Meds
+            { id: 17, question: "Which adverse effect is associated with the use of Clevidipine?", options: ["Bradycardia", "Reflex tachycardia", "Bronchospasm", "Liver failure"], correct: 1, rationale: "Adverse effects of Clevidipine include headache and reflex tachycardia." },
+            { id: 18, question: "What is the onset time for Esmolol?", options: ["1 minute", "5 minutes", "10 minutes", "30 minutes"], correct: 0, rationale: "Esmolol has an onset of 1 minute." },
+
+            // Chest Trauma - Procedures
+            { id: 19, question: "Where should a needle be placed for immediate decompression of a tension pneumothorax?", options: ["5th intercostal space mid-axillary", "2nd intercostal space anterior", "4th intercostal space posterior", "Subxiphoid area"], correct: 1, rationale: "A large-bore needle should be placed into the anterior second intercostal space." },
+            { id: 20, question: "What volume of blood evacuation immediately after thoracotomy is considered a massive hemothorax?", options: ["500 mL", "800 mL", "1000 mL", "1500 mL"], correct: 2, rationale: "Evacuation of more than 1000 mL of blood immediately is considered a massive hemothorax." },
+
+            // True/False Section 1
+            { id: 21, question: "A hypertensive urgency involves severe blood pressure elevation with evidence of end-organ damage.", options: ["True", "False"], correct: 1, rationale: "False. Hypertensive urgency is elevation WITHOUT end-organ damage." },
+            { id: 22, question: "Visceral pain is typically sharp and well-localized.", options: ["True", "False"], correct: 1, rationale: "False. Visceral pain is typically vague, dull, and nauseating. Somatic pain is sharp." },
+            { id: 23, question: "The spleen is the only organ injured in 60% of patients sustaining blunt trauma.", options: ["True", "False"], correct: 0, rationale: "True. In 60% of patients sustaining blunt trauma, the spleen is the only organ injured." },
+            { id: 24, question: "Neurogenic shock presents with tachycardia and cool skin.", options: ["True", "False"], correct: 1, rationale: "False. Neurogenic shock presents with bradycardia and warm skin due to loss of sympathetic tone." },
+            { id: 25, question: "Capillary refill is a reliable indicator of perfusion in adults.", options: ["True", "False"], correct: 1, rationale: "False. Capillary refill is not a reliable adult indicator of perfusion." },
+
+            // Detailed Content Mix
+            { id: 26, question: "Which sign indicates retroperitoneal hemorrhage or hemorrhagic pancreatitis?", options: ["Kehr sign", "Murphy sign", "Grey-Turner sign", "Homman sign"], correct: 2, rationale: "Grey-Turner sign (flank ecchymosis) indicates retroperitoneal hematoma or hemorrhagic pancreatitis." },
+            { id: 27, question: "What is the standard observation period for a hemodynamically stable patient with splenic injury?", options: ["24 hours", "2 days", "5 days", "1 week"], correct: 2, rationale: "An observation period of 5 days is the standard for splenic injury." },
+            { id: 28, question: "Diaphragm rupture occurs more frequently on which side?", options: ["Right side", "Left side", "Both sides equally", "Posterior side"], correct: 1, rationale: "It occurs more frequently on the left side because the diaphragm is not protected by the liver." },
+            { id: 29, question: "What is the recommended goal for mean arterial pressure reduction in the first hour of a hypertensive emergency?", options: ["10% to 15%", "20% to 25%", "30% to 40%", "50%"], correct: 1, rationale: "A general goal is a maximum reduction in mean arterial pressure of 20% to 25% in the first hour." },
+            { id: 30, question: "For aortic dissection, systolic blood pressure should be lowered to below which value within 20 minutes?", options: ["100 mm Hg", "120 mm Hg", "140 mm Hg", "160 mm Hg"], correct: 1, rationale: "For aortic dissection, blood pressure should be lowered to below 120 mm Hg within 20 minutes." },
+
+            // Medications & Specifics
+            { id: 31, question: "Which antihypertensive medication is contraindicated in patients with asthma?", options: ["Nicardipine", "Nitroglycerin", "Labetalol", "Clevidipine"], correct: 2, rationale: "Labetalol is contraindicated in asthma and heart block." },
+            { id: 32, question: "What is the duration of action for Nitroglycerin infusion?", options: ["10 minutes", "1 hour", "3 hours", "5 to 6 hours"], correct: 3, rationale: "Nitroglycerin duration is 5 to 6 hours." },
+            { id: 33, question: "Which condition is a cause of upper right abdominal pain?", options: ["Gastritis", "Splenomegaly", "Cholecystitis", "Diverticulitis"], correct: 2, rationale: "Cholecystitis (gallbladder inflammation) causes upper right abdominal pain." },
+            { id: 34, question: "Which type of shock is characterized by 'warm skin'?", options: ["Hypovolemic", "Cardiogenic", "Neurogenic", "Obstructive"], correct: 2, rationale: "Neurogenic shock causes vasodilation, resulting in warm skin." },
+            { id: 35, question: "What is the primary cause of cardiogenic shock?", options: ["Severe infection", "Spinal cord injury", "Pump failure", "Blood loss"], correct: 2, rationale: "Cardiogenic shock is caused by pump failure (e.g., large MI, heart failure)." },
+
+            // Assessment Tools
+            { id: 36, question: "In the SAMPLE history, what does 'L' stand for?", options: ["Last oral intake", "Last menstrual period", "Level of consciousness", "Location of pain"], correct: 0, rationale: "L stands for Last oral intake." },
+            { id: 37, question: "Which mnemonic is used to analyze pain or other symptoms in detail?", options: ["SAMPLE", "AVPU", "OPQRST", "DCAP-BTLS"], correct: 2, rationale: "OPQRST is used to analyze pain or other symptoms in detail." },
+            { id: 38, question: "Which assessment finding typically suggests a tension pneumothorax rather than a simple pneumothorax?", options: ["Dyspnea", "Chest pain", "Tracheal shift", "Decreased breath sounds"], correct: 2, rationale: "Tracheal shift and neck vein distention are specific signs of tension pneumothorax." },
+            { id: 39, question: "What sound is described as 'Homman's sign'?", options: ["Bowel sounds in chest", "Crunching sound with heartbeat", "Friction rub", "Wheezing"], correct: 1, rationale: "Homman's sign is a crunching sound heard with each heartbeat, caused by air in the mediastinum." },
+            { id: 40, question: "Which type of pneumothorax occurs primarily in young, tall, thin men?", options: ["Secondary spontaneous", "Primary spontaneous", "Traumatic", "Tension"], correct: 1, rationale: "Primary spontaneous pneumothorax occurs primarily in young, tall, and thin men." },
+
+            // Abdominal specifics
+            { id: 41, question: "What does Balance's Sign indicate?", options: ["Liver rupture", "Ruptured spleen", "Appendicitis", "Renal colic"], correct: 1, rationale: "Balance's Sign (dullness on percussion of left upper quadrant) indicates ruptured spleen." },
+            { id: 42, question: "Which sign may indicate a retroperitoneal injury?", options: ["Cullen sign", "Kehr sign", "Homman sign", "Murphy sign"], correct: 0, rationale: "Cullen sign (periumbilical ecchymosis) may indicate retroperitoneal injury." },
+            { id: 43, question: "How are most hemodynamically stable patients with liver injuries managed?", options: ["Immediate surgery", "Nonoperatively", "Embolization", "Packing"], correct: 1, rationale: "Hemodynamically stable patients with liver injuries are now managed nonoperatively." },
+            { id: 44, question: "Which diagnostic test is usually necessary for diagnosing splenic injury?", options: ["X-ray", "Abdominal CT", "Blood culture", "Urinalysis"], correct: 1, rationale: "DPL or abdominal CT is usually necessary for diagnosis of splenic injury." },
+            { id: 45, question: "What is a common complication of diaphragm rupture seen in approximately 30% of patients?", options: ["Hemorrhage", "Bowel strangulation", "Infection", "Kidney failure"], correct: 1, rationale: "Bowel strangulation occurs in approximately 30% of patients with diaphragm rupture." },
+
+            // Shock - Advanced
+            { id: 46, question: "Which stage of shock involves the failure of compensatory mechanisms and a MAP drop of >20%?", options: ["Initial", "Compensatory", "Progressive", "Refractory"], correct: 2, rationale: "In the Progressive stage, compensatory mechanisms fail and MAP drops > 20%." },
+            { id: 47, question: "Which hormone is released by the kidney to increase blood pressure during shock?", options: ["Aldosterone", "Renin", "ADH", "Epinephrine"], correct: 1, rationale: "The kidney releases Renin, which starts the angiotensin cascade to increase BP." },
+            { id: 48, question: "What is the effect of histamine release in anaphylactic shock?", options: ["Vasoconstriction", "Vasodilation and capillary leak", "Increased cardiac output", "Bronchodilation"], correct: 1, rationale: "Histamine release causes massive vasodilation and capillary leak." },
+            { id: 49, question: "Which type of shock is treated with large-volume fluids and broad-spectrum antibiotics?", options: ["Cardiogenic", "Neurogenic", "Septic", "Anaphylactic"], correct: 2, rationale: "Septic shock management includes large-volume fluids and broad-spectrum antibiotics." },
+            { id: 50, question: "What is a characteristic sign of the compensatory stage of shock?", options: ["Bradycardia", "Hypotension", "Faster and deeper breathing", "Anuria"], correct: 2, rationale: "Respiratory compensation involves faster and deeper breathing." },
+
+            // True/False Section 2
+            { id: 51, question: "Primary spontaneous pneumothorax occurs in patients with underlying lung disease.", options: ["True", "False"], correct: 1, rationale: "False. Primary occurs in the absence of underlying disease; Secondary occurs with disease." },
+            { id: 52, question: "The goal in aortic dissection is to lower systolic BP below 120 mm Hg within 20 minutes.", options: ["True", "False"], correct: 0, rationale: "True. Rapid reduction is required to reduce shear stress." },
+            { id: 53, question: "A focused trauma assessment is performed on unresponsive patients.", options: ["True", "False"], correct: 1, rationale: "False. Focused assessment is for alert/responsive patients. Unresponsive patients get a Rapid Trauma Assessment." },
+            { id: 54, question: "Somatic pain comes from the parietal peritoneum and is well localized.", options: ["True", "False"], correct: 0, rationale: "True. Somatic pain is sharp and well localized." },
+            { id: 55, question: "Management of massive hemothorax begins with chest tube insertion before fluid resuscitation.", options: ["True", "False"], correct: 1, rationale: "False. Infusion of fluid must be started BEFORE any attempt to drain a massive hemothorax." },
+
+            // Mixed Difficulty
+            { id: 56, question: "Which drug is used for hypertensive emergencies and has a duration of 3 to 6 hours?", options: ["Esmolol", "Clevidipine", "Labetalol", "Nitroprusside"], correct: 2, rationale: "Labetalol has a duration of 3 to 6 hours." },
+            { id: 57, question: "Nicardipine is contraindicated in which condition?", options: ["Asthma", "Heart block", "Liver failure", "Renal failure"], correct: 2, rationale: "Nicardipine is contraindicated in liver failure." },
+            { id: 58, question: "Which collision type poses a high risk of whiplash injury?", options: ["Head-on", "Rear-impact", "Side-impact", "Rollover"], correct: 1, rationale: "Rear-impact collisions often produce neck injuries (whiplash)." },
+            { id: 59, question: "In a fall, adults often sustain which type of injury?", options: ["Head injury", "Axial loading", "Arm fractures", "Chest trauma"], correct: 1, rationale: "Adults often sustain axial loading injuries (spine, heels)." },
+            { id: 60, question: "Which weapon velocity causes cavitation and extensive internal damage?", options: ["Low velocity", "Medium velocity", "High velocity", "No velocity"], correct: 2, rationale: "High velocity weapons (rifles) can cause cavitation." },
+
+            // Acute Abdomen & Gen
+            { id: 61, question: "Where is the pain of cholecystitis typically located?", options: ["Epigastric region", "Lower left quadrant", "Peri-umbilical region", "Lower right quadrant"], correct: 0, rationale: "Cholecystitis pain is found in the epigastric or upper right region." },
+            { id: 62, question: "Pain from the ureters (ureteric colic) is often referred to which area?", options: ["Shoulder", "Groin", "Back", "Chest"], correct: 1, rationale: "Groin pain is a common example of referred pain due to renal colic." },
+            { id: 63, question: "Which condition is characterized by upper left abdominal pain?", options: ["Appendicitis", "Splenomegaly", "Cholecystitis", "Hepatitis"], correct: 1, rationale: "Spleen pain (splenomegaly) is located in the upper left abdomen." },
+            { id: 64, question: "What does feculent vomiting suggest?", options: ["Upper GI pathology", "Lower GI obstruction", "Gastritis", "Pancreatitis"], correct: 1, rationale: "Feculent vomiting suggests lower GI obstruction." },
+            { id: 65, question: "Which physical exam finding suggests peritonitis?", options: ["Patient rolling around", "Patient lying still", "Slow pulse", "Soft abdomen"], correct: 1, rationale: "Patients with peritonitis like to stay immobile." },
+
+            // Chest - Advanced
+            { id: 66, question: "What is the treatment for severe flail chest injuries?", options: ["Observation", "Pain medication only", "Intubation and ventilation", "Chest tube"], correct: 2, rationale: "For severe flail chest, endotracheal intubation and mechanical ventilation are required." },
+            { id: 67, question: "An open pneumothorax is also known as what?", options: ["Tension pneumothorax", "Sucking chest wound", "Spontaneous pneumothorax", "Closed pneumothorax"], correct: 1, rationale: "Open pneumothorax causes a sucking sound and is a 'sucking chest wound'." },
+            { id: 68, question: "Which valve is used for small uncomplicated pneumothorax chest tubes?", options: ["Mitral valve", "Heimlich valve", "Aortic valve", "Tricuspid valve"], correct: 1, rationale: "The chest tube is frequently connected to a Heimlich valve." },
+            { id: 69, question: "What defines a continued bleeding hemothorax requiring surgery?", options: ["50 mL/hr for 2 hours", "100 mL/hr for 1 hour", "150-200 mL/hr for 2-4 hours", "500 mL/hr for 1 hour"], correct: 2, rationale: "Continued bleeding is defined as 150-200 mL/hr for 2-4 hours." },
+            { id: 70, question: "Which injury involves multiple rib fractures in two or more separate locations?", options: ["Simple fracture", "Flail chest", "Sternal fracture", "Clavicle fracture"], correct: 1, rationale: "Flail chest is defined as fracture of two or more ribs in two or more separate locations." },
+
+            // HTN - More
+            { id: 71, question: "Which of the following is an example of end-organ damage in hypertensive emergency?", options: ["Headache", "Epistaxis", "Eclampsia", "Anxiety"], correct: 2, rationale: "Eclampsia is a sign of end-organ damage; the others are symptoms of urgency." },
+            { id: 72, question: "Acute postoperative hypertension is triggered by what?", options: ["Infection", "Stressors during surgery", "Fluid overload", "Medication error"], correct: 1, rationale: "It is triggered by stressors incurred during major surgery." },
+            { id: 73, question: "Which drug withdrawal can cause a hypertensive crisis?", options: ["Antibiotics", "Clonidine", "Aspirin", "Vitamins"], correct: 1, rationale: "Withdrawal syndromes from clonidine can cause hypertensive crisis." },
+            { id: 74, question: "What examination should be performed to check for papilledema in hypertensive patients?", options: ["Otoscopy", "Fundoscopy", "Laryngoscopy", "Bronchoscopy"], correct: 1, rationale: "Thorough inspection of the optic fundi is needed to check for papilledema." },
+            { id: 75, question: "Which test is recommended for pregnant women with history suggestive of pheochromocytoma?", options: ["Urine culture", "Metanephrine assays", "Liver function test", "Chest X-ray"], correct: 1, rationale: "Plasma or urinary fractionated metanephrine assays are recommended." },
+
+            // Principles - Procedures
+            { id: 76, question: "When should BSI (Body Substance Isolation) equipment be selected?", options: ["After patient contact", "Before contact", "During transport", "Only if bleeding is visible"], correct: 1, rationale: "Ensure all BSI equipment is available before contact." },
+            { id: 77, question: "Which BSI item is the first line of protection?", options: ["Gown", "Mask", "Gloves", "Eye protection"], correct: 2, rationale: "Gloves are the first line of protection." },
+            { id: 78, question: "What does the 'S' in OPQRST stand for?", options: ["Signs", "Severity", "Symptoms", "Site"], correct: 1, rationale: "S in OPQRST stands for Severity." },
+            { id: 79, question: "How often should a stable patient be reassessed?", options: ["Every 5 minutes", "Every 10 minutes", "Every 15 minutes", "Every 30 minutes"], correct: 2, rationale: "Stable patients should be reassessed at least every 15 minutes." },
+            { id: 80, question: "What does the 'C' in DCAP-BTLS stand for?", options: ["Circulation", "Contusions", "Cuts", "Color"], correct: 1, rationale: "C stands for Contusions." },
+
+            // True/False Section 3
+            { id: 81, question: "Hypovolemic shock is caused by pump failure.", options: ["True", "False"], correct: 1, rationale: "False. Hypovolemic shock is caused by loss of blood or fluid. Cardiogenic is pump failure." },
+            { id: 82, question: "A patient with visceral pain is likely to lie perfectly still.", options: ["True", "False"], correct: 1, rationale: "False. Patients with visceral pain are unable to lie still; peritonitis patients lie still." },
+            { id: 83, question: "Diuretics and nitrates are used in the management of cardiogenic shock.", options: ["True", "False"], correct: 0, rationale: "True. They are used to manage cardiogenic shock." },
+            { id: 84, question: "The onset of Clevidipine is 10 minutes.", options: ["True", "False"], correct: 1, rationale: "False. The onset of Clevidipine is 2 minutes." },
+            { id: 85, question: "Hematuria is a sign of kidney trauma.", options: ["True", "False"], correct: 0, rationale: "True. Hematuria is a sign of renal injury." },
+
+            // Shock - Pathophysiology
+            { id: 86, question: "In the initial stage of shock, metabolism changes from aerobic to what?", options: ["Anaerobic", "Catabolic", "Anabolic", "Metabolic"], correct: 0, rationale: "Cells switch from aerobic to anaerobic metabolism." },
+            { id: 87, question: "What byproduct accumulates due to anaerobic metabolism in shock?", options: ["Glucose", "Lactic acid", "Urea", "Oxygen"], correct: 1, rationale: "Anaerobic metabolism leads to lactic acid production." },
+            { id: 88, question: "Which shock stage involves cellular death and multiple organ dysfunction?", options: ["Initial", "Compensatory", "Progressive", "Refractory"], correct: 3, rationale: "The Refractory stage involves widespread cellular death and organ failure." },
+            { id: 89, question: "Which of the following causes distributive shock?", options: ["Hemorrhage", "Dehydration", "Sepsis", "Myocardial infarction"], correct: 2, rationale: "Septic shock is a type of distributive shock." },
+            { id: 90, question: "What is the effect of Angiotensin II?", options: ["Vasodilation", "Vasoconstriction", "Decreased BP", "Diuresis"], correct: 1, rationale: "Angiotensin II causes vasoconstriction to increase blood pressure." },
+
+            // Abdomen - Management
+            { id: 91, question: "What is the priority intervention for a shocked patient with acute abdomen?", options: ["Analgesia", "Antibiotics", "IV fluids", "NG tube"], correct: 2, rationale: "Intravenous (IV) fluids: set up immediately if the patient is shocked." },
+            { id: 92, question: "When is a nasogastric (NG) tube considered?", options: ["Mild pain", "Severe vomiting or obstruction", "Diarrhea", "Fever"], correct: 1, rationale: "Consider NG tube if severe vomiting occurs or there are signs of intestinal obstruction." },
+            { id: 93, question: "What combination of antibiotics is commonly used for suspected peritonitis?", options: ["Penicillin only", "Cephalosporin plus metronidazole", "Vancomycin", "Amoxicillin"], correct: 1, rationale: "IV cephalosporin plus metronidazole are commonly used." },
+            { id: 94, question: "What is the purpose of a feeding jejunostomy tube in bowel trauma?", options: ["Decompression", "Early feeding", "Drainage", "Medication only"], correct: 1, rationale: "It is placed so tube feedings can be initiated early in the postoperative course." },
+            { id: 95, question: "Blunt small bowel injury can present with which finding?", options: ["Blood in nasogastric aspirate", "Clear urine", "Normal CT scan", "High BP"], correct: 0, rationale: "It can present with blood in the nasogastric aspirate or hematemesis." },
+
+            // Chest - More Signs
+            { id: 96, question: "What does the presence of bony crepitus indicate in chest trauma?", options: ["Fluid in lungs", "Rib fractures", "Muscle strain", "Infection"], correct: 1, rationale: "Bony crepitus is a sign of flail chest/rib fractures." },
+            { id: 97, question: "A 'sucking sound' during inspiration is characteristic of which injury?", options: ["Simple pneumothorax", "Hemothorax", "Open pneumothorax", "Flail chest"], correct: 2, rationale: "Sucking sound is characteristic of an open pneumothorax." },
+            { id: 98, question: "Which vein distention is a sign of tension pneumothorax?", options: ["Femoral", "Jugular (Neck)", "Brachial", "Radial"], correct: 1, rationale: "Neck vein distention is a sign of tension pneumothorax." },
+            { id: 99, question: "In flail chest, what happens to the flail segment during expiration?", options: ["Moves inward", "Bulges outward", "Stays still", "Collapses"], correct: 1, rationale: "On expiration, the flail segment bulges outward." },
+            { id: 100, question: "Which diagnostic tool is used for continuous monitoring in chest trauma?", options: ["SpO2", "X-ray", "CT scan", "MRI"], correct: 0, rationale: "Continuous SpO2 is used for monitoring." },
+
+            // Final Mixed Bag
+            { id: 101, question: "What is the recommended IV bolus dose for Labetalol?", options: ["1 to 2 mg", "10 to 20 mg", "50 to 100 mg", "200 mg"], correct: 1, rationale: "Labetalol dose is 10 to 20 mg IV bolus." },
+            { id: 102, question: "Which condition mimics myocardial infarction with upper abdominal pain?", options: ["Acute cholecystitis", "Appendicitis", "Cystitis", "Hernia"], correct: 0, rationale: "Acute cholecystitis sometimes mimics a myocardial infarction." },
+            { id: 103, question: "Should analgesia be withheld in acute abdomen until surgical review?", options: ["Yes, always", "No, it should be given", "Only aspirin", "Only paracetamol"], correct: 1, rationale: "Previous practice was to withhold, but now it is known that surgical abdomen is very painful and requires relief." },
+            { id: 104, question: "Which impact type is most likely to cause whiplash?", options: ["Head-on", "Rear-impact", "Rollover", "Side-impact"], correct: 1, rationale: "Rear-impact collision often produces neck injuries (whiplash)." },
+            { id: 105, question: "What is the first step in the assessment of a responsive medical patient?", options: ["Rapid trauma scan", "Focused medical assessment", "Detailed physical exam", "Transport"], correct: 1, rationale: "Conduct a Focused Medical Assessment for responsive patients." },
+            { id: 106, question: "Which sign is associated with splenic rupture?", options: ["Cullen sign", "Grey-Turner sign", "Kehr sign", "Homman sign"], correct: 2, rationale: "Kehr sign (shoulder pain) is associated with splenic rupture." },
+            { id: 107, question: "What is the definition of shock?", options: ["High blood pressure", "Inadequate tissue perfusion", "Low heart rate", "Fever"], correct: 1, rationale: "Shock is defined as inadequate tissue perfusion." },
+            { id: 108, question: "Which shock is caused by severe infection?", options: ["Hypovolemic", "Septic", "Neurogenic", "Anaphylactic"], correct: 1, rationale: "Septic shock is caused by severe infection." },
+            { id: 109, question: "Which medication helps reduce shear stress in aortic dissection?", options: ["Beta blockers", "Diuretics", "Antibiotics", "Steroids"], correct: 0, rationale: "Beta blockers are used to reduce shear stress." },
+            { id: 110, question: "What is the maximum dose for Labetalol IV bolus increments?", options: ["40 mg", "80 mg", "100 mg", "300 mg"], correct: 1, rationale: "Incremental doses max is 80 mg." },
+            { id: 111, question: "Which organ injury requires postoperative drainage of bile?", options: ["Spleen", "Kidney", "Liver", "Stomach"], correct: 2, rationale: "Large liver injuries need postoperative drainage of bile." },
+            { id: 112, question: "Which injury causes blood in the nasogastric aspirate?", options: ["Splenic rupture", "Gastric injury", "Liver laceration", "Kidney contusion"], correct: 1, rationale: "Gastric injury can present with blood in nasogastric aspirate." },
+            { id: 113, question: "What is the primary treatment for diaphragm rupture?", options: ["Observation", "Surgical repair", "Antibiotics", "Embolization"], correct: 1, rationale: "The only definitive treatment for diaphragm rupture is surgical repair." },
+            { id: 114, question: "Which scan is used to diagnose renal injury?", options: ["MRI", "Helical CT scan", "X-ray", "PET scan"], correct: 1, rationale: "A helical CT scan usually provides the diagnosis for renal injury." },
+            { id: 115, question: "Low-dose dopamine may be used in renal trauma to promote what?", options: ["Clotting", "Renal perfusion", "Sedation", "Pain relief"], correct: 1, rationale: "Low-dose dopamine may be ordered to promote renal perfusion." },
+
+            // True/False Section 4
+            { id: 116, question: "Septic shock is characterized by massive vasoconstriction.", options: ["True", "False"], correct: 1, rationale: "False. Septic shock causes massive vasodilation." },
+            { id: 117, question: "Epinephrine is the first-line treatment for anaphylactic shock.", options: ["True", "False"], correct: 0, rationale: "True. Epinephrine IM is used immediately." },
+            { id: 118, question: "A tension pneumothorax is a life-threatening condition.", options: ["True", "False"], correct: 0, rationale: "True. It causes cardiac output failure." },
+            { id: 119, question: "Scene safety is the second step after checking the patient.", options: ["True", "False"], correct: 1, rationale: "False. Scene safety is the FIRST step." },
+            { id: 120, question: "In flail chest, the flail segment moves in the same direction as the chest wall.", options: ["True", "False"], correct: 1, rationale: "False. It moves paradoxically (opposite direction)." }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

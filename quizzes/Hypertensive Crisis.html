@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Hypertensive Crisis</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "What is the systolic blood pressure threshold for defining a hypertensive crisis?",
+                options: ["140 mm Hg", "160 mm Hg", "180 mm Hg", "200 mm Hg"],
+                correct: 2,
+                rationale: "A hypertensive crisis is defined as a severe increase in blood pressure with a systolic reading of 180 mm Hg or higher."
+            },
+            {
+                id: 2,
+                question: "Which feature distinguishes a hypertensive emergency from a hypertensive urgency?",
+                options: ["Severe headache", "End organ damage", "Systolic pressure over 200", "Duration of symptoms"],
+                correct: 1,
+                rationale: "Hypertensive emergency is characterized by severe elevation in blood pressure accompanied by end-organ damage, whereas urgency is not."
+            },
+            {
+                id: 3,
+                question: "What is the target systolic blood pressure for a patient with aortic dissection?",
+                options: ["Below 120 mm Hg", "Below 140 mm Hg", "Below 160 mm Hg", "Below 180 mm Hg"],
+                correct: 0,
+                rationale: "For aortic dissection, blood pressure should be lowered within 20 minutes to a systolic blood pressure below 120 mm Hg."
+            },
+            {
+                id: 4,
+                question: "Which condition is a contraindication for the use of Esmolol?",
+                options: ["Renal failure", "Liver failure", "Asthma", "Diabetes"],
+                correct: 2,
+                rationale: "Esmolol is contraindicated in patients with asthma, as well as second or third-degree AV block and heart failure."
+            },
+            {
+                id: 5,
+                question: "How much should mean arterial pressure be reduced in the first hour of a general hypertensive emergency?",
+                options: ["10 to 15 percent", "20 to 25 percent", "30 to 35 percent", "40 to 50 percent"],
+                correct: 1,
+                rationale: "A general goal is a maximum reduction in mean arterial pressure of 20% to 25% in the first hour of treatment."
+            },
+            {
+                id: 6,
+                question: "Which medication is specifically contraindicated in patients with liver failure?",
+                options: ["Labetalol", "Nicardipine", "Nitroglycerin", "Esmolol"],
+                correct: 1,
+                rationale: "Nicardipine is contraindicated in patients with liver failure."
+            },
+            {
+                id: 7,
+                question: "Which symptom is commonly associated with hypertensive urgency?",
+                options: ["Pulmonary edema", "Epistaxis", "Intracerebral hemorrhage", "Renal failure"],
+                correct: 1,
+                rationale: "Patients with hypertensive urgency may experience headache, dyspnea, nausea, vomiting, epistaxis, and anxiety."
+            },
+            {
+                id: 8,
+                question: "Withdrawal from which substance is a known etiology of hypertensive crisis?",
+                options: ["Clonidine", "Aspirin", "Ibuprofen", "Acetaminophen"],
+                correct: 0,
+                rationale: "Withdrawal syndromes from alcohol, benzodiazepines, or clonidine can cause a hypertensive crisis."
+            },
+            {
+                id: 9,
+                question: "What is the purpose of measuring Troponin levels during the workup?",
+                options: ["Evaluate renal function", "Detect acute coronary syndromes", "Assess liver function", "Identify drug toxicity"],
+                correct: 1,
+                rationale: "Troponin measurement is used to evaluate for possible acute coronary syndromes or heart failure."
+            },
+            {
+                id: 10,
+                question: "What is the onset of action for Clevidipine?",
+                options: ["2 minutes", "10 minutes", "30 minutes", "1 hour"],
+                correct: 0,
+                rationale: "Clevidipine has a rapid onset of action of approximately 2 minutes."
+            },
+            {
+                id: 11,
+                question: "Which adverse effect is shared by Clevidipine, Nicardipine, and Nitroglycerin?",
+                options: ["Bradycardia", "Reflex tachycardia", "Bronchospasm", "Sedation"],
+                correct: 1,
+                rationale: "Headache and reflex tachycardia are listed adverse effects for Clevidipine, Nicardipine, and Nitroglycerin."
+            },
+            {
+                id: 12,
+                question: "What triggers acute postoperative hypertension?",
+                options: ["Fluid overload", "Stressors from major surgery", "Allergic reaction", "Vitamin deficiency"],
+                correct: 1,
+                rationale: "Acute postoperative hypertension is triggered by stressors incurred during major surgery."
+            },
+            {
+                id: 13,
+                question: "Which finding on a fundoscopic exam suggests a hypertensive emergency?",
+                options: ["Cataracts", "Papilledema", "Glaucoma", "Retinal detachment"],
+                correct: 1,
+                rationale: "Inspection of optic fundi may reveal acute hemorrhages, exudates, or papilledema in severely hypertensive patients."
+            },
+            {
+                id: 14,
+                question: "What is the duration of action for Labetalol?",
+                options: ["10 to 30 minutes", "1 to 2 hours", "3 to 6 hours", "12 to 24 hours"],
+                correct: 2,
+                rationale: "Labetalol has a duration of action of 3 to 6 hours."
+            },
+            {
+                id: 15,
+                question: "Eclampsia is classified as which type of hypertensive condition?",
+                options: ["Hypertensive urgency", "Hypertensive emergency", "White coat hypertension", "Essential hypertension"],
+                correct: 1,
+                rationale: "Eclampsia is listed as a form of end-organ damage defining a hypertensive emergency."
+            },
+            {
+                id: 16,
+                question: "Which illicit drug is a cited cause of hypertensive crisis?",
+                options: ["Heroin", "Marijuana", "Methamphetamine", "Psilocybin"],
+                correct: 2,
+                rationale: "Use of illicit drugs such as cocaine and methamphetamine can cause a hypertensive crisis."
+            },
+            {
+                id: 17,
+                question: "Which endocrine emergency is associated with hypertensive crisis?",
+                options: ["Hypothyroidism", "Addison crisis", "Thyrotoxicosis", "Diabetes insipidus"],
+                correct: 2,
+                rationale: "Endocrine emergencies such as thyrotoxicosis or Cushing syndrome can cause hypertensive crisis."
+            },
+            {
+                id: 18,
+                question: "What specific renal test is recommended for pregnant women with suspected pheochromocytoma?",
+                options: ["Serum creatinine", "Blood urea nitrogen", "Fractionated metanephrines", "Urinary protein"],
+                correct: 2,
+                rationale: "For pregnant women with a history suggestive of pheochromocytoma, plasma or urinary fractionated metanephrine assays are recommended."
+            },
+            {
+                id: 19,
+                question: "What is the maximum incremental dose of Labetalol listed in the management table?",
+                options: ["20 mg", "40 mg", "80 mg", "100 mg"],
+                correct: 2,
+                rationale: "The text states incremental doses of 20 mg or more may be administered up to a maximum of 80 mg."
+            },
+            {
+                id: 20,
+                question: "What is the recommended starting infusion rate for Nicardipine?",
+                options: ["1 mg per hour", "5 mg per hour", "10 mg per hour", "15 mg per hour"],
+                correct: 1,
+                rationale: "Nicardipine infusion starts at 5 mg/h."
+            },
+            {
+                id: 21,
+                question: "What is the target blood pressure range for 2 to 6 hours after starting treatment for a general emergency?",
+                options: ["120 over 80", "140 over 90", "160 over 100", "180 over 110"],
+                correct: 2,
+                rationale: "The goal is a blood pressure of 160/100 mm Hg by 2 to 6 hours."
+            },
+            {
+                id: 22,
+                question: "Which imaging modality is used to evaluate for mediastinal widening?",
+                options: ["Echocardiogram", "Chest radiograph", "Abdominal ultrasound", "MRI of the brain"],
+                correct: 1,
+                rationale: "A chest radiograph is used to evaluate for mediastinal widening, cardiomegaly, and pulmonary edema."
+            },
+            {
+                id: 23,
+                question: "What is the duration of action for Esmolol?",
+                options: ["1 to 2 minutes", "10 to 30 minutes", "1 to 2 hours", "4 to 6 hours"],
+                correct: 1,
+                rationale: "Esmolol has a duration of 10 to 30 minutes."
+            },
+            {
+                id: 24,
+                question: "What is the infusion increment for Nitroglycerin titration?",
+                options: ["5 micrograms per minute", "20 micrograms per minute", "50 micrograms per minute", "100 micrograms per minute"],
+                correct: 0,
+                rationale: "Nitroglycerin is increased by 5 micrograms/min every 5 minutes."
+            },
+            {
+                id: 25,
+                question: "How often should Clevidipine dose be increased initially?",
+                options: ["Every 2 minutes", "Every 5 minutes", "Every 10 minutes", "Every 15 minutes"],
+                correct: 0,
+                rationale: "Clevidipine is increased every 2 minutes until goal BP is approached."
+            },
+            {
+                id: 26,
+                question: "Hypertensive encephalopathy is an example of which condition?",
+                options: ["Hypertensive urgency", "Hypertensive emergency", "Chronic hypertension", "White coat hypertension"],
+                correct: 1,
+                rationale: "Hypertensive encephalopathy is a sign of end-organ damage, classifying it as a hypertensive emergency."
+            },
+            {
+                id: 27,
+                question: "Which of the following is considered a non-illicit drug cause of hypertensive crisis?",
+                options: ["Cocaine", "Methamphetamine", "Glucocorticoids", "Heroin"],
+                correct: 2,
+                rationale: "Non-illicit drugs such as nasal decongestants, NSAIDs, and glucocorticoids can cause hypertensive crisis."
+            },
+            {
+                id: 28,
+                question: "For a patient with abrupt severe headache, which imaging test is indicated?",
+                options: ["Chest X-ray", "Renal ultrasound", "CT scan of the brain", "Echocardiogram"],
+                correct: 2,
+                rationale: "A computed tomography (CT) scan of the brain is indicated for patients with abrupt severe headache or focal neurologic deficits."
+            },
+            {
+                id: 29,
+                question: "What is the diastolic blood pressure threshold for hypertensive crisis?",
+                options: ["90 mm Hg", "100 mm Hg", "110 mm Hg", "120 mm Hg"],
+                correct: 2,
+                rationale: "Hypertensive crisis is defined as systolic >= 180 and/or diastolic >= 110 mm Hg."
+            },
+            {
+                id: 30,
+                question: "Which condition involves end-organ damage to the heart?",
+                options: ["Unstable angina pectoris", "Epistaxis", "Headache", "Anxiety"],
+                correct: 0,
+                rationale: "Unstable angina pectoris and myocardial infarction are signs of cardiac end-organ damage in hypertensive emergency."
+            },
+            {
+                id: 31,
+                question: "Hypertensive urgency requires admission to the ICU.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Hypertensive emergency requires ICU admission; urgency is often managed with outpatient medication and monitoring."
+            },
+            {
+                id: 32,
+                question: "Scleroderma renal crisis is a potential etiology of hypertensive crisis.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Scleroderma renal crisis is listed as a cause of hypertensive crisis."
+            },
+            {
+                id: 33,
+                question: "Labetalol is contraindicated in patients with asthma.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Labetalol and Esmolol are contraindicated in asthma due to beta-blockade effects."
+            },
+            {
+                id: 34,
+                question: "Nicardipine onset of action is 1 hour.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Nicardipine has an onset of 5 to 15 minutes, not 1 hour."
+            },
+            {
+                id: 35,
+                question: "Hypertensive urgency patients are always symptomatic.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Patients with hypertensive urgency may be asymptomatic."
+            },
+            {
+                id: 36,
+                question: "Excessive sodium intake can be a cause of hypertensive crisis.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Excessive sodium intake is listed as a cause of hypertensive crisis."
+            },
+            {
+                id: 37,
+                question: "Urine toxicology screening is part of the diagnostic workup.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Urine toxicology screen is listed under diagnostic tests to check for drug use."
+            },
+            {
+                id: 38,
+                question: "Nitroglycerin is administered via oral tablets for hypertensive emergency.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Nitroglycerin is administered via IV infusion for hypertensive emergencies."
+            },
+            {
+                id: 39,
+                question: "Acute aortic dissection requires rapid blood pressure reduction within 20 minutes.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Blood pressure should be lowered within 20 minutes for aortic dissection."
+            },
+            {
+                id: 40,
+                question: "Esmolol is indicated for patients with bradycardia.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Esmolol is contraindicated in bradycardia."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title>Comprehensive OSCE Emergency Quiz (Verified)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        
+        .question-image {
+            max-height: 350px;
+            width: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .option-btn {
+            transition: all 0.2s;
+        }
+        .option-btn:disabled {
+            cursor: default;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        .ref-text {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10">
+                <i class="fas fa-book-medical text-8xl text-blue-600"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo">Comprehensive OSCE Exam</h1>
+            <p class="text-gray-500 font-cairo">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</p>
+        </div>
+
+        <!-- Quiz Area -->
+        <div id="quiz-container"></div>
+
+        <!-- Result -->
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-check text-4xl text-blue-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display">/ 29</span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        window.handleImageError = function(imgElement) {
+            imgElement.style.display = 'none';
+            const fallback = document.createElement('div');
+            fallback.className = 'bg-gray-100 rounded-lg p-8 text-center border-2 border-dashed border-gray-300 mb-4';
+            fallback.innerHTML = `
+                <i class="fas fa-image text-gray-400 text-3xl mb-2"></i>
+                <p class="text-gray-500 text-sm font-medium">Image not available</p>
+                <p class="text-xs text-gray-400 mt-1">${imgElement.src}</p>
+            `;
+            imgElement.parentElement.appendChild(fallback);
+        };
+
+        const quizData = [
+            {
+                id: 1,
+                title: "Question 1",
+                image: "https://i.ibb.co/cKSPbq65/photo-20-2025-12-11-21-34-19.jpg", 
+                question: "Which of the following is NOT from the therapeutic purpose of this device?",
+                options: [
+                    "Provide ventilation for arrested patient",
+                    "Maintaining respiratory support during transfer ventilator dependent patient",
+                    "Assess the placement of the ETT",
+                    "Pre-oxygenate patient before intubation"
+                ],
+                correct: 2,
+                rationale: "Assessing ETT placement is considered a diagnostic purpose, whereas therapeutic purposes include providing ventilation for arrested patients, maintaining respiratory support during transfer, and providing hyperinflation and hyperoxygenation."
+            },
+            {
+                id: 2,
+                title: "Question 2",
+                image: "https://i.ibb.co/cKSPbq65/photo-20-2025-12-11-21-34-19.jpg", 
+                question: "We squeeze the bag of this device until chest rises every... Seconds in children",
+                options: ["5", "3", "1", "10"],
+                correct: 1,
+                rationale: "Squeeze the bag with two hands until chest rises every five seconds in adults and every three seconds in child and infant."
+            },
+            {
+                id: 3,
+                title: "Question 3",
+                image: "https://i.ibb.co/bYbGg0w/photo-19-2025-12-11-21-34-19.jpg", 
+                question: "What receptor does atropine block in the body?",
+                options: ["GABA", "Glycine", "Acetylcholine", "Glutamate"],
+                correct: 2,
+                rationale: "Atropine increases the heart rate through the anticholinergic effect."
+            },
+            {
+                id: 4,
+                title: "Question 4",
+                image: "https://i.ibb.co/VckHR04R/photo-18-2025-12-11-21-34-19.jpg", 
+                question: "Which one of the following purposes the neck collar is used for?",
+                options: [
+                    "Immobilize the lumber spine",
+                    "Allow free movement of neck joint",
+                    "Keep the neck centrally aligned with the chin slightly elevated",
+                    "Hyperextend the neck joint to open the airway"
+                ],
+                correct: 2,
+                rationale: "The purpose of the cervical collar is to keep the neck centrally aligned with the chin slightly elevated and to immobilize the c-spine to limit motion."
+            },
+            {
+                id: 5,
+                title: "Question 5",
+                image: "https://i.ibb.co/6RHFs8nb/photo-17-2025-12-11-21-34-19.jpg", 
+                question: "Which of the following complications should be considered while using the neck collar?",
+                options: [
+                    "Decreased intracranial pressure",
+                    "Pressure ulcer",
+                    "Effective cervical immobilization",
+                    "Being ambulatory"
+                ],
+                correct: 1,
+                rationale: "Complications of cervical collars include skin damage, especially at risk for pressure ulcers."
+            },
+            {
+                id: 6,
+                title: "Question 6",
+                image: "https://i.ibb.co/1tDVTzNV/photo-16-2025-12-11-21-34-19.jpg", 
+                question: "Which type of breathing pattern does the following picture represent?",
+                options: [
+                    "Normal breathing",
+                    "Cheyne-stokes breathing",
+                    "Kussmaul breathing",
+                    "Biots respiration"
+                ],
+                correct: 1,
+                rationale: "The graph shows Cheyne-Stokes respiration, which is characterized by periods of crescendo-decrescendo breathing followed by apnea."
+            },
+            {
+                id: 7,
+                title: "Question 7",
+                image: "https://i.ibb.co/zTBB3qrv/photo-15-2025-12-11-21-34-19.jpg", 
+                question: "When you examine Glasgow coma scale of a patient with traumatic brain injury, you find the following: no eye opening, incomprehensible sound, and localize pain. What does this indicate?",
+                options: [
+                    "Mild brain injury",
+                    "Moderate brain injury",
+                    "Severe brain injury",
+                    "None of the above"
+                ],
+                correct: 2,
+                rationale: "Calculation: Eye 1 + Verbal 2 + Motor 5 = 8. GCS ≤ 8 indicates Severe Brain Injury."
+            },
+            {
+                id: 8,
+                title: "Question 8",
+                image: "https://i.ibb.co/7t0Cv5SB/photo-14-2025-12-11-21-34-19.jpg", 
+                question: "This photo refer to:",
+                options: [
+                    "Atrial fibrillation",
+                    "Ventricular tachycardia",
+                    "Supraventricular tachycardia",
+                    "Ventricular fibrillation"
+                ],
+                correct: 2,
+                rationale: "The ECG rhythm usually indicates Supraventricular Tachycardia (SVT) when it shows a regular, narrow complex tachycardia with a rate typically over 150/min."
+            },
+            {
+                id: 9,
+                title: "Question 9",
+                image: "https://i.ibb.co/5xcf8kVv/photo-13-2025-12-11-21-34-19.jpg", 
+                question: "Which joules are recommended in the first attempt to treat the dysrhythmia in this photo?",
+                options: ["25 joules", "200 joules", "70 joules", "360 joules"],
+                correct: 2,
+                rationale: "The recommended initial energy for Cardioversion of Paroxysmal Supraventricular Tachycardia (PSVT) is 50-100 Joules. Therefore, 70 Joules is the correct initial setting."
+            },
+            {
+                id: 10,
+                title: "Question 10",
+                image: "https://i.ibb.co/k6SwKLjw/photo-12-2025-12-11-21-34-19.jpg", 
+                question: "In this photo we use:",
+                options: ["Defibrillation", "Cardioversion", "Pacing", "Monitoring"],
+                correct: 1,
+                rationale: "Synchronized Cardioversion is the therapy of choice for termination of hemodynamically unstable tachydysrhythmias (like SVT) that have a pulse."
+            },
+            {
+                id: 11,
+                title: "Question 11",
+                image: "https://i.ibb.co/ZzXdjs33/photo-11-2025-12-11-21-34-19.jpg", 
+                question: "In this photo the rate of success is 90%",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Monophasic sinusoidal technology typically has a lower success rate (around 60%), whereas Biphasic truncated technology has a success rate of 90%."
+            },
+            {
+                id: 12,
+                title: "Question 12",
+                image: "https://i.ibb.co/yFqSXpfk/photo-10-2025-12-11-21-34-19.jpg", 
+                question: "This photo refer to ......",
+                options: ["Drawer 1", "Drawer 2", "Drawer 4", "Drawer 5"],
+                correct: 3,
+                rationale: "Drawer 5 (large drawer) contains items such as ECG electrodes, Chest tubes, Dressings, Sutures, and Cut down tray."
+            },
+            {
+                id: 13,
+                title: "Question 13",
+                image: "https://i.ibb.co/N62fpCRK/photo-9-2025-12-11-21-34-19.jpg", 
+                question: "This object requires nurse to use the tools",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Sterile kits, such as thoracotomy insertion trays, require the use of sterile tools and aseptic technique."
+            },
+            {
+                id: 14,
+                title: "Question 14",
+                image: "https://i.ibb.co/5gH7F9K5/photo-8-2025-12-11-21-34-19.jpg", 
+                question: "In face mask: vents on its sides which allow room air to leak in at many places therapy concentrating the source oxygen",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The simple face mask has vents on its sides which allow room air to leak in at many places, thereby diluting the source oxygen."
+            },
+            {
+                id: 15,
+                title: "Question 15",
+                image: "https://i.ibb.co/m58n4tTc/photo-7-2025-12-11-21-34-19.jpg", 
+                question: "In non rebreathing: The ports on each side that have one way valve that keep the patient from breathing in room air",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The ports on each side of the non-rebreathing mask have one-way valves that keep the patient from breathing in room air to ensure a high concentration of oxygen."
+            },
+            {
+                id: 16,
+                title: "Question 16",
+                image: "https://i.ibb.co/6RsLyyWY/photo-6-2025-12-11-21-34-19.jpg", 
+                question: ".... This picture shows",
+                options: ["Dry power inhaler", "Nebulizer", "Soft mist inhaler", "Metered doses inhaler"],
+                correct: 3,
+                rationale: "This image shows a Metered Dose Inhaler."
+            },
+            {
+                id: 17,
+                title: "Question 17",
+                image: "https://i.ibb.co/qLRdZDVj/photo-5-2025-12-11-21-34-18.jpg", 
+                question: ".... This picture indicates",
+                options: ["Large volume Nebulizer", "Small volume Nebulizer", "Mesh Nebulizer", "Ultrasonic Nebulizer"],
+                correct: 1,
+                rationale: "This is a Small Volume Nebulizer, which is primarily used to administer drugs and is connected to a mouthpiece or mask."
+            },
+            {
+                id: 18,
+                title: "Question 18",
+                image: "https://i.ibb.co/v6ZTstX2/photo-4-2025-12-11-21-34-18.jpg", 
+                question: "This device is in contact with a liquid reservoir?",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Ultrasonic wave nebulizers produce a vibrating element in contact with a liquid reservoir."
+            },
+            {
+                id: 19,
+                title: "Question 19",
+                image: "https://i.ibb.co/3xXSgr6/photo-3-2025-12-11-21-34-18.jpg", 
+                question: "Used Thoracentesis in case Tension Pneumothorax?",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Tension Pneumothorax is managed with needle decompression or chest tube insertion, not Thoracentesis."
+            },
+            {
+                id: 20,
+                title: "Question 20",
+                image: "https://i.ibb.co/21F66Fkh/photo-2-2025-12-11-21-34-18.jpg", 
+                question: "Oxygen concentration greater than 50% For more than 24 hours can cause Physiological Changes in the lungs",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Oxygen concentration greater than 50% for more than 24-28 hours can cause pathological changes in the lungs (Oxygen toxicity)."
+            },
+            {
+                id: 21,
+                title: "Question 21",
+                image: "https://i.ibb.co/5WY8fpBB/photo-2025-12-11-20-19-54.jpg", 
+                question: "Which of the following is the correct calculation of GCS for patient who makes sounds during verbal assessment, his eyes response to voice, and his motor response as shown in this picture ?",
+                options: ["7", "8", "9", "10"],
+                correct: 0,
+                rationale: "Calculation: Eye 3 (To voice) + Verbal 2 (Incomprehensible sounds) + Motor 2 (Decerebrate extension) = 7."
+            },
+            {
+                id: 22,
+                title: "Question 22",
+                image: "https://i.ibb.co/1ymC26M/photo-1-2025-12-11-20-17-28.jpg",
+                question: "To which part of the oropharyngeal this arrow refers to?",
+                options: ["The channel", "The flange", "The tip", "The body"],
+                correct: 3,
+                rationale: "The arrow points to the body of the airway, which curves over the tongue."
+            },
+            {
+                id: 23,
+                title: "Question 23",
+                image: "https://i.ibb.co/zHm07W2R/photo-3-2025-12-11-20-17-28.jpg",
+                question: "Which of the following is the needed joules to terminate the dysrhythmia illustrated in This picture?",
+                options: ["150 joules", "200 joules", "320 joules", "360 joules"],
+                correct: 3,
+                rationale: "For monophasic defibrillators, the recommended energy level for Ventricular Fibrillation and Pulseless VT is 360 Joules."
+            },
+            {
+                id: 24,
+                title: "Question 24",
+                image: "https://i.ibb.co/V05MJx8K/photo-4-2025-12-11-20-17-28.jpg",
+                question: "Which one of the following is NOT a therapeutic purpose of gastric lavage?",
+                options: ["Remove blood and clots from stomach", "Minimize damage to gastrointestinal tissue", "Prevent absorption of high nitrogen load", "Quantify volume loss from upper GIT bleeding"],
+                correct: 3,
+                rationale: "Quantifying volume loss from upper GIT bleeding is listed under Diagnostic purposes, whereas the others are Therapeutic purposes."
+            },
+            {
+                id: 25,
+                title: "Question 25",
+                image: "https://i.ibb.co/cXDbdxVy/photo-5-2025-12-11-20-17-28.jpg",
+                question: "Which of the following is a contraindication of this device insertion?",
+                options: ["Conscious patient", "Patient on aura seizures", "Excessive oral secretion", "Recent oral intubation"],
+                correct: 0,
+                rationale: "Contraindications for oropharyngeal airway include conscious or semiconscious patients."
+            },
+            {
+                id: 26,
+                title: "Question 26",
+                image: "https://i.ibb.co/3mQnkmxW/photo-9-2025-12-11-20-17-28.jpg", 
+                question: "what is the most important instruction that should be given to the patient?",
+                options: ["This machine is indicated only for assessing your irregular ECG patterns.", "You should have been fasting to ensure the effectiveness of ECG.", "Move freely as movements do not affect the ECG reading.", "Don't move for few seconds so that we can obtain fine ECG record."],
+                correct: 3,
+                rationale: "It is important to ask the patient to lie still because muscle movement creates electrical artifacts that interfere with the ECG recording."
+            },
+            {
+                id: 27,
+                title: "Question 27",
+                image: "https://i.ibb.co/hxtx35cf/photo-8-2025-12-11-20-17-28.jpg",
+                question: "Which person in the attached photo should be the leader of the motion?",
+                options: ["Person 1", "Person 2", "Person 3", "Person 4"],
+                correct: 0,
+                rationale: "The head hold person (Person 1) manages cervical spine alignment and is in control of the roll."
+            },
+            {
+                id: 28,
+                title: "Question 28",
+                image: "https://i.ibb.co/PsmYt3Qr/photo-7-2025-12-11-20-17-28.jpg",
+                question: "The illustrated picture refers to which of the following techniques?",
+                options: ["Chest compression", "Chest thrust", "Abdominal compression", "Abdominal thrust"],
+                correct: 3,
+                rationale: "The picture illustrates the Abdominal Thrust (Heimlich maneuver) used for airway obstruction in conscious patients."
+            },
+            {
+                id: 29,
+                title: "Question 29",
+                image: "https://i.ibb.co/S2MS17h/photo-6-2025-12-11-20-17-28.jpg",
+                question: "Which of the following is the possible cause of stoppage of water fluctuation in this device?",
+                options: ["Attaching patient with mechanical ventilator", "The system is broken", "There is an air leak in the tubing system", "The lung may have been re-expanded"],
+                correct: 3,
+                rationale: "Decreased or absent drainage/fluctuation without respiratory distress may indicate lung re-expansion or obstruction in the tube."
+            }
+        ];
+
+        const container = document.getElementById('quiz-container');
+        let score = 0;
+        let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            
+            container.innerHTML = quizData.map((q, index) => `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100 relative">
+                    <span class="absolute top-4 right-4 bg-gray-100 text-gray-500 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                    
+                    <div class="mb-4">
+                        <img src="${q.image}" 
+                             class="question-image" 
+                             alt="Question ${index + 1} Image"
+                             onerror="window.handleImageError(this)">
+                    </div>
+
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg pr-8 leading-relaxed">${q.question}</h3>
+                    
+                    <div class="grid gap-3">
+                        ${q.options.map((opt, i) => `
+                            <button onclick="checkAnswer(${index}, ${i})" 
+                                class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white">
+                                <span class="font-medium text-gray-700 group-hover:text-blue-700">${opt}</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center group-hover:border-blue-400">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-blue-900 text-sm mb-1">Rationale</p>
+                                <p class="text-blue-800 text-sm leading-relaxed">${q.rationale}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const question = quizData[qIndex];
+            const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+            const buttons = document.querySelectorAll(`.option-btn-${qIndex}`);
+            
+            if (feedbackEl.classList.contains('block')) return; 
+
+            feedbackEl.classList.remove('hidden-content');
+            feedbackEl.classList.add('block');
+
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'bg-white');
+                
+                const iconContainer = btn.lastElementChild;
+                
+                if (i === question.correct) {
+                    btn.classList.add('correct-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-check text-green-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else if (i === optIndex) {
+                    btn.classList.add('wrong-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-times text-red-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            answeredCount++;
+            if (optIndex === question.correct) score++;
+
+            if (answeredCount === quizData.length) {
+                const resultDiv = document.getElementById('result-summary');
+                resultDiv.classList.remove('hidden-content');
+                document.getElementById('score-display').textContent = score;
+                
+                const messageEl = document.getElementById('score-message');
+                const percentage = (score / quizData.length) * 100;
+
+                if (percentage === 100) messageEl.textContent = "Perfect Score! Outstanding Medical Knowledge.";
+                else if (percentage >= 75) messageEl.textContent = "Great Job! You have a solid understanding.";
+                else if (percentage >= 50) messageEl.textContent = "Good effort. Review the rationales to improve.";
+                else messageEl.textContent = "Keep studying! Review the rationales carefully.";
+                
+                setTimeout(() => {
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 500);
+            }
+        };
+
+        renderQuiz();
+    </script>
+</body>
+</html>

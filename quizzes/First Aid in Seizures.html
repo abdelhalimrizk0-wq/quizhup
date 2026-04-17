@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">First Aid in Seizures</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "Which of the following best describes the nature of a seizure?",
+                options: ["A specific disease process", "A symptom of underlying dysfunction", "A psychological disorder", "A permanent brain injury"],
+                correct: 1,
+                rationale: "Like a headache, a seizure is a symptom rather than a disease itself. It is a temporary alteration in brain function."
+            },
+            {
+                id: 2,
+                question: "What is the priority nursing intervention when a patient begins to have a generalized seizure?",
+                options: ["Restrain the limbs firmly", "Insert a tongue depressor", "Protect the patient from injury", "Administer oral medication"],
+                correct: 2,
+                rationale: "The priority is preventing injury by moving objects away and protecting the head. You should never restrain the patient or force objects into the mouth."
+            },
+            {
+                id: 3,
+                question: "Febrile seizures are most commonly observed in which age group?",
+                options: ["Newborns to 3 months", "6 months to 6 years", "10 years to 15 years", "Adults over 65 years"],
+                correct: 1,
+                rationale: "Febrile seizures are most common in children between 6 months and 6 years of age and are triggered by a rapid rise in body temperature."
+            },
+            {
+                id: 4,
+                question: "True or False: You should attempt to hold the patient's mouth open to prevent them from biting their tongue.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. You should not force anything into the mouth or between the teeth, as this may cause injury or break teeth."
+            },
+            {
+                id: 5,
+                question: "Which phase of a generalized seizure involves extreme muscular rigidity with hyperextension of the back?",
+                options: ["Aura phase", "Clonic phase", "Hypertonic phase", "Postictal phase"],
+                correct: 2,
+                rationale: "The Hypertonic phase is characterized by extreme muscular rigidity and hyperextension of the back."
+            },
+            {
+                id: 6,
+                question: "What is the primary characteristic of the clonic phase of a seizure?",
+                options: ["Loss of consciousness", "Sensory warning signs", "Muscle relaxation only", "Jerky muscle contractions"],
+                correct: 3,
+                rationale: "The clonic phase consists of muscle spasms alternating with relaxation, producing violent and jerky seizure activity."
+            },
+            {
+                id: 7,
+                question: "When documenting a seizure using the COLD mnemonic, what does the letter 'O' stand for?",
+                options: ["Outcome", "Onset", "Observation", "Occurrence"],
+                correct: 1,
+                rationale: "In the COLD mnemonic, 'O' stands for Onset (When did it start? What was the patient doing?)."
+            },
+            {
+                id: 8,
+                question: "Which airway adjunct is preferred for an actively seizing patient if airway management is necessary?",
+                options: ["Oropharyngeal airway", "Nasopharyngeal airway", "Laryngeal mask airway", "Endotracheal tube"],
+                correct: 1,
+                rationale: "A nasopharyngeal airway is the airway of choice because it is flexible and does not require forcing the mouth open."
+            },
+            {
+                id: 9,
+                question: "Which finding is unique to a simple partial seizure compared to a complex partial seizure?",
+                options: ["The patient remains awake and aware", "The patient loses consciousness", "The patient acts confused afterward", "The patient performs repetitive movements"],
+                correct: 0,
+                rationale: "In a simple partial seizure, the patient remains awake and aware. In a complex partial seizure, the patient is awake but not aware of surroundings."
+            },
+            {
+                id: 10,
+                question: "Status epilepticus is defined as a seizure lasting longer than which duration?",
+                options: ["1 minute", "2 minutes", "5 minutes", "10 minutes"],
+                correct: 2,
+                rationale: "A seizure lasting longer than 5 minutes, or consecutive seizures without recovery of consciousness, is considered status epilepticus."
+            },
+            {
+                id: 11,
+                question: "Which behavior is commonly associated with a complex partial seizure?",
+                options: ["Violent full body convulsions", "Lip smacking or chewing motions", "Immediate loss of muscle tone", "High pitched epileptic cry"],
+                correct: 1,
+                rationale: "Complex partial seizures often involve random activities such as lip smacking, chewing, or rolling fingers."
+            },
+            {
+                id: 12,
+                question: "What is the recommended target oxygen saturation for a postictal patient showing signs of hypoxia?",
+                options: ["Greater than 85%", "Greater than 90%", "Greater than 94%", "100% at all times"],
+                correct: 2,
+                rationale: "If SpO2 is <94% or signs of hypoxia are present, administer oxygen to maintain an SpO2 reading of >94%."
+            },
+            {
+                id: 13,
+                question: "True or False: Epilepsy is exclusively a disorder of childhood.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. While common in childhood, there is also a high new onset incidence in those over the age of 65."
+            },
+            {
+                id: 14,
+                question: "Which metabolic condition is a common cause of secondary seizures?",
+                options: ["High cholesterol", "Hypoglycemia", "Hypothyroidism", "Vitamin C deficiency"],
+                correct: 1,
+                rationale: "Hypoglycemia (low blood sugar) is listed as a common cause of secondary seizures."
+            },
+            {
+                id: 15,
+                question: "What is the correct positioning for a patient in the postictal state who has no spinal injury?",
+                options: ["Supine position", "Prone position", "Lateral recumbent position", "Trendelenburg position"],
+                correct: 2,
+                rationale: "The postictal patient should be placed in a lateral recumbent (recovery) position to protect the airway and drain secretions."
+            },
+            {
+                id: 16,
+                question: "Which sensation serves as a warning sign that a seizure is about to begin?",
+                options: ["Aura", "Tonicity", "Clonus", "Postictal"],
+                correct: 0,
+                rationale: "An aura is a warning sensation (smell, sound, feeling) that occurs before a seizure begins."
+            },
+            {
+                id: 17,
+                question: "During which phase of a seizure might a patient exhibit an 'epileptic cry'?",
+                options: ["Aura phase", "Tonic phase", "Postictal phase", "Recovery phase"],
+                correct: 1,
+                rationale: "The epileptic cry typically occurs during the Tonic phase when muscles contract and air is forced out."
+            },
+            {
+                id: 18,
+                question: "What is the first action an EMT should take upon arriving at a scene with a seizing patient?",
+                options: ["Insert an airway immediately", "Check the blood glucose", "Assess scene safety and mechanism", "Restrain the patient"],
+                correct: 2,
+                rationale: "The first step in the assessment-based approach is Scene Size-up: Is the seizure due to trauma or medical problem? Look for safety hazards."
+            },
+            {
+                id: 19,
+                question: "True or False: A patient experiencing a simple partial seizure can usually control the jerky muscle activity.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. The patient cannot control the jerky movement even though they remain awake and aware."
+            },
+            {
+                id: 20,
+                question: "Which medication is commonly used for the long-term control of partial seizures?",
+                options: ["Penicillin", "Carbamazepine", "Insulin", "Warfarin"],
+                correct: 1,
+                rationale: "Carbamazepine (Tegretol) is listed as a medication for long-term control of partial seizures."
+            },
+            {
+                id: 21,
+                question: "How long does the postictal phase generally last?",
+                options: ["10 to 30 minutes", "1 to 2 minutes", "Less than 30 seconds", "24 to 48 hours"],
+                correct: 0,
+                rationale: "The postictal phase generally lasts from 10-30 minutes, though it can last longer."
+            },
+            {
+                id: 22,
+                question: "True or False: You should immediately suction the airway of a patient who is actively seizing.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Suction is typically performed after the seizure activity stops or if secretions are accessible; forcing suction during active seizing can cause injury."
+            },
+            {
+                id: 23,
+                question: "Which sign would indicate a seizure is caused by something other than epilepsy?",
+                options: ["Presence of an aura", "Typical postictal phase", "Evidence of head trauma", "History of seizures"],
+                correct: 2,
+                rationale: "Evidence of head trauma, fever, or poisoning suggests a secondary cause rather than primary epilepsy."
+            },
+            {
+                id: 24,
+                question: "What is the primary feature of a Jacksonian motor seizure?",
+                options: ["Full body loss of tone", "Jerky activity in one area", "Immediate unconsciousness", "Bilateral muscle rigidity"],
+                correct: 1,
+                rationale: "A Jacksonian (simple partial) seizure generally produces jerky muscle activity in one area of the body, arm, leg, or face."
+            },
+            {
+                id: 25,
+                question: "If a patient is in status epilepticus, which intervention is required after opening the airway?",
+                options: ["Wait for the seizure to stop", "Begin positive pressure ventilation", "Administer oral glucose", "Place in prone position"],
+                correct: 1,
+                rationale: "For status epilepticus, you should open the airway, insert an NPA, and begin positive pressure ventilation with supplemental oxygen."
+            },
+            {
+                id: 26,
+                question: "What is a common characteristic of the postictal state?",
+                options: ["Hyperactivity and alertness", "Confusion and exhaustion", "Immediate return to baseline", "Severe hypertension"],
+                correct: 1,
+                rationale: "The postictal state involves altered mental status ranging from unresponsiveness to confusion, exhaustion, and weakness."
+            },
+            {
+                id: 27,
+                question: "True or False: Febrile seizures are triggered by a slow and gradual rise in body temperature.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Febrile seizures are triggered by a rapid rise in body temperature."
+            },
+            {
+                id: 28,
+                question: "Which of the following justifies immediate transport of a seizure patient?",
+                options: ["The seizure lasted 2 minutes", "The patient has a known history", "More than one seizure occurred", "The patient woke up fully"],
+                correct: 2,
+                rationale: "Transport is required if more than one seizure occurred, the seizure lasted >5 minutes, or anything is abnormal."
+            },
+            {
+                id: 29,
+                question: "During the primary assessment, what should be checked if the patient is unresponsive?",
+                options: ["Detailed family history", "Presence of secretions or vomitus", "Exact date of birth", "Insurance information"],
+                correct: 1,
+                rationale: "Primary assessment includes checking the airway for obstruction by tongue, vomitus, or secretions."
+            },
+            {
+                id: 30,
+                question: "What distinguishes a 'partial' seizure from a 'generalized' seizure?",
+                options: ["Duration of the event", "Involvement of cerebral hemispheres", "Age of the patient", "Severity of the convulsions"],
+                correct: 1,
+                rationale: "Partial seizures involve only one cerebral hemisphere, whereas generalized seizures involve both hemispheres."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

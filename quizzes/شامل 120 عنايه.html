@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Critical Care Nursing Comprehensive Exam</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 120 QUESTIONS HERE) ---
+        const rawQuizData = [
+            // Mechanical Ventilation & Respiratory Failure
+            {
+                id: 1,
+                question: "A patient on a mechanical ventilator triggers the high-pressure alarm. The nurse notes the patient is biting on the endotracheal tube. What is the priority nursing intervention?",
+                options: ["Increase the sedation level", "Insert a bite block", "Suction the airway", "Manually ventilate the patient"],
+                correct: 1,
+                rationale: "Biting the endotracheal tube obstructs airflow and triggers the high-pressure alarm. Inserting a bite block prevents occlusion while protecting the airway."
+            },
+            {
+                id: 2,
+                question: "Which ventilator mode allows the patient to breathe spontaneously between preset mandatory breaths without assistance?",
+                options: ["Assist Control", "Synchronized Intermittent Mandatory Ventilation", "Pressure Support Ventilation", "Continuous Positive Airway Pressure"],
+                correct: 1,
+                rationale: "SIMV delivers a preset number of breaths but allows the patient to breathe spontaneously in between them without ventilator assistance on those spontaneous breaths."
+            },
+            {
+                id: 3,
+                question: "True or False: The primary purpose of PEEP is to keep alveoli open at the end of expiration to improve oxygenation.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "PEEP (Positive End-Expiratory Pressure) maintains positive pressure in the airways at the end of exhalation to prevent alveolar collapse and improve gas exchange."
+            },
+            {
+                id: 4,
+                question: "A patient with ARDS is receiving mechanical ventilation with high levels of PEEP. What is a major hemodynamic complication the nurse should monitor for?",
+                options: ["Hypertension", "Increased cardiac output", "Hypotension", "Bradycardia"],
+                correct: 2,
+                rationale: "High levels of PEEP increase intrathoracic pressure, which decreases venous return to the heart, leading to decreased cardiac output and hypotension."
+            },
+            {
+                id: 5,
+                question: "Which arterial blood gas result indicates uncompensated respiratory acidosis?",
+                options: ["pH 7.25 PaCO2 60 HCO3 24", "pH 7.50 PaCO2 30 HCO3 24", "pH 7.35 PaCO2 45 HCO3 24", "pH 7.30 PaCO2 35 HCO3 18"],
+                correct: 0,
+                rationale: "Respiratory acidosis is characterized by a low pH (<7.35) and a high PaCO2 (>45). Normal HCO3 indicates the kidneys have not yet compensated."
+            },
+            {
+                id: 6,
+                question: "The nurse is weaning a patient from the ventilator using a T-piece trial. Which finding would indicate the need to stop the trial?",
+                options: ["Respiratory rate of 22 breaths per minute", "Heart rate increase from 80 to 90 beats per minute", "Oxygen saturation of 95 percent", "Respiratory rate of 38 breaths per minute"],
+                correct: 3,
+                rationale: "A respiratory rate greater than 35 breaths/min is a sign of weaning intolerance and indicates the need to stop the trial and rest the patient."
+            },
+            {
+                id: 7,
+                question: "Which condition is classified as an intrarenal cause of Acute Kidney Injury?",
+                options: ["Hypovolemic shock", "Acute Tubular Necrosis", "Benign Prostatic Hypertrophy", "Dehydration"],
+                correct: 1,
+                rationale: "Acute Tubular Necrosis (ATN) causes direct damage to the kidney parenchyma, making it an intrarenal cause. Shock is prerenal; BPH is postrenal."
+            },
+            {
+                id: 8,
+                question: "A patient with acute kidney injury has a serum potassium level of 6.8 mEq/L. Which medication should the nurse anticipate administering first?",
+                options: ["Sodium polystyrene sulfonate", "Regular insulin and dextrose", "Furosemide", "Sevelamer"],
+                correct: 1,
+                rationale: "IV Regular insulin and dextrose moves potassium into the cells rapidly, temporizing the emergency. Sodium polystyrene sulfonate takes hours to work."
+            },
+            {
+                id: 9,
+                question: "True or False: Delirium in the ICU is always characterized by agitation and hallucinations.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Delirium can be hyperactive (agitated), hypoactive (lethargic/withdrawn), or mixed. Hypoactive delirium is often missed because the patient is quiet."
+            },
+            {
+                id: 10,
+                question: "Which tool is most appropriate for assessing pain in an intubated, non-verbal critical care patient?",
+                options: ["Numeric Rating Scale", "Critical-Care Pain Observation Tool", "Visual Analog Scale", "Verbal Descriptor Scale"],
+                correct: 1,
+                rationale: "The Critical-Care Pain Observation Tool (CPOT) uses behavioral indicators (facial expression, body movements, muscle tension, compliance with ventilator) to assess pain in non-verbal patients."
+            },
+            {
+                id: 11,
+                question: "A patient with severe sepsis has a lactate level of 5 mmol/L. What is the priority intervention?",
+                options: ["Administer vasopressors", "Start broad-spectrum antibiotics", "Administer 30 mL/kg crystalloid fluid", "Obtain blood cultures"],
+                correct: 2,
+                rationale: "Initial resuscitation for sepsis-induced hypoperfusion (high lactate) involves rapid administration of 30 mL/kg of crystalloids."
+            },
+            {
+                id: 12,
+                question: "Which electrolyte imbalance is most likely to cause Trousseau's sign?",
+                options: ["Hypokalemia", "Hypernatremia", "Hypocalcemia", "Hypermagnesemia"],
+                correct: 2,
+                rationale: "Trousseau's sign (carpopedal spasm induced by inflating a BP cuff) is a classic sign of hypocalcemia."
+            },
+            {
+                id: 13,
+                question: "The nurse is caring for a patient with increased intra-abdominal pressure. Which position is contraindicated?",
+                options: ["Supine", "Reverse Trendelenburg", "High Fowler's", "Side-lying"],
+                correct: 2,
+                rationale: "High Fowler's position increases intra-abdominal pressure by compressing the abdominal contents. Reverse Trendelenburg is preferred."
+            },
+            {
+                id: 14,
+                question: "True or False: Intra-abdominal hypertension is defined as a sustained intra-abdominal pressure greater than 12 mmHg.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "IAH is defined as sustained intra-abdominal pressure > 12 mmHg. ACS occurs when pressure > 20 mmHg with organ dysfunction."
+            },
+            {
+                id: 15,
+                question: "Which medication is primarily used for sedation in ICU patients to reduce the duration of mechanical ventilation and delirium?",
+                options: ["Lorazepam", "Midazolam", "Dexmedetomidine", "Haloperidol"],
+                correct: 2,
+                rationale: "Dexmedetomidine is associated with shorter duration of ventilation and lower delirium rates compared to benzodiazepines like Lorazepam or Midazolam."
+            },
+            {
+                id: 16,
+                question: "A patient has a central venous pressure (CVP) of 2 mmHg. What does this value indicate?",
+                options: ["Fluid volume overload", "Fluid volume deficit", "Right ventricular failure", "Increased intrathoracic pressure"],
+                correct: 1,
+                rationale: "Normal CVP is typically higher (e.g., 2-6 or 8-12 depending on source, but 2 is low end). A very low CVP indicates hypovolemia or fluid volume deficit."
+            },
+            {
+                id: 17,
+                question: "What is the most accurate method to measure intra-abdominal pressure in a critically ill patient?",
+                options: ["Abdominal girth measurement", "Nasogastric tube manometry", "Rectal pressure monitoring", "Intravesical bladder pressure"],
+                correct: 3,
+                rationale: "Intravesical (bladder) pressure monitoring is the gold standard for indirect measurement of intra-abdominal pressure."
+            },
+            {
+                id: 18,
+                question: "Which finding suggests a patient has developed a pneumothorax while on mechanical ventilation?",
+                options: ["Increased breath sounds on the affected side", "Tracheal deviation toward the affected side", "Sudden decrease in oxygen saturation", "Decreased peak airway pressure"],
+                correct: 2,
+                rationale: "A pneumothorax causes sudden hypoxia, absent breath sounds on the affected side, and potentially tracheal deviation away from the affected side (tension)."
+            },
+            {
+                id: 19,
+                question: "True or False: The ABCDEF bundle is designed to maximize sedation and limit mobility in ICU patients.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The ABCDEF bundle focuses on Awakening, Breathing coordination, Delirium monitoring, and Early mobility to improve outcomes."
+            },
+            {
+                id: 20,
+                question: "Which type of sleep is characterized by rapid eye movements and vivid dreaming?",
+                options: ["Stage 1 NREM", "Stage 2 NREM", "Stage 3 NREM", "REM sleep"],
+                correct: 3,
+                rationale: "REM (Rapid Eye Movement) sleep is the stage where most vivid dreaming occurs and brain activity resembles wakefulness."
+            },
+            {
+                id: 21,
+                question: "A patient with COPD is receiving oxygen. Why should the nurse be cautious about administering high concentrations of oxygen?",
+                options: ["It may cause absorption atelectasis", "It may suppress the hypoxic drive", "It causes rapid pulmonary fibrosis", "It increases carbon dioxide excretion"],
+                correct: 1,
+                rationale: "In some COPD patients with chronic hypercapnia, the respiratory drive is triggered by low oxygen levels. High O2 can suppress this drive, causing hypoventilation."
+            },
+            {
+                id: 22,
+                question: "Which of the following is a prerenal cause of acute kidney injury?",
+                options: ["Nephrotoxic antibiotics", "Ureteral calculus", "Severe dehydration", "Glomerulonephritis"],
+                correct: 2,
+                rationale: "Severe dehydration reduces blood flow to the kidneys, classifying it as a prerenal cause. Antibiotics are intrarenal; calculi are postrenal."
+            },
+            {
+                id: 23,
+                question: "What is the normal range for serum sodium?",
+                options: ["125 to 135 mEq per L", "135 to 145 mEq per L", "145 to 155 mEq per L", "155 to 165 mEq per L"],
+                correct: 1,
+                rationale: "The normal physiological range for serum sodium is 135 to 145 mEq/L."
+            },
+            {
+                id: 24,
+                question: "A patient presents with muscle weakness, peaked T waves on ECG, and nausea. Which electrolyte imbalance is suspected?",
+                options: ["Hypokalemia", "Hyperkalemia", "Hyponatremia", "Hypercalcemia"],
+                correct: 1,
+                rationale: "Peaked T waves are the hallmark ECG sign of hyperkalemia. Muscle weakness and GI symptoms are also common."
+            },
+            {
+                id: 25,
+                question: "True or False: ICU-acquired weakness typically spares the facial and ocular muscles.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "ICU-acquired weakness (CIP/CIM) affects limb and respiratory muscles but usually spares the facial and ocular muscles."
+            },
+            {
+                id: 26,
+                question: "Which intervention is most effective in preventing ventilator-associated pneumonia (VAP)?",
+                options: ["Keeping the patient supine at all times", "Elevating the head of the bed 30 to 45 degrees", "Changing ventilator circuits daily", "Administering prophylactic antibiotics"],
+                correct: 1,
+                rationale: "Elevating the head of the bed prevents aspiration of gastric contents, a primary cause of VAP. Circuits should not be changed routinely."
+            },
+            {
+                id: 27,
+                question: "What is the primary goal of the 'diuretic phase' in Acute Kidney Injury recovery?",
+                options: ["To concentrate the urine", "To excrete excess fluid and electrolytes", "To restore glomerular filtration rate completely", "To prevent potassium loss"],
+                correct: 1,
+                rationale: "In the diuretic phase, the kidneys recover the ability to excrete urine but cannot concentrate it well, leading to large fluid and electrolyte losses."
+            },
+            {
+                id: 28,
+                question: "Which finding is consistent with a diagnosis of delirium using the CAM-ICU tool?",
+                options: ["Chronic memory loss", "Acute onset and fluctuating course", "Stable mental status", "Ability to follow complex commands"],
+                correct: 1,
+                rationale: "The hallmark of delirium is an acute change in mental status that fluctuates over time, combined with inattention."
+            },
+            {
+                id: 29,
+                question: "A patient is receiving neuromuscular blocking agents. Which assessment is essential to ensure patient safety?",
+                options: ["Checking deep tendon reflexes daily", "Ensuring adequate sedation and analgesia", "Monitoring for hyperactive delirium", "Assessing pupil reaction hourly"],
+                correct: 1,
+                rationale: "Paralytics do not provide sedation or pain relief. A paralyzed patient who is awake and in pain experiences terror; adequate sedation is mandatory."
+            },
+            {
+                id: 30,
+                question: "True or False: Sleep deprivation in the ICU can lead to delirium and delayed weaning from mechanical ventilation.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Sleep deprivation disrupts circadian rhythms and immune function, contributing to delirium and weakening respiratory muscles, which delays weaning."
+            },
+            {
+                id: 31,
+                question: "What is the correct landmark for zeroing the transducer for intra-abdominal pressure measurement?",
+                options: ["Sternal angle", "Mid-axillary line at the iliac crest", "Umbilicus", "Symphysis pubis"],
+                correct: 1,
+                rationale: "For IAP measurement, the transducer should be zeroed at the mid-axillary line at the level of the iliac crest."
+            },
+            {
+                id: 32,
+                question: "Which ventilator setting determines the amount of effort the patient must generate to trigger a breath?",
+                options: ["Sensitivity", "Peak Inspiratory Pressure", "Positive End Expiratory Pressure", "Tidal Volume"],
+                correct: 0,
+                rationale: "Sensitivity controls how much negative pressure or flow change the patient must generate to trigger the ventilator to deliver a breath."
+            },
+            {
+                id: 33,
+                question: "A patient with a head injury requires mechanical ventilation. What is a primary goal regarding CO2 levels?",
+                options: ["Maintain hypercapnia to improve flow", "Maintain respiratory alkalosis to reduce ICP", "Keep PaCO2 above 50 mmHg", "Allow permissive hypercapnia"],
+                correct: 1,
+                rationale: "In head injury, controlled hyperventilation (respiratory alkalosis) causes cerebral vasoconstriction, which helps reduce Intracranial Pressure (ICP)."
+            },
+            {
+                id: 34,
+                question: "Which of the following suggests a patient is ready to be weaned from mechanical ventilation?",
+                options: ["Hemodynamic instability", "FiO2 requirement of 80 percent", "Adequate respiratory muscle strength", "Deep sedation"],
+                correct: 2,
+                rationale: "Readiness for weaning requires resolved underlying cause, hemodynamic stability, adequate oxygenation on low FiO2, and adequate muscle strength."
+            },
+            {
+                id: 35,
+                question: "True or False: The RIFLE criteria are used to classify the severity of Acute Respiratory Distress Syndrome.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The RIFLE criteria (Risk, Injury, Failure, Loss, ESKD) are used to classify Acute Kidney Injury, not ARDS."
+            },
+            {
+                id: 36,
+                question: "Which factor contributes most to sleep fragmentation in the ICU?",
+                options: ["Continuous darkness", "Noise and frequent care interventions", "Administration of melatonin", "Family visitation"],
+                correct: 1,
+                rationale: "Noise from alarms and staff, along with frequent nursing interventions, are major causes of sleep disruption in the ICU."
+            },
+            {
+                id: 37,
+                question: "A patient has a serum calcium level of 7.0 mg/dL. The nurse should assess for which sign?",
+                options: ["Chvostek sign", "Babinski sign", "Brudzinski sign", "Kernig sign"],
+                correct: 0,
+                rationale: "Chvostek's sign (facial muscle twitching when the cheek is tapped) is a sign of hypocalcemia (tetany)."
+            },
+            {
+                id: 38,
+                question: "What is the preferred route for nutrition in a critically ill patient with a functional GI tract?",
+                options: ["Total Parenteral Nutrition", "Enteral Nutrition", "Peripheral Parenteral Nutrition", "Clear liquid diet"],
+                correct: 1,
+                rationale: "Enteral nutrition preserves gut mucosal integrity and immune function and is preferred over parenteral nutrition if the gut is working."
+            },
+            {
+                id: 39,
+                question: "Which complication is associated with high levels of PEEP?",
+                options: ["Barotrauma", "Atelectasis", "Hypertension", "Increased venous return"],
+                correct: 0,
+                rationale: "High PEEP can overdistend alveoli, leading to rupture and air leakage (barotrauma), such as pneumothorax."
+            },
+            {
+                id: 40,
+                question: "True or False: Hypoactive delirium is often characterized by lethargy and withdrawal.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Hypoactive delirium presents with decreased psychomotor activity, lethargy, and withdrawal, making it harder to detect than hyperactive delirium."
+            },
+            {
+                id: 41,
+                question: "The nurse is caring for a patient with abdominal compartment syndrome. What is the definitive treatment for severe ACS with organ failure?",
+                options: ["Fluid bolus", "Decompressive laparotomy", "Increased sedation", "Diuretic therapy"],
+                correct: 1,
+                rationale: "While medical management is tried first, severe ACS with organ dysfunction requires surgical decompression (opening the abdomen) to relieve pressure."
+            },
+            {
+                id: 42,
+                question: "Which metabolic imbalance is a common complication of Acute Kidney Injury?",
+                options: ["Metabolic alkalosis", "Metabolic acidosis", "Respiratory alkalosis", "Respiratory acidosis"],
+                correct: 1,
+                rationale: "The kidneys lose the ability to excrete hydrogen ions and reabsorb bicarbonate in AKI, leading to metabolic acidosis."
+            },
+            {
+                id: 43,
+                question: "A patient is experiencing 'fighting the ventilator'. What does this likely indicate?",
+                options: ["Patient-ventilator dyssynchrony", "Adequate sedation", "Improvement in lung compliance", "Need for extubation"],
+                correct: 0,
+                rationale: "Fighting the ventilator indicates dyssynchrony, where the patient's breath attempts do not match the machine's delivery, often due to pain, anxiety, or inadequate flow."
+            },
+            {
+                id: 44,
+                question: "Which type of respiratory failure is characterized by a PaO2 less than 60 mmHg and a normal or low PaCO2?",
+                options: ["Hypercapnic respiratory failure", "Hypoxemic respiratory failure", "Mixed respiratory failure", "Chronic respiratory failure"],
+                correct: 1,
+                rationale: "Type I (Hypoxemic) respiratory failure involves oxygenation failure (low PaO2) with normal ventilation (normal/low PaCO2)."
+            },
+            {
+                id: 45,
+                question: "True or False: Enteral nutrition should be avoided during the first week of critical illness to prevent weakness.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Early parenteral nutrition should be avoided, but early enteral nutrition is generally encouraged unless contraindicated."
+            },
+            {
+                id: 46,
+                question: "What is a common cause of postrenal Acute Kidney Injury?",
+                options: ["Heart failure", "Kidney stones obstructing the ureter", "Contrast dye exposure", "Sepsis"],
+                correct: 1,
+                rationale: "Postrenal AKI is caused by obstruction of urine flow. Kidney stones, tumors, or BPH obstructing the tract are classic causes."
+            },
+            {
+                id: 47,
+                question: "Which intervention helps prevent ICU-acquired weakness?",
+                options: ["Strict bed rest", "Early mobilization", "Continuous deep sedation", "High-dose corticosteroids"],
+                correct: 1,
+                rationale: "Early mobilization and physical therapy are the primary evidence-based interventions to prevent muscle wasting and ICU-acquired weakness."
+            },
+            {
+                id: 48,
+                question: "A patient reports sharp pain at an incision site. Which nerve fibers are responsible for transmitting this fast, sharp pain?",
+                options: ["C fibers", "A-delta fibers", "Beta fibers", "Gamma fibers"],
+                correct: 1,
+                rationale: "A-delta fibers are myelinated and transmit rapid, sharp, localized pain. C fibers are unmyelinated and transmit slow, dull, aching pain."
+            },
+            {
+                id: 49,
+                question: "Which ventilator alarm indicates a potential disconnection of the tubing?",
+                options: ["High pressure alarm", "Low pressure alarm", "High respiratory rate alarm", "High tidal volume alarm"],
+                correct: 1,
+                rationale: "A low pressure alarm usually indicates a leak or disconnection in the ventilator circuit, as the machine meets no resistance."
+            },
+            {
+                id: 50,
+                question: "True or False: Family presence during resuscitation is generally harmful and should be discouraged.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Evidence suggests family presence during resuscitation helps families cope and does not disrupt patient care; it should be offered/supported."
+            },
+            {
+                id: 51,
+                question: "Which phase of AKI is characterized by a urine output of less than 400 mL per day?",
+                options: ["Onset phase", "Oliguric phase", "Diuretic phase", "Recovery phase"],
+                correct: 1,
+                rationale: "Oliguria is defined as urine output < 400 mL/day (or < 0.5 mL/kg/hr), marking the oliguric phase of AKI."
+            },
+            {
+                id: 52,
+                question: "A patient has a potassium level of 2.8 mEq/L. Which clinical manifestation is most concerning?",
+                options: ["Hyperactive bowel sounds", "Cardiac dysrhythmias", "Increased muscle tone", "Confusion"],
+                correct: 1,
+                rationale: "Severe hypokalemia (< 3.0) can cause life-threatening cardiac dysrhythmias and cardiac arrest."
+            },
+            {
+                id: 53,
+                question: "What is the formula for calculating Abdominal Perfusion Pressure (APP)?",
+                options: ["MAP minus IAP", "MAP plus IAP", "Systolic BP minus IAP", "Diastolic BP plus IAP"],
+                correct: 0,
+                rationale: "APP = Mean Arterial Pressure (MAP) - Intra-abdominal Pressure (IAP). A target APP > 60 mmHg is recommended."
+            },
+            {
+                id: 54,
+                question: "Which agent is an antioxidant used to prevent contrast-induced nephropathy?",
+                options: ["Furosemide", "N-acetylcysteine", "Dopamine", "Mannitol"],
+                correct: 1,
+                rationale: "N-acetylcysteine (Mucomyst) is an antioxidant that may help prevent renal damage from contrast dye, often used with hydration."
+            },
+            {
+                id: 55,
+                question: "True or False: Hyperactive delirium is the most common subtype of delirium in the ICU.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Mixed or hypoactive delirium is actually more common than pure hyperactive delirium, though hyperactive is more disruptive."
+            },
+            {
+                id: 56,
+                question: "What is the primary physiological effect of CPAP mode?",
+                options: ["It delivers full mandatory breaths", "It provides constant positive airway pressure during spontaneous breathing", "It synchronizes breaths with patient effort", "It provides negative pressure ventilation"],
+                correct: 1,
+                rationale: "CPAP (Continuous Positive Airway Pressure) provides a constant pressure throughout the respiratory cycle to keep airways open during spontaneous breathing."
+            },
+            {
+                id: 57,
+                question: "Which sign indicates a patient is failing a spontaneous breathing trial (SBT)?",
+                options: ["Respiratory rate of 20 breaths per minute", "Oxygen saturation of 96 percent", "Diaphoresis and agitation", "Systolic BP of 120 mmHg"],
+                correct: 2,
+                rationale: "Signs of failure include agitation, diaphoresis, tachypnea (>35), tachycardia (>140), or desaturation."
+            },
+            {
+                id: 58,
+                question: "The nurse monitors a patient for 'volutrauma'. This lung injury is caused by which factor?",
+                options: ["High inspiratory pressures", "High tidal volumes", "High oxygen concentrations", "Low PEEP levels"],
+                correct: 1,
+                rationale: "Volutrauma is lung injury caused by overdistension of alveoli due to excessive tidal volumes."
+            },
+            {
+                id: 59,
+                question: "Which condition causes a 'pre-renal' failure by decreasing effective renal perfusion?",
+                options: ["Heart failure", "Prostate cancer", "Aminoglycoside toxicity", "Lupus nephritis"],
+                correct: 0,
+                rationale: "Heart failure reduces cardiac output, which reduces perfusion to the kidneys, leading to prerenal failure."
+            },
+            {
+                id: 60,
+                question: "True or False: A score of 0 on the Richmond Agitation-Sedation Scale (RASS) indicates the patient is alert and calm.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "RASS 0 represents an alert and calm state. Positive scores are agitation; negative scores are sedation."
+            },
+            {
+                id: 61,
+                question: "Which ventilator parameter controls the volume of air delivered with each breath?",
+                options: ["FiO2", "PEEP", "Tidal Volume", "Flow rate"],
+                correct: 2,
+                rationale: "Tidal Volume (Vt) is the specific volume of gas delivered to the patient during a mechanical breath."
+            },
+            {
+                id: 62,
+                question: "What is the recommended target glucose range for critically ill patients to prevent polyneuromyopathy?",
+                options: ["80 to 110 mg per dL", "140 to 180 mg per dL", "60 to 100 mg per dL", "200 to 250 mg per dL"],
+                correct: 0,
+                rationale: "Strict glycemic control (historically 80-110, though guidelines vary, the text cites 80-110) helps prevent metabolic derangements contributing to weakness."
+            },
+            {
+                id: 63,
+                question: "Which nursing intervention is best to promote sleep in the ICU?",
+                options: ["Keep lights on continuously", "Cluster nursing care activities", "Maximize sedation at night", "Leave alarms at maximum volume"],
+                correct: 1,
+                rationale: "Clustering care minimizes interruptions, allowing longer periods of uninterrupted sleep."
+            },
+            {
+                id: 64,
+                question: "A patient has a serum sodium of 118 mEq/L. The nurse initiates seizure precautions. What is the rationale?",
+                options: ["Hyponatremia causes cerebral cell shrinkage", "Hyponatremia causes cerebral edema", "Hyponatremia increases nerve conduction velocity", "Hyponatremia causes muscle tetany"],
+                correct: 1,
+                rationale: "Severe hyponatremia causes water to shift into brain cells, leading to cerebral edema and potentially seizures."
+            },
+            {
+                id: 65,
+                question: "True or False: Percussion and vibration are techniques used to loosen respiratory secretions.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Chest physiotherapy techniques like percussion and vibration help mobilize secretions so they can be coughed up or suctioned."
+            },
+            {
+                id: 66,
+                question: "Which mode of ventilation is often used as a weaning mode?",
+                options: ["Control Mode Ventilation", "Pressure Support Ventilation", "High Frequency Oscillatory Ventilation", "Assist Control"],
+                correct: 1,
+                rationale: "Pressure Support Ventilation (PSV) allows the patient to control rate and volume, only boosting their effort, making it ideal for weaning."
+            },
+            {
+                id: 67,
+                question: "A patient with acute respiratory failure has V/Q mismatch. What is the most common cause?",
+                options: ["Pulmonary Embolism", "Pneumonia", "Neuromuscular disorder", "Narcotic overdose"],
+                correct: 1,
+                rationale: "Pneumonia causes alveoli to fill with fluid, preventing gas exchange despite blood flow, creating a classic V/Q mismatch."
+            },
+            {
+                id: 68,
+                question: "Which assessment finding is consistent with fluid volume deficit?",
+                options: ["Distended neck veins", "Bounding pulse", "Flat neck veins", "Crackles in lungs"],
+                correct: 2,
+                rationale: "Flat neck veins (in supine position) indicate low intravascular volume (hypovolemia)."
+            },
+            {
+                id: 69,
+                question: "What is the minimum mean arterial pressure (MAP) usually required to maintain adequate renal perfusion?",
+                options: ["45 mmHg", "65 mmHg", "85 mmHg", "100 mmHg"],
+                correct: 1,
+                rationale: "A MAP of at least 65 mmHg is generally considered necessary to maintain adequate tissue perfusion, including to the kidneys."
+            },
+            {
+                id: 70,
+                question: "True or False: Critically ill patients should be positioned flat on their back to prevent aspiration.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Supine positioning increases aspiration risk. The head of the bed should be elevated 30-45 degrees unless contraindicated."
+            },
+            {
+                id: 71,
+                question: "Which electrolyte imbalance is associated with digoxin toxicity?",
+                options: ["Hyperkalemia", "Hypokalemia", "Hypercalcemia", "Hyponatremia"],
+                correct: 1,
+                rationale: "Hypokalemia potentiates the effects of digoxin and increases the risk of digoxin toxicity."
+            },
+            {
+                id: 72,
+                question: "A patient is in the 'alarm stage' of stress. Which physiological response is expected?",
+                options: ["Decreased heart rate", "Pupil constriction", "Increased release of catecholamines", "Decreased blood pressure"],
+                correct: 2,
+                rationale: "The alarm stage (fight or flight) involves the release of epinephrine and norepinephrine (catecholamines), increasing HR and BP."
+            },
+            {
+                id: 73,
+                question: "What is 'permissive hypercapnia'?",
+                options: ["Allowing PaCO2 to rise to protect the lungs from high pressures", "Accidental increase in CO2 due to ventilator failure", "Using bicarbonate to lower pH", "Keeping CO2 low to reduce ICP"],
+                correct: 0,
+                rationale: "Permissive hypercapnia is a strategy of accepting higher CO2 levels to use lower tidal volumes and pressures, thus preventing lung injury."
+            },
+            {
+                id: 74,
+                question: "Which nursing action prevents complications of immobility in ventilated patients?",
+                options: ["Keeping the patient sedated", "Daily passive range of motion exercises", "Restricting fluid intake", "Maintaining a flat position"],
+                correct: 1,
+                rationale: "Passive ROM and early mobilization help prevent muscle atrophy, contractures, and DVT."
+            },
+            {
+                id: 75,
+                question: "True or False: Non-invasive positive pressure ventilation (NPPV) can be used to treat COPD exacerbations.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "NPPV (like BiPAP) is a first-line treatment for COPD exacerbations to avoid intubation."
+            },
+            {
+                id: 76,
+                question: "Which factor increases the risk of delirium in the ICU?",
+                options: ["Young age", "Use of physical restraints", "Natural lighting", "Early mobilization"],
+                correct: 1,
+                rationale: "Physical restraints are a potent precipitating factor for delirium and agitation."
+            },
+            {
+                id: 77,
+                question: "A patient has a PaO2/FiO2 ratio of 100. This suggests which condition?",
+                options: ["Normal lung function", "Mild hypoxemia", "Severe ARDS", "Hyperventilation"],
+                correct: 2,
+                rationale: "A P/F ratio < 100 mmHg typically indicates severe ARDS (Acute Respiratory Distress Syndrome)."
+            },
+            {
+                id: 78,
+                question: "Which intervention helps reduce intracranial pressure in a ventilated patient?",
+                options: ["Applying PEEP of 15 cmH2O", "Hyperventilation to respiratory alkalosis", "Placing the head of bed flat", "Suctioning frequently"],
+                correct: 1,
+                rationale: "Controlled hyperventilation lowers CO2, causing cerebral vasoconstriction and lowering ICP. High PEEP and suctioning can raise ICP."
+            },
+            {
+                id: 79,
+                question: "What is the primary cause of 'volutrauma'?",
+                options: ["Oxygen toxicity", "Large tidal volumes", "High PEEP", "Low flow rates"],
+                correct: 1,
+                rationale: "Volutrauma refers to lung injury specifically caused by over-stretching the lung with large Tidal Volumes."
+            },
+            {
+                id: 80,
+                question: "True or False: Suctioning should be performed routinely every 2 hours.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Suctioning should be done only when indicated (secretions, desaturation, coughing), not routinely, to avoid trauma and hypoxia."
+            },
+            {
+                id: 81,
+                question: "Which medication is an osmotic diuretic used to reduce cerebral edema?",
+                options: ["Furosemide", "Mannitol", "Spironolactone", "Hydrochlorothiazide"],
+                correct: 1,
+                rationale: "Mannitol is an osmotic diuretic that draws fluid out of brain tissue to reduce Intracranial Pressure."
+            },
+            {
+                id: 82,
+                question: "A patient with renal failure has metabolic acidosis. The body compensates by:",
+                options: ["Retaining bicarbonate", "Decreasing respiratory rate", "Increasing respiratory rate", "Excreting more hydrogen ions"],
+                correct: 2,
+                rationale: "The respiratory system compensates for metabolic acidosis by increasing the respiratory rate (Kussmaul respirations) to blow off CO2 (acid)."
+            },
+            {
+                id: 83,
+                question: "What is the main advantage of the 'Assist Control' ventilator mode?",
+                options: ["It prevents respiratory muscle atrophy completely", "It ensures a minimum minute ventilation", "It allows the patient to control tidal volume entirely", "It requires no patient effort"],
+                correct: 1,
+                rationale: "AC mode ensures that every breath (patient-triggered or machine-triggered) delivers a full preset volume, guaranteeing minute ventilation."
+            },
+            {
+                id: 84,
+                question: "Which condition is a risk factor for abdominal compartment syndrome?",
+                options: ["Chronic constipation", "Massive fluid resuscitation", "Gastritis", "Appendicitis"],
+                correct: 1,
+                rationale: "Massive fluid resuscitation leads to bowel edema and third-spacing, significantly increasing intra-abdominal pressure."
+            },
+            {
+                id: 85,
+                question: "True or False: Pain is what the patient says it is, regardless of objective signs.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The patient's self-report is the single most reliable indicator of pain."
+            },
+            {
+                id: 86,
+                question: "Which parameter is decreased in hypovolemic shock?",
+                options: ["Heart rate", "Systemic Vascular Resistance", "Central Venous Pressure", "Hematocrit (initially)"],
+                correct: 2,
+                rationale: "In hypovolemic shock, circulating volume is low, leading to a decreased CVP (preload)."
+            },
+            {
+                id: 87,
+                question: "What is the effect of 'Auto-PEEP' or air trapping?",
+                options: ["Improved oxygenation", "Decreased work of breathing", "Hemodynamic compromise", "Increased lung compliance"],
+                correct: 2,
+                rationale: "Auto-PEEP (air trapping) increases intrathoracic pressure, which can reduce venous return and cause hypotension (hemodynamic compromise)."
+            },
+            {
+                id: 88,
+                question: "Which intervention is appropriate for a patient with hypernatremia?",
+                options: ["Administer hypertonic saline", "Restrict fluid intake", "Administer hypotonic fluids slowly", "Administer salt tablets"],
+                correct: 2,
+                rationale: "Hypernatremia (water deficit) is treated by replacing free water, often with hypotonic fluids (like D5W or 0.45% NaCl) slowly to prevent cerebral edema."
+            },
+            {
+                id: 89,
+                question: "A patient on a ventilator has sudden asymmetry of chest movement. What is the likely cause?",
+                options: ["Right mainstem intubation", "Bronchospasm", "Sedation effect", " Pulmonary hypertension"],
+                correct: 0,
+                rationale: "If the tube slips into the right mainstem bronchus, only the right lung inflates, causing asymmetrical chest movement."
+            },
+            {
+                id: 90,
+                question: "True or False: The use of physical restraints is recommended to prevent extubation in agitated patients.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "While used, restraints are not first-line 'recommended' as they increase agitation and delirium. Chemical sedation or treating the cause is preferred."
+            },
+            {
+                id: 91,
+                question: "Which phase of the nursing process involves identifying the family's coping style?",
+                options: ["Assessment", "Diagnosis", "Planning", "Evaluation"],
+                correct: 0,
+                rationale: "Assessment involves gathering data about the family's structure, coping mechanisms, and needs."
+            },
+            {
+                id: 92,
+                question: "A patient with sepsis has a urine output of 10 mL/hr for 2 hours. This is defined as:",
+                options: ["Polyuria", "Oliguria", "Anuria", "Normal output"],
+                correct: 1,
+                rationale: "Oliguria is < 0.5 mL/kg/hr. 10 mL/hr is critically low and indicates renal compromise."
+            },
+            {
+                id: 93,
+                question: "What is the purpose of the 'inspiratory hold' maneuver on a ventilator?",
+                options: ["To measure auto-PEEP", "To measure plateau pressure", "To clear secretions", "To trigger a breath"],
+                correct: 1,
+                rationale: "An inspiratory hold pauses flow at end-inspiration to measure the plateau pressure (alveolar pressure)."
+            },
+            {
+                id: 94,
+                question: "Which of the following causes metabolic alkalosis?",
+                options: ["Diarrhea", "Renal failure", "Nasogastric suctioning", "Diabetic ketoacidosis"],
+                correct: 2,
+                rationale: "NG suctioning removes gastric acid (H+), leaving a relative excess of base, causing metabolic alkalosis."
+            },
+            {
+                id: 95,
+                question: "True or False: Endorphins are endogenous opioids that help relieve pain.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Endorphins (endogenous morphine) are natural peptides that bind to opioid receptors to block pain."
+            },
+            {
+                id: 96,
+                question: "Which sign suggests a patient has 'fluid volume excess'?",
+                options: ["Poor skin turgor", "Weight loss", "Crackles on auscultation", "Dry mucous membranes"],
+                correct: 2,
+                rationale: "Fluid overload leads to pulmonary edema, manifested as crackles (rales) in the lungs."
+            },
+            {
+                id: 97,
+                question: "The 'ABCDEF' bundle component 'F' stands for:",
+                options: ["Feeding", "Fluids", "Family engagement", "Follow-up"],
+                correct: 2,
+                rationale: "F stands for Family engagement and empowerment in the care of the critically ill patient."
+            },
+            {
+                id: 98,
+                question: "Which drug is a neuromuscular blocker?",
+                options: ["Propofol", "Fentanyl", "Cisatracurium", "Midazolam"],
+                correct: 2,
+                rationale: "Cisatracurium is a non-depolarizing neuromuscular blocking agent (paralytic). Propofol/Midazolam are sedatives; Fentanyl is an analgesic."
+            },
+            {
+                id: 99,
+                question: "What is the normal physiologic shunt in healthy lungs?",
+                options: ["0 percent", "2 to 5 percent", "10 to 15 percent", "20 to 25 percent"],
+                correct: 1,
+                rationale: "A small amount of blood (2-5%) normally bypasses the alveoli (bronchial/pleural veins) without gas exchange."
+            },
+            {
+                id: 100,
+                question: "True or False: High blood glucose levels (Hyperglycemia) are beneficial in critical illness to provide energy.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Hyperglycemia is detrimental; it increases infection risk, neuropathy, and mortality. Glycemic control is a standard of care."
+            },
+            {
+                id: 101,
+                question: "Which complication is most likely with prolonged immobility in the ICU?",
+                options: ["Improved muscle tone", "Deep Vein Thrombosis", "Hypertension", "Hypercalcemia"],
+                correct: 1,
+                rationale: "Venous stasis from immobility significantly increases the risk of DVT and pulmonary embolism."
+            },
+            {
+                id: 102,
+                question: "A patient with ARDS requires prone positioning. What is the primary benefit?",
+                options: ["It facilitates nursing care", "It improves V/Q matching", "It reduces the need for sedation", "It prevents skin breakdown"],
+                correct: 1,
+                rationale: "Prone positioning recruits dorsal lung regions and improves Ventilation/Perfusion (V/Q) matching in ARDS."
+            },
+            {
+                id: 103,
+                question: "Which finding indicates successful weaning from the ventilator?",
+                options: ["PaCO2 increases by 10 mmHg", "Rapid shallow breathing index less than 105", "Heart rate increases by 30 bpm", "Agitation and diaphoresis"],
+                correct: 1,
+                rationale: "A Rapid Shallow Breathing Index (RSBI) < 105 is a predictor of successful weaning."
+            },
+            {
+                id: 104,
+                question: "Which electrolyte is mainly intracellular?",
+                options: ["Sodium", "Calcium", "Chloride", "Potassium"],
+                correct: 3,
+                rationale: "Potassium is the primary intracellular cation. Sodium is the primary extracellular cation."
+            },
+            {
+                id: 105,
+                question: "True or False: The diaphragm is the primary muscle of inspiration.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The diaphragm contraction increases thoracic volume, creating negative pressure for inspiration."
+            },
+            {
+                id: 106,
+                question: "Which factor decreases the diffusion of gases across the alveolar-capillary membrane?",
+                options: ["Increased surface area", "Thin membrane", "Pulmonary edema", "High partial pressure gradient"],
+                correct: 2,
+                rationale: "Pulmonary edema thickens the diffusion barrier with fluid, impairing gas exchange."
+            },
+            {
+                id: 107,
+                question: "A patient is receiving a loop diuretic. The nurse should monitor for which electrolyte imbalance?",
+                options: ["Hyperkalemia", "Hypokalemia", "Hypernatremia", "Hypercalcemia"],
+                correct: 1,
+                rationale: "Loop diuretics (e.g., Lasix) cause the kidneys to excrete potassium, leading to hypokalemia."
+            },
+            {
+                id: 108,
+                question: "What is the purpose of 'daily interruption of sedation'?",
+                options: ["To save medication costs", "To assess neurological status and readiness to wean", "To allow the patient to sleep", "To increase ventilator synchrony"],
+                correct: 1,
+                rationale: "Stopping sedation daily ('sedation vacation') prevents accumulation and allows assessment of mental status and extubation readiness."
+            },
+            {
+                id: 109,
+                question: "Which condition is a contraindication for Non-Invasive Ventilation (NIV)?",
+                options: ["COPD exacerbation", "Cardiogenic pulmonary edema", "Facial trauma or burns", "Obstructive sleep apnea"],
+                correct: 2,
+                rationale: "NIV requires a tight mask seal. Facial trauma or burns prevent a seal and are contraindications."
+            },
+            {
+                id: 110,
+                question: "True or False: An arterial line is used primarily to administer medications.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Arterial lines are used for continuous BP monitoring and blood sampling, NOT for medication administration (danger of arterial spasm/necrosis)."
+            },
+            {
+                id: 111,
+                question: "Which hormone is responsible for water retention in the kidneys?",
+                options: ["Insulin", "Antidiuretic Hormone", "Glucagon", "Thyroxine"],
+                correct: 1,
+                rationale: "ADH (Vasopressin) increases water reabsorption in the collecting ducts of the kidney."
+            },
+            {
+                id: 112,
+                question: "A patient with liver failure is at risk for which fluid imbalance?",
+                options: ["Third-spacing and ascites", "Severe dehydration", "Hypernatremia", "Intracellular dehydration"],
+                correct: 0,
+                rationale: "Low albumin in liver failure reduces oncotic pressure, causing fluid to leak into the peritoneal cavity (ascites/third-spacing)."
+            },
+            {
+                id: 113,
+                question: "What is the primary treatment for hypovolemic shock?",
+                options: ["Vasopressors", "Fluid resuscitation", "Antibiotics", "Diuretics"],
+                correct: 1,
+                rationale: "The priority in hypovolemic shock is to replace the lost volume (fluids or blood) before using pressors."
+            },
+            {
+                id: 114,
+                question: "Which ventilator setting prevents alveolar collapse during expiration?",
+                options: ["FiO2", "PEEP", "Rate", "Trigger"],
+                correct: 1,
+                rationale: "PEEP maintains pressure to keep alveoli open."
+            },
+            {
+                id: 115,
+                question: "True or False: Benzodiazepines are the first-line choice for sedation in mechanically ventilated patients.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Guidelines now suggest non-benzodiazepines (Propofol, Dexmedetomidine) are preferred due to lower delirium risk."
+            },
+            {
+                id: 116,
+                question: "Which sign indicates respiratory muscle fatigue?",
+                options: ["Paradoxical abdominal movement", "Respiratory rate of 14", "Pink skin color", "Symmetrical chest expansion"],
+                correct: 0,
+                rationale: "Paradoxical breathing (abdomen moves in on inspiration) indicates diaphragm fatigue and impending failure."
+            },
+            {
+                id: 117,
+                question: "A patient has 'refractory hypoxemia'. What does this mean?",
+                options: ["Hypoxemia responds quickly to oxygen", "Hypoxemia persists despite high levels of oxygen", "Hypoxemia is caused by low hemoglobin", "Hypoxemia is intermittent"],
+                correct: 1,
+                rationale: "Refractory hypoxemia means PaO2 remains low despite increasing FiO2, often due to shunting (e.g., ARDS)."
+            },
+            {
+                id: 118,
+                question: "Which of the following is a cause of Intra-abdominal Hypertension?",
+                options: ["Gastric decompression", "Abdominal wall relaxation", "Bowel edema", "Negative fluid balance"],
+                correct: 2,
+                rationale: "Bowel edema occupies space and increases pressure within the abdominal cavity."
+            },
+            {
+                id: 119,
+                question: "Which nursing action is essential during a 'spontaneous awakening trial'?",
+                options: ["Restraining the patient", "Monitoring for safety and tolerance", "Leaving the room to reduce stimuli", "Administering a bolus of sedative"],
+                correct: 1,
+                rationale: "The nurse must closely monitor the patient for agitation, desaturation, or respiratory distress when sedation is stopped."
+            },
+            {
+                id: 120,
+                question: "True or False: Metabolic acidosis is characterized by a low pH and low bicarbonate.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Metabolic acidosis involves a pH < 7.35 (acid) and HCO3 < 22 (low base)."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Acute Respiratory Failure</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "Which arterial blood gas values are diagnostically definitive for Acute Respiratory Failure according to the provided text?",
+                options: ["PaO2 less than 50 mm Hg and PaCO2 greater than 50 mm Hg", "PaO2 less than 80 mm Hg and PaCO2 greater than 45 mm Hg", "PaO2 greater than 60 mm Hg and pH less than 7.30", "PaO2 less than 60 mm Hg and PaCO2 less than 35 mm Hg"],
+                correct: 0,
+                rationale: "Acute respiratory failure is defined as a fall in arterial oxygen tension (PaO2) to less than 50 mm Hg and a rise in arterial carbon dioxide tension (PaCO2) to greater than 50 mm Hg."
+            },
+            {
+                id: 2,
+                question: "A patient with unilateral lung disease is admitted to the unit. Which position should the nurse prioritize to improve oxygenation?",
+                options: ["Prone position", "Supine position with head elevated", "Side lying with the good lung down", "Side lying with the affected lung down"],
+                correct: 2,
+                rationale: "Patients with unilateral lung disease should be positioned on their side with the better functioning 'good' lung down to allow gravity to perfuse the lung with the best ventilation."
+            },
+            {
+                id: 3,
+                question: "Which mechanism is the most common cause of hypoxemia in respiratory failure?",
+                options: ["Alveolar hypoventilation", "Ventilation perfusion mismatch", "Diffusion defects", "Intrapulmonary shunting"],
+                correct: 1,
+                rationale: "In respiratory failure, ventilation-perfusion (V/Q) mismatch is the most common cause of hypoxemia and can often be corrected by increasing the FiO2."
+            },
+            {
+                id: 4,
+                question: "The nurse monitors a patient with hypercapnia for which cardinal symptoms?",
+                options: ["Cyanosis and restlessness", "Dyspnea and headache", "Tachycardia and hypotension", "Pallor and tremors"],
+                correct: 1,
+                rationale: "The cardinal symptoms of hypercapnia are dyspnea and headache. Other signs include conjunctival hyperemia and impaired consciousness."
+            },
+            {
+                id: 5,
+                question: "True or False: Acute respiratory failure occurs rapidly over minutes to hours with little time for physiological compensation.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "ARF differs from chronic respiratory failure in that it occurs rapidly over minutes to hours, leaving little time for physiological compensation."
+            },
+            {
+                id: 6,
+                question: "Which dietary adjustment is recommended for patients with acute respiratory failure to prevent excess carbon dioxide production?",
+                options: ["High carbohydrate diet", "High protein diet only", "At least 50 percent of non protein calories from fat", "Low calorie restricted diet"],
+                correct: 2,
+                rationale: "At least 50% of the diet's non-protein caloric source should be in the form of fat versus carbohydrates to prevent excess carbon dioxide production."
+            },
+            {
+                id: 7,
+                question: "A patient presents with PaO2 of 55 mm Hg and a normal PaCO2. This presentation is most consistent with which condition?",
+                options: ["Type II hypercapnic respiratory failure", "Type I hypoxemic respiratory failure", "Combined respiratory failure", "Chronic respiratory failure"],
+                correct: 1,
+                rationale: "Type I (hypoxemic) failure is characterized by a PaO2 less than 60 mm Hg and a normal or low PaCO2."
+            },
+            {
+                id: 8,
+                question: "Which condition is classified as an extrapulmonary cause of acute respiratory failure?",
+                options: ["Chronic obstructive pulmonary disease", "Guillain Barre syndrome", "Pulmonary embolism", "Cystic fibrosis"],
+                correct: 1,
+                rationale: "Guillain-Barré syndrome is a neuromuscular disorder classified as an extrapulmonary cause of respiratory failure."
+            },
+            {
+                id: 9,
+                question: "True or False: Cyanosis is an early and sensitive indicator of hypoxemia.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Cyanosis is a late sign of profound arterial hypoxemia, usually appearing when PaO2 is less than 50 mm Hg."
+            },
+            {
+                id: 10,
+                question: "Which statement accurately describes intrapulmonary shunting?",
+                options: ["Blood reaches the arterial system without participating in gas exchange", "Ventilation exceeds perfusion in the alveoli", "Gas exchange is impaired by a thickened membrane", "Carbon dioxide is retained due to muscle fatigue"],
+                correct: 0,
+                rationale: "Intrapulmonary shunting occurs when blood reaches the arterial system without participating in gas exchange, such as in atelectasis or pulmonary edema."
+            },
+            {
+                id: 11,
+                question: "An elderly patient is admitted with suspected acute respiratory failure. What is often the earliest sign of hypoxemia in this population?",
+                options: ["Severe dyspnea", "Change in mental status", "Central cyanosis", "Hypotension"],
+                correct: 1,
+                rationale: "The most common early sign of hypoxemia in the elderly is a change in mental status, such as confusion or agitation, often mistaken for dementia."
+            },
+            {
+                id: 12,
+                question: "What is the primary pathophysiological effect of hypoventilation?",
+                options: ["Decrease in alveolar carbon dioxide", "Increase in arterial oxygen tension", "Increase in alveolar carbon dioxide", "Decrease in pulmonary vascular resistance"],
+                correct: 2,
+                rationale: "Hypoventilation causes CO2 to accumulate in the alveoli because it is not blown off, leading to hypercapnia and respiratory acidosis."
+            },
+            {
+                id: 13,
+                question: "A patient with a pulmonary embolism typically demonstrates which ventilation-perfusion abnormality?",
+                options: ["Low V/Q ratio", "High V/Q ratio", "Normal V/Q ratio", "Silent unit"],
+                correct: 1,
+                rationale: "A pulmonary embolism obstructs blood flow while ventilation remains adequate, resulting in ventilation exceeding perfusion (High V/Q ratio)."
+            },
+            {
+                id: 14,
+                question: "True or False: Hypercapnia causes cerebral vasoconstriction and decreased cerebral blood flow.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Hypercapnia greatly increases cerebral blood flow, which can lead to headache, papilledema, and increased intracranial pressure."
+            },
+            {
+                id: 15,
+                question: "Which intervention is appropriate for a patient experiencing pain who is at risk for hypoventilation?",
+                options: ["Withhold all analgesics to protect respiratory drive", "Administer analgesics to prevent shallow breathing", "Use only sedatives instead of pain medication", "Encourage rapid breathing techniques"],
+                correct: 1,
+                rationale: "Pain should be treated with analgesics to prevent shallow breathing (hypoventilation) and atelectasis caused by splinting from pain."
+            },
+            {
+                id: 16,
+                question: "Which laboratory study is considered the gold standard for confirming the diagnosis of acute respiratory failure?",
+                options: ["Pulse oximetry", "Chest x ray", "Arterial blood gas analysis", "Complete blood count"],
+                correct: 2,
+                rationale: "Only determination of the blood gases and pH (ABG analysis) can confirm the diagnosis of acute respiratory failure."
+            },
+            {
+                id: 17,
+                question: "A patient has a thickened alveolar-capillary membrane due to pulmonary fibrosis. This pathophysiology is known as:",
+                options: ["Diffusion defect", "Ventilatory failure", "Dead space ventilation", "Circulatory hypoxia"],
+                correct: 0,
+                rationale: "Diffusion defects occur when the alveolar-capillary membrane is thickened or destroyed, compromising the movement of gas across the membrane."
+            },
+            {
+                id: 18,
+                question: "What is the normal physiologic dead space percentage of the inspired volume?",
+                options: ["10 to 15 percent", "25 to 30 percent", "40 to 50 percent", "60 to 70 percent"],
+                correct: 1,
+                rationale: "Physiologic dead space, the volume of inspired gas that fills structures not participating in gas exchange, is normally 25% to 30% of inspired volume."
+            },
+            {
+                id: 19,
+                question: "Which medication class is used to decrease ventilator asynchrony in intubated patients?",
+                options: ["Antibiotics", "Bronchodilators", "Neuromuscular blocking agents", "Mucolytics"],
+                correct: 2,
+                rationale: "Neuromuscular blocking agents are used to prevent ventilator asynchrony and decrease oxygen demand."
+            },
+            {
+                id: 20,
+                question: "True or False: A low V/Q ratio indicates that perfusion exceeds ventilation.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "A low V/Q ratio indicates that perfusion is exceeding ventilation, seen in conditions like emphysema where there is excess blood flow without adequate air."
+            },
+            {
+                id: 21,
+                question: "Which sign indicates respiratory muscle fatigue during the physical assessment?",
+                options: ["Paradoxical abdominal movement", "Increased breath sounds", "Peripheral edema", "Bradycardia"],
+                correct: 0,
+                rationale: "Paradoxical abdominal movement, along with accessory muscle use and retractions, indicates respiratory muscle fatigue or diaphragmatic weakness."
+            },
+            {
+                id: 22,
+                question: "Why is naloxone administered to a patient with acute respiratory failure caused by drug overdose?",
+                options: ["To reverse bronchospasm", "To treat underlying infection", "To reverse impaired central respiratory drive", "To reduce pulmonary secretions"],
+                correct: 2,
+                rationale: "Reversal agents like naloxone (opiate antagonist) are used in cases of impaired central respiratory drive due to poisoning or overdose."
+            },
+            {
+                id: 23,
+                question: "A patient with emphysema develops a lower respiratory tract infection. This scenario most likely results in which type of failure?",
+                options: ["Type I failure only", "Type II failure only", "Combined hypoxemic and hypercapnic failure", "Chronic failure without acute decompensation"],
+                correct: 2,
+                rationale: "Combined failure is commonly seen in patients with chronic conditions like emphysema who develop complications like infections, involving both inadequate ventilation and abnormal gas transport."
+            },
+            {
+                id: 24,
+                question: "What is the primary purpose of chest physiotherapy in the management of ARF?",
+                options: ["To decrease oxygen demand", "To assist with expulsion of retained secretions", "To increase cardiac output", "To reduce pleuritic chest pain"],
+                correct: 1,
+                rationale: "Chest physiotherapy (postural drainage and percussion) is used to assist with the expulsion of retained secretions in patients with large amounts of sputum."
+            },
+            {
+                id: 25,
+                question: "True or False: Hypoxemia caused by a large intrapulmonary shunt is easily corrected by increasing the FiO2.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Hypoxemia produced by a shunt is difficult to correct by solely increasing FiO2 because the increased oxygen cannot reach the non-ventilated alveoli."
+            },
+            {
+                id: 26,
+                question: "Which factor contributes to Type II (Hypercapnic) respiratory failure?",
+                options: ["Increased diffusion capacity", "Decreased ventilatory drive", "Increased chest wall elasticity", "Decreased airway resistance"],
+                correct: 1,
+                rationale: "Type II failure is contributed to by decreased ventilatory drive, respiratory muscle fatigue, and increased work of breathing."
+            },
+            {
+                id: 27,
+                question: "The nurse ensures adequate hydration for a patient with ARF primarily to achieve which outcome?",
+                options: ["Maintain blood pressure", "Thin secretions and facilitate clearance", "Prevent renal failure", "Correct electrolyte imbalances"],
+                correct: 1,
+                rationale: "Adequate hydration and humidification are maintained to thin secretions and facilitate airway clearance."
+            },
+            {
+                id: 28,
+                question: "Which condition represents a failure of oxygenation (Type I)?",
+                options: ["Myasthenia gravis", "Opioid overdose", "Pulmonary edema", "Spinal cord injury"],
+                correct: 2,
+                rationale: "Pulmonary edema causes a failure of oxygenation (Type I) due to V/Q mismatch or shunting, whereas the other options primarily cause ventilatory failure."
+            },
+            {
+                id: 29,
+                question: "True or False: A normal cardiac output is necessary to deliver oxygen to tissues even if lung function is adequate.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Adequate tissue oxygenation depends on the balance of O2 supply and demand; cardiac output is the mechanism for delivering O2 to tissues."
+            },
+            {
+                id: 30,
+                question: "Under normal circumstances, how long does it take for oxygen and carbon dioxide to diffuse across the alveolar-capillary membrane?",
+                options: ["0.25 seconds", "0.75 seconds", "1.0 second", "2.0 seconds"],
+                correct: 0,
+                rationale: "Under normal circumstances, O2 and CO2 diffuse across the alveolar-capillary membrane in 0.25 seconds."
+            },
+            {
+                id: 31,
+                question: "Which clinical finding is a late sign of diffusion defects?",
+                options: ["Hypoxemia during exercise", "Hypercapnia", "Tachypnea", "Anxiety"],
+                correct: 1,
+                rationale: "Because CO2 is more readily diffusible than O2, hypercapnia is a late sign of diffusion defects; hypoxemia is the first parameter affected."
+            },
+            {
+                id: 32,
+                question: "A patient's ABG shows a pH of 7.25 and PaCO2 of 60 mm Hg. This indicates:",
+                options: ["Respiratory alkalosis", "Uncompensated respiratory acidosis", "Metabolic acidosis", "Compensated respiratory acidosis"],
+                correct: 1,
+                rationale: "A pH less than 7.35 (acidosis) and a PaCO2 greater than 50 mm Hg indicate uncompensated respiratory acidosis, characteristic of Type II failure."
+            },
+            {
+                id: 33,
+                question: "True or False: Anemia can result in tissue hypoxia even if gas exchange in the lungs is normal.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Since 95% of oxygen is transported bound to hemoglobin, low hemoglobin levels can impair oxygen supply to tissues leading to hypoxia despite normal lung function."
+            },
+            {
+                id: 34,
+                question: "Which intervention is most appropriate for a patient with unilateral lung disease who needs position changes?",
+                options: ["Rotate every 4 hours", "Change position every 2 hours favoring improved oxygenation", "Maintain supine position at all times", "Keep the patient in high Fowler's strictly"],
+                correct: 1,
+                rationale: "Position changes should occur every 2 hours, favoring positions that improve oxygenation, such as good lung down for unilateral disease."
+            },
+            {
+                id: 35,
+                question: "What is the definition of Acute-on-Chronic respiratory failure?",
+                options: ["Sudden failure in a healthy individual", "Chronic failure that slowly worsens", "Chronic failure patient developing a sudden stressor like infection", "Failure due to trauma only"],
+                correct: 2,
+                rationale: "Acute-on-chronic respiratory failure is defined as a condition where a person with chronic respiratory failure develops a sudden infection or is exposed to stressors."
+            },
+            {
+                id: 36,
+                question: "True or False: High V/Q ratio occurs when ventilation exceeds perfusion.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "A high V/Q ratio indicates that ventilation is exceeding perfusion, which can occur if blood flow is obstructed."
+            },
+            {
+                id: 37,
+                question: "Which of the following is a symptom of tissue hypoxia related to anaerobic metabolism?",
+                options: ["Metabolic alkalosis", "Lactic acid production", "Decreased respiratory rate", "Bradycardia"],
+                correct: 1,
+                rationale: "Anaerobic metabolism occurs when tissues cannot obtain adequate O2, leading to the production of lactic acid."
+            },
+            {
+                id: 38,
+                question: "What is the primary goal of noninvasive positive-pressure ventilation (NPPV) in select patients?",
+                options: ["To replace the need for antibiotics", "To maintain a patent airway without intubation", "To cure the underlying disease immediately", "To sedation the patient completely"],
+                correct: 1,
+                rationale: "NPPV is used to maintain a patent airway and treat ARF effectively in select conditions like COPD or pulmonary edema without invasive intubation."
+            },
+            {
+                id: 39,
+                question: "True or False: Respiratory acidosis occurs rapidly in hypoventilation before renal compensation can occur.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "In hypoventilation, CO2 accumulates rapidly, causing respiratory acidosis before the kidneys have time to compensate."
+            },
+            {
+                id: 40,
+                question: "Which assessment finding suggests a decrease in cardiac output in a patient with ARF?",
+                options: ["Warm and dry skin", "Strong bounding pulses", "Hypotension and weak pulses", "Bradycardia and flushed skin"],
+                correct: 2,
+                rationale: "As ARF progresses, it may lead to hypotension and weak pulses, indicating poor perfusion and decreased cardiac output."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

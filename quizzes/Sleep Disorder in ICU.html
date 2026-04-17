@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Sleep Disorder in ICU</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "A nurse is assessing a client's sleep history. Which statement accurately defines sleep according to current medical understanding?",
+                options: ["A state of complete unconsciousness", "An altered state of consciousness with decreased perception", "A period of total physiological inactivity", "A passive condition disconnected from the environment"],
+                correct: 1,
+                rationale: "Sleep is defined as an altered state of consciousness in which the individual's perception and reaction to the environment are decreased, rather than total unconsciousness."
+            },
+            {
+                id: 2,
+                question: "Which anatomical structure is primarily responsible for integrating sensory information and relaying it to the cerebral cortex to regulate wakefulness?",
+                options: ["Pineal gland", "Reticular formation", "Hypothalamus", "Cerebellum"],
+                correct: 1,
+                rationale: "Neurons within the reticular formation in the brainstem integrate sensory information and relay it to the cerebral cortex via the reticular activating system (RAS)."
+            },
+            {
+                id: 3,
+                question: "The nurse understands that Serotonin influences the sleep-wake cycle by performing which function?",
+                options: ["Turning off activity in the RAS neurons", "Diminishing the response to sensory stimulation", "Activating the sympathetic nervous system", "Stimulating the release of cortisol"],
+                correct: 1,
+                rationale: "Serotonin is thought to diminish the response to sensory stimulation, whereas GABA turns off activity in the neurons of the reticular activating system."
+            },
+            {
+                id: 4,
+                question: "True or False: NREM sleep accounts for approximately 75% of total sleep time during a night.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "About 75% of sleep during a night is NREM (non-rapid eye movement) sleep."
+            },
+            {
+                id: 5,
+                question: "A patient in the ICU is being administered benzodiazepines. The nurse should monitor for which alteration in sleep architecture?",
+                options: ["Increased Rapid Eye Movement sleep", "Decreased REM and Slow Wave Sleep", "Increased deep sleep duration", "Enhanced circadian rhythm synchronization"],
+                correct: 1,
+                rationale: "Benzodiazepines are known to decrease both REM (Rapid Eye Movement) sleep and SWS (Slow Wave Sleep)."
+            },
+            {
+                id: 6,
+                question: "During which stage of NREM sleep do the eyes roll from side to side and the individual feels drowsy and relaxed?",
+                options: ["Stage 1", "Stage 2", "Stage 3", "REM Stage"],
+                correct: 0,
+                rationale: "Stage 1 is very light sleep lasting a few minutes where the eyes roll from side to side and the individual feels drowsy."
+            },
+            {
+                id: 7,
+                question: "Which physiological change is characteristic of Stage 3 NREM sleep?",
+                options: ["Increased cardiac output", "Rise in basal metabolic rate", "Peak levels of growth hormone secretion", "Heightened muscle tone"],
+                correct: 2,
+                rationale: "Stage 3 is deep sleep where peak levels of growth hormone are secreted, promoting tissue healing and protein synthesis."
+            },
+            {
+                id: 8,
+                question: "Why is REM sleep often referred to as 'paradoxical sleep'?",
+                options: ["The body is completely rigid", "EEG activity resembles that of wakefulness", "Heart rate becomes fixed and steady", "Metabolic rate drops to its lowest point"],
+                correct: 1,
+                rationale: "REM sleep is called paradoxical sleep because the brain's EEG activity resembles that of wakefulness despite the person being asleep."
+            },
+            {
+                id: 9,
+                question: "A patient prescribed Amiodarone reports disturbing dreams. The nurse recognizes this as a known side effect categorized as:",
+                options: ["Insomnia", "Nightmares", "Sleep fragmentation", "Hypersomnia"],
+                correct: 1,
+                rationale: "Amiodarone is specifically listed as a drug that induces nightmares."
+            },
+            {
+                id: 10,
+                question: "True or False: Sleep deprivation leads to a decrease in carbon dioxide (CO2) production.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Sleep deprivation leads to increased oxygen consumption and increased CO2 production."
+            },
+            {
+                id: 11,
+                question: "The nurse is reviewing the 'A' component of the ABCDEF bundle. What does this acronym stand for?",
+                options: ["Assessment of airway patency", "Awakening and spontaneous breathing coordination", "Administration of benzodiazepines", "Avoidance of all sedatives"],
+                correct: 1,
+                rationale: "In the ABCDEF bundle, 'A' stands for Awakening and spontaneous Breathing coordination and Choice of drugs."
+            },
+            {
+                id: 12,
+                question: "Which intervention is recommended to promote sleep and reduce delirium in ICU patients?",
+                options: ["Maintaining bright lights continuously", "Minimizing evening hour noise", "Administering preventitive antipsychotics", "Keeping the patient sedated during the day"],
+                correct: 1,
+                rationale: "Strategies include minimizing evening hour noise and lighting to promote natural circadian rhythms."
+            },
+            {
+                id: 13,
+                question: "True or False: Brain metabolism may increase by as much as 20% during REM sleep.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "During REM sleep, the brain is highly active, and brain metabolism may increase as much as 20%."
+            },
+            {
+                id: 14,
+                question: "A patient with sleep deprivation is at higher risk for acute myocardial infarction primarily due to which mechanism?",
+                options: ["Decreased sympathetic tone", "Endothelial disruption", "Lowered catecholamine levels", "Reduced blood pressure"],
+                correct: 1,
+                rationale: "Sleep deprivation increases the risk for AMI (Acute Myocardial Infarction) due to endothelial disruption and increased sympathetic tone."
+            },
+            {
+                id: 15,
+                question: "Which immune system alteration is associated with sleep deprivation?",
+                options: ["Increased natural killer cell activity", "Enhanced T-helper cell function", "Decreased phagocytosis activity", "Improved leukocyte function"],
+                correct: 2,
+                rationale: "Sleep deprivation causes impaired immune function, including decreased natural killer cells, decreased T-helper cells, and decreased phagocytosis activity."
+            },
+            {
+                id: 16,
+                question: "When administering Melatonin for sleep regulation, the nurse should administer it at which time?",
+                options: ["Immediately after dinner", "1 hour before sleep", "At the onset of sunrise", "Twice daily with meals"],
+                correct: 1,
+                rationale: "Melatonin is typically taken orally 1 hour before sleep to help regulate circadian rhythm."
+            },
+            {
+                id: 17,
+                question: "The nurse avoids administering antihistamines as sleep aids in the ICU primarily because of which potential adverse effect?",
+                options: ["Severe hypotension", "Respiratory depression", "Impaired cognition and anticholinergic effects", "Hypoglycemia"],
+                correct: 2,
+                rationale: "Antihistamines are not recommended for routine use because they may cause impaired cognition, anticholinergic effects, and cardiac toxicity."
+            },
+            {
+                id: 18,
+                question: "Which of the following is considered an objective tool for assessing sleep?",
+                options: ["Patient self-report", "Polysomnography", "Clinician observation", "Sleep diary"],
+                correct: 1,
+                rationale: "Polysomnography, Bispectral Index (BIS), and Actigraphy are listed as objective tools, whereas self-reports and clinician observations are subjective."
+            },
+            {
+                id: 19,
+                question: "True or False: Stage 3 NREM sleep is characterized by a 20% to 30% drop in heart and respiratory rates.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "In Stage 3, heart and respiratory rates drop 20% to 30%, and skeletal muscles are very relaxed."
+            },
+            {
+                id: 20,
+                question: "A critically ill patient is demonstrating signs of insulin resistance. The nurse suspects this may be a complication of sleep deprivation affecting which system?",
+                options: ["Cardiac System", "Respiratory System", "Endocrine System", "Neurologic System"],
+                correct: 2,
+                rationale: "The endocrine system impact of sleep deprivation includes hormonal effects such as hyperglycemia, insulin resistance, and altered glucose metabolism."
+            },
+            {
+                id: 21,
+                question: "Evidence suggests that a massage of what duration may have a positive effect on the parasympathetic nervous system?",
+                options: ["At least 15 minutes", "As few as 3 minutes", "Minimum of 30 minutes", "One hour"],
+                correct: 1,
+                rationale: "Evidence suggests that as few as 3 minutes of massage may have a positive effect."
+            },
+            {
+                id: 22,
+                question: "Which neurotransmitter is found at its highest levels during REM sleep?",
+                options: ["Norepinephrine", "Acetylcholine", "Serotonin", "Histamine"],
+                correct: 1,
+                rationale: "During REM sleep, levels of acetylcholine and dopamine increase, with the highest levels of acetylcholine release occurring during this phase."
+            },
+            {
+                id: 23,
+                question: "True or False: Cortisol secretion is inhibited during sleep.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "During sleep, the growth hormone is secreted and cortisol is inhibited."
+            },
+            {
+                id: 24,
+                question: "The nurse is planning care to promote sleep. Which environmental factor should be addressed to reduce sleep deprivation?",
+                options: ["Diagnostic tests", "Pain management", "Ventilator alarms", "Beta-blocker administration"],
+                correct: 2,
+                rationale: "Noise from ventilator alarms is specifically categorized as an environmental factor contributing to sleep deprivation."
+            },
+            {
+                id: 25,
+                question: "Which drug class is reported to cause increased sleep fragmentation?",
+                options: ["Phenytoin", "Corticosteroids", "Quinolones", "Opioids"],
+                correct: 0,
+                rationale: "Phenytoin is listed as causing increased sleep fragmentation."
+            },
+            {
+                id: 26,
+                question: "True or False: Actigraphy is considered a subjective tool for sleep assessment.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Actigraphy is listed under objective tools, not subjective ones."
+            },
+            {
+                id: 27,
+                question: "What is the primary effect of Opioids on sleep stages?",
+                options: ["Increase REM sleep", "Decrease REM and SWS", "Increase SWS only", "No effect on sleep architecture"],
+                correct: 1,
+                rationale: "Opioids are listed as causing a decrease in both REM (Rapid Eye Movement) and SWS (Slow Wave Sleep)."
+            },
+            {
+                id: 28,
+                question: "A patient on mechanical ventilation is being weaned. The research suggests which strategy regarding sleep?",
+                options: ["Wean continuously through the night", "Reconnect to the ventilator at night", "Use high pressure support at night", "Maintain wakefulness for 24 hours"],
+                correct: 1,
+                rationale: "Research suggests that patients should be reconnected at night while liberation from mechanical ventilation is being attempted."
+            },
+            {
+                id: 29,
+                question: "Which psychological factor is explicitly cited as contributing to sleep deprivation in the ICU?",
+                options: ["Depression", "Loneliness", "Euphoria", "Amnesia"],
+                correct: 1,
+                rationale: "Psychological factors contributing to sleep deprivation include anxiety, fear, worry, and loneliness."
+            },
+            {
+                id: 30,
+                question: "True or False: Stage 3 NREM sleep lasts about 50 to 60 minutes.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Stage 3 lasts about 50 to 60 minutes and is essential for restoring energy."
+            },
+            {
+                id: 31,
+                question: "Circadian regularity typically begins to develop by which age?",
+                options: ["1st week of life", "6th week of life", "6 months of age", "1 year of age"],
+                correct: 1,
+                rationale: "Circadian regularity begins to develop by the 6th week of life."
+            },
+            {
+                id: 32,
+                question: "Which neurotransmitter functions to turn off activity in the neurons of the reticular activating system (RAS)?",
+                options: ["Dopamine", "Gamma-aminobutyric acid (GABA)", "Norepinephrine", "Glutamate"],
+                correct: 1,
+                rationale: "GABA (Gamma-aminobutyric acid) is thought to turn off the activity in the neurons of the reticular activating system."
+            },
+            {
+                id: 33,
+                question: "True or False: Routine administration of medications to prevent delirium is recommended in the ICU.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The strategies state: 'Do not administer medications to prevent delirium' as a routine measure."
+            },
+            {
+                id: 34,
+                question: "Sleep deprivation affects the respiratory system by causing which of the following?",
+                options: ["Increased inspiratory muscle endurance", "Decreased respiratory drive", "Improved lung mechanics", "Reduced oxygen consumption"],
+                correct: 1,
+                rationale: "Impacts on the respiratory system include decreased respiratory drive and decreased inspiratory muscle endurance."
+            },
+            {
+                id: 35,
+                question: "The nurse monitors a patient for 'ICU psychosis'. This condition is a potential consequence of sleep deprivation on which system?",
+                options: ["Neurologic System", "Psychiatric/cognitive System", "Endocrine System", "Immunological System"],
+                correct: 1,
+                rationale: "ICU psychosis and delirium are listed under the Psychiatric/cognitive impact of sleep deprivation."
+            },
+            {
+                id: 36,
+                question: "Which hormone level is expected to be at its lowest with the beginning of daylight?",
+                options: ["Cortisol", "Melatonin", "Insulin", "Thyroxine"],
+                correct: 1,
+                rationale: "With the beginning of daylight, melatonin is at its lowest level in the body."
+            },
+            {
+                id: 37,
+                question: "True or False: Quinolones are associated with insomnia.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The drug table lists Quinolones as causing Insomnia."
+            },
+            {
+                id: 38,
+                question: "What effect does NREM sleep generally have on the basal metabolic rate?",
+                options: ["Increases by 10% to 30%", "Decreases by 10% to 30%", "Remains unchanged", "Fluctuates rapidly"],
+                correct: 1,
+                rationale: "During NREM sleep, the basal metabolic rate decreases by 10% to 30%."
+            },
+            {
+                id: 39,
+                question: "Which of the following describes the EEG activity seen during Stage N3 sleep?",
+                options: ["Alpha waves", "Delta waves", "Sleep spindles", "Beta waves"],
+                correct: 1,
+                rationale: "Stage N3 sleep is characterized by Delta waves."
+            },
+            {
+                id: 40,
+                question: "True or False: Skeletal muscles are very relaxed during Stage 3 NREM sleep.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "In Stage 3, skeletal muscles are very relaxed and reflexes are diminished."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

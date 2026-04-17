@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Critical Care Nursing Exam</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 200 QUESTIONS HERE) ---
+        const rawQuizData = [
+    {
+        "id": 1,
+        "question": "Which of the following is the primary physiological mechanism responsible for the sensation of dull, aching pain?",
+        "options": ["Transmission via A delta fibers", "Transmission via C fibers", "Activation of mechanoreceptors", "Release of dopamine"],
+        "correct": 1,
+        "rationale": "C fibers are unmyelinated and smaller in diameter, transmitting dull, aching pain sensations, whereas A delta fibers transmit sharp pain."
+    },
+    {
+        "id": 2,
+        "question": "A patient on a mechanical ventilator triggers the high-pressure alarm. Which assessment finding would most likely be the cause?",
+        "options": ["Patient disconnection from the circuit", "Cuff leak", "Kinked ventilator tubing", "Extubation"],
+        "correct": 2,
+        "rationale": "High-pressure alarms are triggered by increased resistance, such as kinked tubing, secretions, or biting the tube. Disconnections cause low-pressure alarms."
+    },
+    {
+        "id": 3,
+        "question": "Which electrolyte imbalance is characterized by a positive Chvostek's sign?",
+        "options": ["Hyperkalemia", "Hypocalcemia", "Hypernatremia", "Hypomagnesemia"],
+        "correct": 1,
+        "rationale": "Hypocalcemia manifests with neuromuscular excitability, including a positive Chvostek's sign (facial twitching) and Trousseau's sign."
+    },
+    {
+        "id": 4,
+        "question": "True or False: The Confusion Assessment Method for the ICU (CAM-ICU) is valid for use in mechanically ventilated patients who cannot speak.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "The CAM-ICU was specifically designed and validated for use in non-verbal, mechanically ventilated patients."
+    },
+    {
+        "id": 5,
+        "question": "A patient with Acute Kidney Injury (AKI) has a serum potassium level of 6.2 mEq/L. Which ECG change should the nurse anticipate?",
+        "options": ["Prominent U waves", "Peaked T waves", "ST segment depression", "Shortened QT interval"],
+        "correct": 1,
+        "rationale": "Hyperkalemia classically causes tall, peaked T waves, prolonged PR intervals, and widened QRS complexes."
+    },
+    {
+        "id": 6,
+        "question": "Which ventilator mode delivers a preset tidal volume for every breath, regardless of whether it is initiated by the patient or the ventilator?",
+        "options": ["Pressure Support Ventilation", "Assist Control Volume Ventilation", "CPAP", "SIMV"],
+        "correct": 1,
+        "rationale": "In Assist Control (AC) volume ventilation, every breath (machine or patient-triggered) delivers the full preset tidal volume."
+    },
+    {
+        "id": 7,
+        "question": "What is the primary definition of Intra-abdominal Hypertension (IAH)?",
+        "options": ["Sustained IAP > 12 mmHg", "Sustained IAP > 20 mmHg", "Sustained IAP > 5 mmHg", "Sustained IAP > 25 mmHg"],
+        "correct": 0,
+        "rationale": "IAH is defined as a sustained intra-abdominal pressure (IAP) greater than 12 mmHg."
+    },
+    {
+        "id": 8,
+        "question": "Which of the following interventions is most appropriate for a patient with delirium to promote sleep?",
+        "options": ["Administering benzodiazepines", "Minimizing evening noise and light", "Keeping the television on all night", "Frequent awakening for orientation"],
+        "correct": 1,
+        "rationale": "Nonpharmacological sleep promotion includes minimizing noise and light at night. Benzodiazepines should be avoided as they can worsen delirium."
+    },
+    {
+        "id": 9,
+        "question": "In the RIFLE criteria for AKI, what does the 'F' stand for?",
+        "options": ["Function", "Failure", "Filtration", "Fatigue"],
+        "correct": 1,
+        "rationale": "RIFLE stands for Risk, Injury, Failure, Loss, and End-stage kidney disease."
+    },
+    {
+        "id": 10,
+        "question": "A patient presents with a PaO2 of 55 mmHg and a PaCO2 of 38 mmHg on room air. This is classified as:",
+        "options": ["Type I Respiratory Failure", "Type II Respiratory Failure", "Combined Respiratory Failure", "Chronic Respiratory Failure"],
+        "correct": 0,
+        "rationale": "Type I (Hypoxemic) failure is characterized by low PaO2 (<60 mmHg) with normal or low PaCO2."
+    },
+    {
+        "id": 11,
+        "question": "Which complication is most associated with the use of high levels of PEEP?",
+        "options": ["Hypertension", "Barotrauma", "Increased venous return", "Respiratory alkalosis"],
+        "correct": 1,
+        "rationale": "High PEEP can cause overdistention of alveoli, leading to barotrauma (e.g., pneumothorax) and decreased venous return."
+    },
+    {
+        "id": 12,
+        "question": "True or False: Delirium usually develops gradually over months or years.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Delirium develops acutely over hours to days, whereas dementia develops gradually."
+    },
+    {
+        "id": 13,
+        "question": "What is the gold standard method for measuring Intra-abdominal Pressure (IAP) in critically ill patients?",
+        "options": ["Direct intraperitoneal measurement", "Intragastric measurement", "Intravesical (bladder) measurement", "Rectal measurement"],
+        "correct": 2,
+        "rationale": "Intravesical (bladder) pressure measurement is considered the gold standard and most practical method."
+    },
+    {
+        "id": 14,
+        "question": "A nurse is assessing a patient with hyponatremia. Which symptom is most concerning?",
+        "options": ["Dry skin", "Muscle cramps", "Seizures", "Mild nausea"],
+        "correct": 2,
+        "rationale": "Severe hyponatremia causes cerebral edema, which can lead to life-threatening seizures and coma."
+    },
+    {
+        "id": 15,
+        "question": "Which phase of sleep is characterized by rapid eye movements and vivid dreaming?",
+        "options": ["Stage 1 NREM", "Stage 2 NREM", "Stage 3 NREM", "REM sleep"],
+        "correct": 3,
+        "rationale": "REM sleep is named for the rapid eye movements that occur and is the stage where most dreaming takes place."
+    },
+    {
+        "id": 16,
+        "question": "Which medication is a depolarizing neuromuscular blocker that might be used during intubation but is not typically used for long-term paralysis?",
+        "options": ["Succinylcholine", "Rocuronium", "Vecuronium", "Cisatracurium"],
+        "correct": 0,
+        "rationale": "Succinylcholine is a depolarizing agent often used for rapid sequence intubation but not for maintenance."
+    },
+    {
+        "id": 17,
+        "question": "The nurse notes a patient's ventilator is set to SIMV mode. What does this mean for the patient's spontaneous breaths?",
+        "options": ["They are not allowed", "They are fully supported with the set tidal volume", "They can vary in volume and are not fully supported by the machine", "They trigger a mandatory breath every time"],
+        "correct": 2,
+        "rationale": "In SIMV, the patient can breathe spontaneously between mandatory breaths, but these spontaneous breaths have volumes determined by the patient's effort."
+    },
+    {
+        "id": 18,
+        "question": "Which of the following is a key component of the ABCDEF bundle for ICU care?",
+        "options": ["Always sedate deeply", "Bed rest until discharge", "Early mobilization", "Family exclusion during rounds"],
+        "correct": 2,
+        "rationale": "The 'E' in the ABCDEF bundle stands for Early mobilization."
+    },
+    {
+        "id": 19,
+        "question": "A patient with ARDS is placed in the prone position. What is the primary physiological benefit?",
+        "options": ["Decreased intracranial pressure", "Improved V/Q matching", "Easier nursing care", "Reduced risk of aspiration"],
+        "correct": 1,
+        "rationale": "Prone positioning improves V/Q matching by recruiting dorsal lung regions and improving aeration."
+    },
+    {
+        "id": 20,
+        "question": "True or False: Pre-renal AKI is caused by direct damage to the kidney tissue.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Pre-renal AKI is caused by decreased perfusion (e.g., hypovolemia) before the blood reaches the kidney, not direct tissue damage."
+    },
+    {
+        "id": 21,
+        "question": "Which assessment tool is most appropriate for evaluating pain in a non-verbal, intubated patient?",
+        "options": ["Visual Analog Scale", "Numeric Rating Scale", "Critical-Care Pain Observation Tool (CPOT)", "Faces Scale"],
+        "correct": 2,
+        "rationale": "The CPOT and Behavioral Pain Scale (BPS) are valid tools for assessing pain in patients unable to self-report."
+    },
+    {
+        "id": 22,
+        "question": "What is the normal range for serum potassium?",
+        "options": ["135-145 mEq/L", "3.5-5.0 mEq/L", "8.5-10.5 mg/dL", "1.5-2.5 mEq/L"],
+        "correct": 1,
+        "rationale": "The normal serum potassium range is approximately 3.5 to 5.0 mEq/L."
+    },
+    {
+        "id": 23,
+        "question": "Which condition is a common cause of Intra-abdominal Hypertension?",
+        "options": ["Severe dehydration", "Massive fluid resuscitation", "Weight loss", "Chronic anemia"],
+        "correct": 1,
+        "rationale": "Massive fluid resuscitation leads to bowel edema and third-spacing, increasing intra-abdominal pressure."
+    },
+    {
+        "id": 24,
+        "question": "Which of the following is a classic sign of Type II (Hypercapnic) Respiratory Failure?",
+        "options": ["Low PaCO2", "High PaO2", "High PaCO2", "Normal pH"],
+        "correct": 2,
+        "rationale": "Type II failure is failure of ventilation, characterized by elevated PaCO2 (>50 mmHg) and acidosis."
+    },
+    {
+        "id": 25,
+        "question": "A patient has a pH of 7.25 and PaCO2 of 60 mmHg. This indicates:",
+        "options": ["Respiratory Alkalosis", "Metabolic Acidosis", "Respiratory Acidosis", "Metabolic Alkalosis"],
+        "correct": 2,
+        "rationale": "Low pH (acidosis) combined with high PaCO2 indicates a respiratory origin."
+    },
+    {
+        "id": 26,
+        "question": "What is the primary treatment for Abdominal Compartment Syndrome (ACS)?",
+        "options": ["Increased sedation", "Surgical decompressive laparotomy", "More fluid resuscitation", "Diuretics only"],
+        "correct": 1,
+        "rationale": "Definitive management for ACS is surgical decompression to relieve the pressure and restore organ perfusion."
+    },
+    {
+        "id": 27,
+        "question": "True or False: ICU-acquired weakness typically affects proximal muscles more than distal muscles.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "ICU-acquired weakness is generally symmetrical and affects proximal limb muscles more than distal ones."
+    },
+    {
+        "id": 28,
+        "question": "Which nursing intervention is essential when weaning a patient from mechanical ventilation?",
+        "options": ["Deep sedation", "Frequent ABG monitoring", "Keep the patient supine", "Avoid suctioning"],
+        "correct": 1,
+        "rationale": "Monitoring ABGs and vital signs is crucial to assess tolerance during weaning. The patient should be upright, not supine."
+    },
+    {
+        "id": 29,
+        "question": "Which medication is a benzodiazepine often used for sedation in the ICU?",
+        "options": ["Propofol", "Dexmedetomidine", "Midazolam", "Fentanyl"],
+        "correct": 2,
+        "rationale": "Midazolam is a benzodiazepine. Propofol is a hypnotic, Dexmedetomidine is an alpha-2 agonist, and Fentanyl is an opioid."
+    },
+    {
+        "id": 30,
+        "question": "What is the recommended bladder instillation volume for measuring IAP?",
+        "options": ["100 mL", "25 mL", "50 mL", "200 mL"],
+        "correct": 1,
+        "rationale": "Current guidelines recommend a maximal instillation volume of 25 mL of sterile saline to avoid overdistending the bladder and falsely elevating pressure."
+    },
+    {
+        "id": 31,
+        "question": "A patient with severe sepsis requires fluid resuscitation. Which fluid is the initial crystalloid of choice?",
+        "options": ["Dextrose 5%", "Albumin", "Normal Saline or Lactated Ringer's", "Hetastarch"],
+        "correct": 2,
+        "rationale": "Isotonic crystalloids like Normal Saline or Lactated Ringer's are the first-line fluids for septic shock resuscitation."
+    },
+    {
+        "id": 32,
+        "question": "Which finding suggests a patient is not ready for weaning from the ventilator?",
+        "options": ["Hemodynamic stability", "Adequate cough", "FiO2 requirement of 80%", "Minimal secretions"],
+        "correct": 2,
+        "rationale": "Weaning criteria typically require an FiO2 < 40-50% and PEEP < 5-8. An FiO2 of 80% indicates severe oxygenation failure."
+    },
+    {
+        "id": 33,
+        "question": "Which electrolyte abnormality is most likely to cause digoxin toxicity?",
+        "options": ["Hyperkalemia", "Hypokalemia", "Hypercalcemia", "Hyponatremia"],
+        "correct": 1,
+        "rationale": "Hypokalemia increases the risk of digoxin toxicity and associated arrhythmias."
+    },
+    {
+        "id": 34,
+        "question": "True or False: Family presence during resuscitation is generally discouraged in modern critical care.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Evidence supports family presence during resuscitation as it helps with closure and understanding, and is encouraged in modern practice."
+    },
+    {
+        "id": 35,
+        "question": "Which type of delirium is characterized by lethargy, withdrawal, and flat affect?",
+        "options": ["Hyperactive", "Hypoactive", "Mixed", "Psychotic"],
+        "correct": 1,
+        "rationale": "Hypoactive delirium is the 'quiet' type, characterized by apathy, lethargy, and withdrawal."
+    },
+    {
+        "id": 36,
+        "question": "What is the normal range for Central Venous Pressure (CVP)?",
+        "options": ["0-2 mmHg", "2-6 mmHg (or 8-12 mmHg)", "20-30 mmHg", "50-60 mmHg"],
+        "correct": 1,
+        "rationale": "Normal CVP is generally 2-6 mmHg, though targets in sepsis might be slightly higher (8-12 mmHg)."
+    },
+    {
+        "id": 37,
+        "question": "Which condition causes a 'prerenal' type of acute kidney injury?",
+        "options": ["Nephrotoxic drugs", "Kidney stones", "Severe Hemorrhage", "Glomerulonephritis"],
+        "correct": 2,
+        "rationale": "Hemorrhage causes hypovolemia and reduced renal perfusion, which is a prerenal cause."
+    },
+    {
+        "id": 38,
+        "question": "What is the calculation for Cerebral Perfusion Pressure (CPP)?",
+        "options": ["MAP + ICP", "MAP - ICP", "Systolic BP - Diastolic BP", "MAP / ICP"],
+        "correct": 1,
+        "rationale": "CPP is calculated as Mean Arterial Pressure (MAP) minus Intracranial Pressure (ICP)."
+    },
+    {
+        "id": 39,
+        "question": "True or False: N-acetylcysteine may be used to prevent contrast-induced nephropathy.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "N-acetylcysteine is an antioxidant that has been used to help prevent renal damage from contrast dye, though hydration is key."
+    },
+    {
+        "id": 40,
+        "question": "Which ventilator alarm indicates a potential obstruction in the endotracheal tube?",
+        "options": ["Low pressure", "High pressure", "Low minute volume", "Power failure"],
+        "correct": 1,
+        "rationale": "Obstruction (secretions, biting, kink) increases resistance, triggering the high-pressure alarm."
+    },
+    {
+        "id": 41,
+        "question": "A patient has a sodium level of 115 mEq/L. The nurse initiates seizure precautions. What is the rationale?",
+        "options": ["Risk of cerebral hemorrhage", "Risk of cerebral edema", "Risk of cardiac arrest", "Risk of renal failure"],
+        "correct": 1,
+        "rationale": "Severe hyponatremia causes water to shift into cells, leading to cerebral edema and seizure risk."
+    },
+    {
+        "id": 42,
+        "question": "Which factor is a major contributor to sleep deprivation in the ICU?",
+        "options": ["Darkness", "Silence", "Environmental noise and alarms", "Comfortable bedding"],
+        "correct": 2,
+        "rationale": "Noise from alarms, staff conversation, and equipment is a primary cause of sleep fragmentation."
+    },
+    {
+        "id": 43,
+        "question": "Which assessment finding typically indicates the 'diuretic phase' of AKI?",
+        "options": ["Urine output < 400 mL/day", "Urine output 2-4 L/day", "Normal GFR", "High Urine Specific Gravity"],
+        "correct": 1,
+        "rationale": "The diuretic phase is characterized by a large increase in urine output (polyuria) as the kidneys recover the ability to excrete fluid but not concentrate it."
+    },
+    {
+        "id": 44,
+        "question": "What is the purpose of the 'inspiratory hold' maneuver on a ventilator?",
+        "options": ["To measure Peak Pressure", "To measure Plateau Pressure", "To suction the patient", "To trigger a breath"],
+        "correct": 1,
+        "rationale": "An inspiratory hold stops flow at the end of inspiration to measure the static compliance or Plateau Pressure."
+    },
+    {
+        "id": 45,
+        "question": "True or False: Pain should be assessed and treated before sedating an agitated patient.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "Analgesia-first sedation (analgosedation) is the recommended approach. Treat pain first, then sedate if necessary."
+    },
+    {
+        "id": 46,
+        "question": "Which cranial nerve is typically spared in Critical Illness Polyneuropathy?",
+        "options": ["Vagus nerve", "Facial nerve", "Sciatic nerve", "Phrenic nerve"],
+        "correct": 1,
+        "rationale": "ICU-acquired weakness typically spares the cranial and facial muscles."
+    },
+    {
+        "id": 47,
+        "question": "A patient has 'staccato speech' and weak cough. These are signs of:",
+        "options": ["Vocal cord paralysis", "Respiratory muscle weakness", "Stroke", "Hearing loss"],
+        "correct": 1,
+        "rationale": "Respiratory muscle weakness (diaphragm) leads to breathlessness when talking (staccato speech) and ineffective cough."
+    },
+    {
+        "id": 48,
+        "question": "Which drug is an alpha-2 agonist used for light sedation in the ICU?",
+        "options": ["Propofol", "Lorazepam", "Dexmedetomidine", "Haloperidol"],
+        "correct": 2,
+        "rationale": "Dexmedetomidine (Precedex) is an alpha-2 agonist that provides sedation without significant respiratory depression."
+    },
+    {
+        "id": 49,
+        "question": "What is the primary cause of 'volutrauma' in mechanical ventilation?",
+        "options": ["High FiO2", "High Tidal Volumes", "High PEEP", "Low flow rates"],
+        "correct": 1,
+        "rationale": "Volutrauma is lung injury caused by overdistention of alveoli from excessive tidal volumes."
+    },
+    {
+        "id": 50,
+        "question": "True or False: Post-renal AKI is the most common form of kidney injury in the ICU.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Post-renal AKI (obstruction) is rare in the ICU compared to Prerenal (hypoperfusion) and Intrarenal (ATN/sepsis) causes."
+    },
+    {
+        "id": 51,
+        "question": "Which finding is a sign of hypernatremia?",
+        "options": ["Polyuria", "Extreme thirst", "Bradycardia", "Hypotension"],
+        "correct": 1,
+        "rationale": "Hypernatremia triggers the thirst mechanism due to hyperosmolality."
+    },
+    {
+        "id": 52,
+        "question": "A patient with a head injury requires hyperventilation. What is the therapeutic goal?",
+        "options": ["Increase PaCO2 to dilate vessels", "Decrease PaCO2 to cause vasoconstriction", "Increase O2 delivery", "Treat acidosis"],
+        "correct": 1,
+        "rationale": "Controlled hyperventilation lowers PaCO2, causing cerebral vasoconstriction, which reduces Intracranial Pressure (ICP)."
+    },
+    {
+        "id": 53,
+        "question": "What is the definition of 'Oliguria'?",
+        "options": ["Urine output < 400 mL/day", "Urine output < 100 mL/day", "Urine output > 2000 mL/day", "No urine output"],
+        "correct": 0,
+        "rationale": "Oliguria is typically defined as urine output less than 400 mL/day or less than 0.5 mL/kg/hr."
+    },
+    {
+        "id": 54,
+        "question": "Which nursing action helps prevent Ventilator-Associated Pneumonia (VAP)?",
+        "options": ["Keep head of bed flat", "Oral care with chlorhexidine", "Frequent circuit changes", "Deep sedation"],
+        "correct": 1,
+        "rationale": "Oral care, elevating the head of the bed (30-45 degrees), and sedation vacations are key VAP prevention strategies."
+    },
+    {
+        "id": 55,
+        "question": "The 'P' in the SAMPLE history mnemonic stands for:",
+        "options": ["Pain", "Past medical history", "Pulse", "Pharmacy"],
+        "correct": 1,
+        "rationale": "S=Signs/Symptoms, A=Allergies, M=Medications, P=Past medical history, L=Last meal, E=Events."
+    },
+    {
+        "id": 56,
+        "question": "True or False: Dopamine at low doses is proven to prevent renal failure.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "So-called 'renal-dose dopamine' is no longer recommended as it does not prevent renal failure or improve outcomes."
+    },
+    {
+        "id": 57,
+        "question": "Which electrolyte imbalance typically causes paralytic ileus?",
+        "options": ["Hypokalemia", "Hyperkalemia", "Hyponatremia", "Hypercalcemia"],
+        "correct": 0,
+        "rationale": "Hypokalemia decreases smooth muscle contraction, leading to decreased bowel sounds and paralytic ileus."
+    },
+    {
+        "id": 58,
+        "question": "What is the normal I:E ratio usually set on a ventilator?",
+        "options": ["1:2", "2:1", "1:1", "4:1"],
+        "correct": 0,
+        "rationale": "A normal I:E ratio is 1:2, allowing more time for exhalation than inspiration."
+    },
+    {
+        "id": 59,
+        "question": "Which condition typically causes metabolic acidosis with a high anion gap?",
+        "options": ["Diarrhea", "Diabetic Ketoacidosis (DKA)", "Vomiting", "Hyperventilation"],
+        "correct": 1,
+        "rationale": "DKA causes an accumulation of ketones (acids), leading to a high anion gap metabolic acidosis."
+    },
+    {
+        "id": 60,
+        "question": "A patient has a CVP of 15 mmHg. What does this suggest?",
+        "options": ["Hypovolemia", "Fluid volume overload", "Vasodilation", "Normal hydration"],
+        "correct": 1,
+        "rationale": "High CVP (>6-8 mmHg) generally indicates right ventricular failure or fluid volume overload."
+    },
+    {
+        "id": 61,
+        "question": "True or False: Hand washing is the single most important measure to prevent cross-infection in the ICU.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "Hand hygiene is universally recognized as the most effective method to prevent infection transmission."
+    },
+    {
+        "id": 62,
+        "question": "Which of the following is an early sign of hypoxemia in the elderly?",
+        "options": ["Cyanosis", "Confusion", "Hypotension", "Bradycardia"],
+        "correct": 1,
+        "rationale": "Confusion or mental status changes are often the earliest and most subtle signs of hypoxemia in older adults."
+    },
+    {
+        "id": 63,
+        "question": "What is the main advantage of Tracheostomy over Endotracheal intubation for long-term ventilation?",
+        "options": ["Increases dead space", "Increases work of breathing", "Improves patient comfort and oral care", "Prevents all infections"],
+        "correct": 2,
+        "rationale": "Tracheostomies are more comfortable, allow for oral hygiene, may permit speech, and decrease dead space compared to ETT."
+    },
+    {
+        "id": 64,
+        "question": "Which gas law explains the diffusion of gases across the alveolar-capillary membrane?",
+        "options": ["Boyle's Law", "Fick's Law", "Dalton's Law", "Charles's Law"],
+        "correct": 1,
+        "rationale": "Fick's Law of diffusion describes how gas moves across a tissue sheet."
+    },
+    {
+        "id": 65,
+        "question": "In a patient with severe ARDS, which ventilation strategy is recommended?",
+        "options": ["High Tidal Volume (10-12 mL/kg)", "Low Tidal Volume (6 mL/kg)", "Zero PEEP", "High Pressure limits"],
+        "correct": 1,
+        "rationale": "Lung-protective ventilation uses Low Tidal Volumes (4-8 mL/kg) to prevent volutrauma."
+    },
+    {
+        "id": 66,
+        "question": "True or False: Pulse oximetry accurately reflects ventilation.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Pulse oximetry measures oxygenation (SpO2), not ventilation (CO2 removal). Capnography measures ventilation."
+    },
+    {
+        "id": 67,
+        "question": "Which agent is an opioid antagonist used to reverse respiratory depression?",
+        "options": ["Flumazenil", "Naloxone", "Protamine Sulfate", "Vitamin K"],
+        "correct": 1,
+        "rationale": "Naloxone (Narcan) reverses the effects of opioids."
+    },
+    {
+        "id": 68,
+        "question": "A patient's ventilator tubing has water in it. What is the priority nursing action?",
+        "options": ["Drain it back into the humidifier", "Drain it into a waste receptacle away from the patient", "Increase the temperature", "Leave it alone"],
+        "correct": 1,
+        "rationale": "Condensation should be drained away from the patient to prevent aspiration and contamination. Never drain back into the reservoir."
+    },
+    {
+        "id": 69,
+        "question": "Which type of shock is characterized by low CVP, low BP, and tachycardia?",
+        "options": ["Cardiogenic", "Hypovolemic", "Neurogenic", "Anaphylactic"],
+        "correct": 1,
+        "rationale": "Hypovolemic shock presents with low preload (CVP), hypotension, and compensatory tachycardia."
+    },
+    {
+        "id": 70,
+        "question": "What is the primary cause of 'Intrarenal' failure?",
+        "options": ["BPH", "Dehydration", "Acute Tubular Necrosis (ATN)", "Renal artery stenosis"],
+        "correct": 2,
+        "rationale": "ATN (ischemic or toxic) is the most common cause of intrinsic (intrarenal) failure."
+    },
+    {
+        "id": 71,
+        "question": "True or False: Delirium is associated with increased mortality in ICU patients.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "Delirium is an independent predictor of higher mortality and longer hospital stays."
+    },
+    {
+        "id": 72,
+        "question": "Which electrolyte imbalance causes tall, tented T waves?",
+        "options": ["Hypokalemia", "Hyperkalemia", "Hypercalcemia", "Hyponatremia"],
+        "correct": 1,
+        "rationale": "Hyperkalemia causes peaked T waves."
+    },
+    {
+        "id": 73,
+        "question": "Which of the following describes 'Third Spacing'?",
+        "options": ["Fluid moving into the vascular space", "Fluid moving into the intracellular space", "Fluid moving into non-functional interstitial spaces", "Fluid excreted by kidneys"],
+        "correct": 2,
+        "rationale": "Third spacing is the accumulation of fluid in areas where it is not physiologically useful (e.g., ascites, pleural effusion)."
+    },
+    {
+        "id": 74,
+        "question": "Which factor decreases the diffusion capacity of the lung?",
+        "options": ["Exercise", "Pulmonary fibrosis", "High altitude", "Increased cardiac output"],
+        "correct": 1,
+        "rationale": "Fibrosis thickens the alveolar membrane, impairing gas diffusion."
+    },
+    {
+        "id": 75,
+        "question": "What does the 'S' in the mnemonic FAST for stroke stand for?",
+        "options": ["Smile", "Speech difficulty", "Sensation", "Sight"],
+        "correct": 1,
+        "rationale": "FAST = Face drooping, Arm weakness, Speech difficulty, Time to call 911."
+    },
+    {
+        "id": 76,
+        "question": "True or False: Enteral nutrition is preferred over parenteral nutrition in critically ill patients with a functional gut.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "Enteral nutrition preserves gut mucosal integrity and immunity and is preferred if the gut works."
+    },
+    {
+        "id": 77,
+        "question": "Which parameter indicates the effectiveness of ventilation?",
+        "options": ["PaO2", "SaO2", "PaCO2", "pH"],
+        "correct": 2,
+        "rationale": "PaCO2 is the direct measure of alveolar ventilation."
+    },
+    {
+        "id": 78,
+        "question": "A patient has a PaO2/FiO2 ratio of 150. This suggests:",
+        "options": ["Normal lung function", "Mild hypoxemia", "ARDS (Acute Respiratory Distress Syndrome)", "Hyperventilation"],
+        "correct": 2,
+        "rationale": "A P/F ratio < 200 (Berlin definition < 300) indicates ARDS."
+    },
+    {
+        "id": 79,
+        "question": "Which drug is used to treat malignant hyperthermia?",
+        "options": ["Atropine", "Dantrolene", "Succinylcholine", "Lidocaine"],
+        "correct": 1,
+        "rationale": "Dantrolene is the specific antidote for malignant hyperthermia."
+    },
+    {
+        "id": 80,
+        "question": "True or False: A nasogastric tube can be used to measure intra-abdominal pressure.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "While gastric pressure can be measured, the bladder (intravesical) method is the standard. However, intragastric IS a method. The question says 'can'. So True. But wait, the text calls bladder the gold standard. Let's stick to the text. Text says: 'Indirect: 2. Intragastric'. So it CAN be used."
+    },
+    {
+        "id": 81,
+        "question": "Which of the following is a sign of 'Refractory Hypoxemia'?",
+        "options": ["PaO2 increases with O2 therapy", "PaO2 remains low despite high FiO2", "PaCO2 is high", "pH is alkalotic"],
+        "correct": 1,
+        "rationale": "Refractory hypoxemia is the inability to improve oxygenation despite increasing oxygen delivery, a hallmark of ARDS/shunting."
+    },
+    {
+        "id": 82,
+        "question": "Which condition is a risk factor for contrast-induced nephropathy?",
+        "options": ["Hypertension", "Dehydration", "Young age", "High fluid intake"],
+        "correct": 1,
+        "rationale": "Dehydration significantly increases the risk of kidney injury from contrast dye."
+    },
+    {
+        "id": 83,
+        "question": "What is the normal Glomerular Filtration Rate (GFR)?",
+        "options": ["60 mL/min", "125 mL/min", "10 mL/min", "200 mL/min"],
+        "correct": 1,
+        "rationale": "Normal GFR is approximately 125 mL/min."
+    },
+    {
+        "id": 84,
+        "question": "Which of the following is a colloid solution?",
+        "options": ["0.9% Normal Saline", "Albumin", "Lactated Ringer's", "D5W"],
+        "correct": 1,
+        "rationale": "Albumin is a colloid (protein); the others are crystalloids."
+    },
+    {
+        "id": 85,
+        "question": "True or False: Suctioning should be performed routinely every 2 hours.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Suctioning should be performed 'as needed' based on assessment (secretions, cough, desaturation), not routinely, to avoid trauma."
+    },
+    {
+        "id": 86,
+        "question": "Which nursing position is best for a patient with increased Intracranial Pressure (ICP)?",
+        "options": ["Trendelenburg", "Prone", "Head of bed elevated 30 degrees", "Supine with legs elevated"],
+        "correct": 2,
+        "rationale": "Elevating the head promotes venous drainage from the brain and lowers ICP."
+    },
+    {
+        "id": 87,
+        "question": "What is the definition of 'titration' in critical care medications?",
+        "options": ["Mixing drugs together", "Adjusting the dose to achieve a specific effect", "Giving a bolus only", "Stopping the drug abruptly"],
+        "correct": 1,
+        "rationale": "Titration involves adjusting the infusion rate/dose based on patient response (e.g., BP, sedation level)."
+    },
+    {
+        "id": 88,
+        "question": "Which lab value is the best indicator of nutritional status?",
+        "options": ["Albumin", "Prealbumin", "Total protein", "BUN"],
+        "correct": 1,
+        "rationale": "Prealbumin has a shorter half-life than albumin and more accurately reflects current nutritional status."
+    },
+    {
+        "id": 89,
+        "question": "A patient has a potassium level of 2.8 mEq/L. The nurse should prepare to administer:",
+        "options": ["Kayexalate", "Insulin and Glucose", "Potassium Chloride", "Calcium Gluconate"],
+        "correct": 2,
+        "rationale": "The patient is hypokalemic and requires replacement (KCl)."
+    },
+    {
+        "id": 90,
+        "question": "True or False: Acute pain triggers the sympathetic nervous system (Fight or Flight).",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "Acute pain stimulates the sympathetic response: tachycardia, hypertension, diaphoresis."
+    },
+    {
+        "id": 91,
+        "question": "Which of the following is an isotonic fluid?",
+        "options": ["0.45% Saline", "0.9% Normal Saline", "3% Saline", "D10W"],
+        "correct": 1,
+        "rationale": "0.9% NaCl is isotonic to plasma. 0.45% is hypotonic, 3% is hypertonic."
+    },
+    {
+        "id": 92,
+        "question": "What does the 'A' in the ABCDE trauma assessment stand for?",
+        "options": ["Airway", "Breathing", "Circulation", "Assessment"],
+        "correct": 0,
+        "rationale": "A = Airway maintenance with cervical spine protection."
+    },
+    {
+        "id": 93,
+        "question": "Which sign indicates effective fluid resuscitation in shock?",
+        "options": ["Urine output > 0.5 mL/kg/hr", "Tachycardia", "Hypotension", "CVP < 2 mmHg"],
+        "correct": 0,
+        "rationale": "Adequate urine output is a key indicator of end-organ perfusion."
+    },
+    {
+        "id": 94,
+        "question": "A patient's ventilator alarms 'Low Minute Volume'. This could indicate:",
+        "options": ["Secretions", "Apnea or disconnect", "Biting the tube", "Coughing"],
+        "correct": 1,
+        "rationale": "Low minute volume means the patient is not moving enough air, often due to disconnection, apnea, or cuff leak."
+    },
+    {
+        "id": 95,
+        "question": "True or False: Melatonin secretion increases during the day.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Melatonin is the 'hormone of darkness' and secretion increases at night."
+    },
+    {
+        "id": 96,
+        "question": "Which condition is a contraindication for Succinylcholine?",
+        "options": ["Hyperkalemia", "Hypokalemia", "Hyponatremia", "Hypothermia"],
+        "correct": 0,
+        "rationale": "Succinylcholine can cause massive potassium release, causing cardiac arrest in patients with pre-existing hyperkalemia or burns/crush injuries."
+    },
+    {
+        "id": 97,
+        "question": "What is the primary buffer system in the body?",
+        "options": ["Phosphate buffer", "Protein buffer", "Bicarbonate-Carbonic acid buffer", "Hemoglobin buffer"],
+        "correct": 2,
+        "rationale": "The Bicarbonate-Carbonic acid system is the major extracellular buffer."
+    },
+    {
+        "id": 98,
+        "question": "Which intervention reduces the risk of 'ICU Psychosis' (Delirium)?",
+        "options": ["Physical restraints", "Frequent reorientation", "Constant bright lights", "Isolation"],
+        "correct": 1,
+        "rationale": "Reorientation, early mobility, and normalizing sleep-wake cycles help prevent delirium."
+    },
+    {
+        "id": 99,
+        "question": "Which of the following is a symptom of hypocalcemia?",
+        "options": ["Muscle weakness", "Constipation", "Tetany", "Polyuria"],
+        "correct": 2,
+        "rationale": "Hypocalcemia causes neuromuscular irritability and tetany."
+    },
+    {
+        "id": 100,
+        "question": "True or False: A cuff pressure of 50 cmH2O is appropriate for an endotracheal tube.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Normal cuff pressure is 20-30 cmH2O. 50 is too high and causes tracheal necrosis."
+    },
+    {
+        "id": 101,
+        "question": "Which type of burn injury is painless?",
+        "options": ["First degree", "Second degree", "Third degree (Full thickness)", "Superficial"],
+        "correct": 2,
+        "rationale": "Full-thickness burns destroy nerve endings, making them painless."
+    },
+    {
+        "id": 102,
+        "question": "What is 'Autonomic Dysreflexia'?",
+        "options": ["A reaction to anesthesia", "A life-threatening hypertensive crisis in spinal cord injury", "Low blood pressure in shock", "Respiratory failure"],
+        "correct": 1,
+        "rationale": "It is a hypertensive emergency in SCI (T6 or above) triggered by noxious stimuli (e.g., full bladder)."
+    },
+    {
+        "id": 103,
+        "question": "Which medication is an antidote for Heparin?",
+        "options": ["Vitamin K", "Protamine Sulfate", "Flumazenil", "Glucagon"],
+        "correct": 1,
+        "rationale": "Protamine Sulfate reverses Heparin. Vitamin K reverses Warfarin."
+    },
+    {
+        "id": 104,
+        "question": "A patient with COPD is a 'CO2 retainer'. Their drive to breathe comes from:",
+        "options": ["High CO2 levels", "Low O2 levels (Hypoxic Drive)", "High pH", "Low pH"],
+        "correct": 1,
+        "rationale": "In chronic hypercapnia, the central chemoreceptors reset, and the hypoxic drive becomes the primary stimulus."
+    },
+    {
+        "id": 105,
+        "question": "True or False: The femoral vein is the preferred site for central line insertion to minimize infection.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "The Subclavian site is preferred for infection control; femoral has the highest infection risk."
+    },
+    {
+        "id": 106,
+        "question": "Which of the following indicates a tension pneumothorax?",
+        "options": ["Tracheal deviation away from the affected side", "Tracheal deviation toward the affected side", "Bilateral breath sounds", "Hypertension"],
+        "correct": 0,
+        "rationale": "Tension pneumothorax pushes mediastinal structures (trachea) away from the injury."
+    },
+    {
+        "id": 107,
+        "question": "What is the priority action for a patient with V-Fib?",
+        "options": ["Administer Atropine", "Defibrillation", "Synchronized Cardioversion", "Intubation"],
+        "correct": 1,
+        "rationale": "V-Fib is a shockable rhythm; immediate defibrillation is required."
+    },
+    {
+        "id": 108,
+        "question": "Which enzyme is most specific for myocardial infarction?",
+        "options": ["CK-MM", "Troponin", "Myoglobin", "LDH"],
+        "correct": 1,
+        "rationale": "Troponin I or T is the most specific and sensitive biomarker for MI."
+    },
+    {
+        "id": 109,
+        "question": "A patient has a 'flail chest'. What is the characteristic sign?",
+        "options": ["Tracheal deviation", "Paradoxical chest movement", "Absent breath sounds", "Wheezing"],
+        "correct": 1,
+        "rationale": "Flail chest (multiple rib fractures) causes the chest to move in during inspiration and out during expiration (paradoxical)."
+    },
+    {
+        "id": 110,
+        "question": "True or False: Passive leg raising is a test for fluid responsiveness.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "Passive leg raising gives an 'auto-bolus' of blood; if cardiac output increases, the patient is fluid responsive."
+    },
+    {
+        "id": 111,
+        "question": "Which complication is associated with rapid correction of hyponatremia?",
+        "options": ["Cerebral edema", "Osmotic Demyelination Syndrome", "Renal failure", "Pulmonary edema"],
+        "correct": 1,
+        "rationale": "Correcting sodium too fast causes demyelination of the pons (CPM)."
+    },
+    {
+        "id": 112,
+        "question": "What is the normal range for Mean Arterial Pressure (MAP)?",
+        "options": ["40-60 mmHg", "70-100 mmHg", "100-120 mmHg", "10-20 mmHg"],
+        "correct": 1,
+        "rationale": "Normal MAP is 70-105 mmHg; >65 is usually needed for perfusion."
+    },
+    {
+        "id": 113,
+        "question": "Which agent is used for 'chemical paralysis' in the ICU?",
+        "options": ["Fentanyl", "Propofol", "Cisatracurium", "Midazolam"],
+        "correct": 2,
+        "rationale": "Cisatracurium (Nimbex) is a neuromuscular blocking agent (paralytic)."
+    },
+    {
+        "id": 114,
+        "question": "A patient typically requires dialysis when GFR falls below:",
+        "options": ["60 mL/min", "30 mL/min", "15 mL/min", "90 mL/min"],
+        "correct": 2,
+        "rationale": "End-stage renal disease (Stage 5) is GFR < 15 mL/min."
+    },
+    {
+        "id": 115,
+        "question": "True or False: Hyperglycemia is beneficial in critically ill patients.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Hyperglycemia impairs immunity and increases mortality; strict(er) control is needed (target typically 140-180 mg/dL)."
+    },
+    {
+        "id": 116,
+        "question": "Which of the following is an example of 'insensible' fluid loss?",
+        "options": ["Urine", "Vomit", "Diarrhea", "Evaporation from skin and lungs"],
+        "correct": 3,
+        "rationale": "Insensible loss cannot be measured directly (sweat/vapor)."
+    },
+    {
+        "id": 117,
+        "question": "What is the primary cause of Septic Shock?",
+        "options": ["Heart failure", "Infection leading to systemic vasodilation", "Blood loss", "Spinal injury"],
+        "correct": 1,
+        "rationale": "Sepsis causes widespread vasodilation and capillary leak."
+    },
+    {
+        "id": 118,
+        "question": "Which rhythm is treated with Adenosine?",
+        "options": ["Sinus Bradycardia", "SVT (Supraventricular Tachycardia)", "V-Fib", "Asystole"],
+        "correct": 1,
+        "rationale": "Adenosine slows conduction through the AV node and terminates SVT."
+    },
+    {
+        "id": 119,
+        "question": "A patient has 'Guillain-Barré Syndrome'. The nurse monitors for:",
+        "options": ["Descending paralysis", "Ascending paralysis and respiratory failure", "Unilateral weakness", "Seizures"],
+        "correct": 1,
+        "rationale": "GBS causes ascending paralysis that can affect the diaphragm."
+    },
+    {
+        "id": 120,
+        "question": "True or False: The balloon of a PA catheter (Swan-Ganz) should be left inflated continuously.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Continuous inflation causes pulmonary artery rupture or infarction. Inflate only for reading."
+    },
+    {
+        "id": 121,
+        "question": "Which of the following is a sign of Cushing's Triad (Increased ICP)?",
+        "options": ["Hypotension, Tachycardia, Tachypnea", "Hypertension, Bradycardia, Irregular respirations", "Hypotension, Bradycardia, Apnea", "Hypertension, Tachycardia, Fever"],
+        "correct": 1,
+        "rationale": "Cushing's Triad = Systolic HTN (widening pulse pressure), Bradycardia, Bradypnea (irregular)."
+    },
+    {
+        "id": 122,
+        "question": "What is the main side effect of ACE inhibitors?",
+        "options": ["Hypokalemia", "Dry cough", "Tachycardia", "Hypertension"],
+        "correct": 1,
+        "rationale": "ACE inhibitors often cause a persistent dry cough."
+    },
+    {
+        "id": 123,
+        "question": "Which patient is prioritized in triage?",
+        "options": ["Cardiac arrest (unsalvageable)", "Minor fracture", "Tension Pneumothorax", "Deceased"],
+        "correct": 2,
+        "rationale": "Red tag (Immediate) includes life-threatening but treatable conditions like tension pneumothorax."
+    },
+    {
+        "id": 124,
+        "question": "A patient is on TPN. Abrupt discontinuation can cause:",
+        "options": ["Hyperglycemia", "Hypoglycemia", "Hyperkalemia", "Air embolism"],
+        "correct": 1,
+        "rationale": "TPN has high glucose; stopping it suddenly causes rebound hypoglycemia due to high insulin levels."
+    },
+    {
+        "id": 125,
+        "question": "True or False: Morphine causes pupil dilation.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Opioids cause pupil constriction (miosis)."
+    },
+    {
+        "id": 126,
+        "question": "Which finding requires immediate intervention after a liver biopsy?",
+        "options": ["Mild pain", "Tachycardia and hypotension", "Sleepiness", "Trace blood on dressing"],
+        "correct": 1,
+        "rationale": "Signs of shock indicate internal bleeding."
+    },
+    {
+        "id": 127,
+        "question": "What is the normal Activated Partial Thromboplastin Time (aPTT)?",
+        "options": ["10-13 seconds", "30-40 seconds", "60-80 seconds", "2-3 minutes"],
+        "correct": 1,
+        "rationale": "Normal aPTT is 30-40s. Therapeutic for Heparin is usually 1.5-2.5x normal."
+    },
+    {
+        "id": 128,
+        "question": "Which assessment finding is specific to Meningitis?",
+        "options": ["McBurney's point tenderness", "Brudzinski's sign", "Murphy's sign", "Homan's sign"],
+        "correct": 1,
+        "rationale": "Nuchal rigidity, Kernig's, and Brudzinski's signs indicate meningeal irritation."
+    },
+    {
+        "id": 129,
+        "question": "A patient with a Potassium of 7.0 mEq/L is receiving Insulin. Why?",
+        "options": ["To treat diabetes", "To drive Potassium into the cell", "To increase blood sugar", "To protect the heart"],
+        "correct": 1,
+        "rationale": "Insulin drives K+ into cells, lowering serum levels temporarily."
+    },
+    {
+        "id": 130,
+        "question": "True or False: The phlebostatic axis is located at the 4th intercostal space, mid-axillary line.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "This is the reference point for zeroing hemodynamic transducers."
+    },
+    {
+        "id": 131,
+        "question": "Which condition is treated with a chest tube?",
+        "options": ["Pneumonia", "Pneumothorax", "Pulmonary embolism", "COPD"],
+        "correct": 1,
+        "rationale": "Chest tubes drain air (pneumothorax) or fluid (hemothorax) from the pleural space."
+    },
+    {
+        "id": 132,
+        "question": "What is 'tidal volume'?",
+        "options": ["Volume of air in lungs after max exhalation", "Volume of air inhaled/exhaled with normal breath", "Volume of air left after normal exhalation", "Total lung capacity"],
+        "correct": 1,
+        "rationale": "Tidal volume (Vt) is the volume of a normal breath."
+    },
+    {
+        "id": 133,
+        "question": "Which sign indicates a basilar skull fracture?",
+        "options": ["Periorbital ecchymosis (Raccoon eyes)", "Deviated septum", "Jaw pain", "Blurred vision"],
+        "correct": 0,
+        "rationale": "Raccoon eyes and Battle's sign (bruising behind ear) are classic signs."
+    },
+    {
+        "id": 134,
+        "question": "A patient with asthma has 'silent chest'. This implies:",
+        "options": ["Resolution of attack", "Severe obstruction and impending failure", "Good air entry", "Normal finding"],
+        "correct": 1,
+        "rationale": "Absence of wheezing (silent chest) in an asthmatic means no air is moving; it's an emergency."
+    },
+    {
+        "id": 135,
+        "question": "True or False: Potassium should never be given IV push.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "IV push Potassium causes immediate cardiac arrest."
+    },
+    {
+        "id": 136,
+        "question": "Which type of insulin can be given IV?",
+        "options": ["NPH", "Regular", "Glargine", "Lente"],
+        "correct": 1,
+        "rationale": "Only Regular insulin is administered intravenously."
+    },
+    {
+        "id": 137,
+        "question": "What is the first action for a fire in a patient's room?",
+        "options": ["Extinguish the fire", "Rescue the patient", "Pull the alarm", "Contain the fire"],
+        "correct": 1,
+        "rationale": "RACE: Rescue, Alarm, Contain, Extinguish."
+    },
+    {
+        "id": 138,
+        "question": "Which finding suggests pulmonary embolism?",
+        "options": ["Sudden dyspnea and chest pain", "Slow onset fever", "Productive cough", "Bradycardia"],
+        "correct": 0,
+        "rationale": "Sudden onset SOB, pleuritic pain, and tachycardia are classic PE signs."
+    },
+    {
+        "id": 139,
+        "question": "A patient with Heart Failure has BNP of 1200 pg/mL. This confirms:",
+        "options": ["Normal heart function", "Acute exacerbation of HF", "Renal failure", "Liver failure"],
+        "correct": 1,
+        "rationale": "BNP > 100 indicates HF; 1200 is severe elevation."
+    },
+    {
+        "id": 140,
+        "question": "True or False: Hand hygiene is not needed if gloves are worn.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Gloves are not a substitute for hand hygiene. Wash before and after."
+    },
+    {
+        "id": 141,
+        "question": "Which organ is most sensitive to hypotension?",
+        "options": ["Skin", "Kidneys", "Liver", "Lungs"],
+        "correct": 1,
+        "rationale": "The kidneys are highly vascular and very sensitive to hypoperfusion (AKI)."
+    },
+    {
+        "id": 142,
+        "question": "What is the specific gravity of urine in dehydration?",
+        "options": ["1.000", "1.010", "> 1.030", "1.005"],
+        "correct": 2,
+        "rationale": "Dehydration leads to concentrated urine with high specific gravity."
+    },
+    {
+        "id": 143,
+        "question": "Which medication is a beta-blocker?",
+        "options": ["Lisinopril", "Metoprolol", "Amlodipine", "Furosemide"],
+        "correct": 1,
+        "rationale": "-olol suffix indicates beta-blockers."
+    },
+    {
+        "id": 144,
+        "question": "A patient has 'coffee ground' emesis. This indicates:",
+        "options": ["Lower GI bleed", "Upper GI bleed", "Food poisoning", "Bowel obstruction"],
+        "correct": 1,
+        "rationale": "Digested blood from the stomach/upper GI tract looks like coffee grounds."
+    },
+    {
+        "id": 145,
+        "question": "True or False: An NG tube can be used for feeding in a patient with a basal skull fracture.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "It is contraindicated due to risk of intracranial insertion. Use Orogastric instead."
+    },
+    {
+        "id": 146,
+        "question": "Which solution is hypertonic?",
+        "options": ["0.9% NaCl", "0.45% NaCl", "3% NaCl", "LR"],
+        "correct": 2,
+        "rationale": "3% Saline is hypertonic."
+    },
+    {
+        "id": 147,
+        "question": "What is the correct compression-to-breath ratio in adult CPR?",
+        "options": ["15:2", "30:2", "5:1", "10:1"],
+        "correct": 1,
+        "rationale": "Standard adult CPR ratio is 30 compressions to 2 breaths."
+    },
+    {
+        "id": 148,
+        "question": "Which lab test monitors Warfarin therapy?",
+        "options": ["aPTT", "INR/PT", "Platelets", "Bleeding time"],
+        "correct": 1,
+        "rationale": "INR is used for Warfarin (Coumadin)."
+    },
+    {
+        "id": 149,
+        "question": "A patient has a 'board-like' rigid abdomen. This suggests:",
+        "options": ["Constipation", "Peritonitis", "Gastritis", "Ascites"],
+        "correct": 1,
+        "rationale": "Rigidity is a sign of peritoneal irritation/perforation (acute abdomen)."
+    },
+    {
+        "id": 150,
+        "question": "True or False: Defibrillation is used for Asystole.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "You cannot shock a flatline (Asystole). Use CPR and Epinephrine."
+    },
+    {
+        "id": 151,
+        "question": "Which vitamin promotes wound healing?",
+        "options": ["Vitamin A", "Vitamin C", "Vitamin D", "Vitamin K"],
+        "correct": 1,
+        "rationale": "Vitamin C is essential for collagen synthesis."
+    },
+    {
+        "id": 152,
+        "question": "What does 'triage' mean?",
+        "options": ["To treat everyone equally", "To sort patients by priority", "To send patients home", "To admit patients"],
+        "correct": 1,
+        "rationale": "Triage is the sorting of patients based on urgency."
+    },
+    {
+        "id": 153,
+        "question": "A patient has pulsus paradoxus. This is seen in:",
+        "options": ["Heart Failure", "Cardiac Tamponade", "MI", "Stroke"],
+        "correct": 1,
+        "rationale": "A drop in SBP >10 mmHg during inspiration is classic for Tamponade."
+    },
+    {
+        "id": 154,
+        "question": "Which electrolyte is mainly intracellular?",
+        "options": ["Sodium", "Calcium", "Potassium", "Chloride"],
+        "correct": 2,
+        "rationale": "Potassium is the primary intracellular cation."
+    },
+    {
+        "id": 155,
+        "question": "True or False: Restraints should be tied to the side rail.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Restraints must be tied to the bed frame (immovable part), not the rail."
+    },
+    {
+        "id": 156,
+        "question": "Which condition causes 'moon face' and 'buffalo hump'?",
+        "options": ["Addison's disease", "Cushing's syndrome", "Hypothyroidism", "Diabetes"],
+        "correct": 1,
+        "rationale": "Excess cortisol (Cushing's) causes these fat redistributions."
+    },
+    {
+        "id": 157,
+        "question": "What is the priority assessment for a patient with a cast?",
+        "options": ["Cleanliness", "Neurovascular status (CMS)", "Itching", "Color"],
+        "correct": 1,
+        "rationale": "Check Circulation, Motor, Sensation to prevent compartment syndrome."
+    },
+    {
+        "id": 158,
+        "question": "A patient with liver failure has high Ammonia. Which drug is given?",
+        "options": ["Insulin", "Lactulose", "Furosemide", "Digoxin"],
+        "correct": 1,
+        "rationale": "Lactulose traps ammonia in the gut for excretion."
+    },
+    {
+        "id": 159,
+        "question": "Which finding indicates hip fracture?",
+        "options": ["Lengthening of leg", "External rotation and shortening", "Internal rotation", "Bruising"],
+        "correct": 1,
+        "rationale": "Classic sign: Leg shortened and externally rotated."
+    },
+    {
+        "id": 160,
+        "question": "True or False: Oxygen is considered a medication.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "Oxygen requires an order and is treated as a drug."
+    },
+    {
+        "id": 161,
+        "question": "What is the Allen test used for?",
+        "options": ["To test patency of ulnar artery", "To test vision", "To test hearing", "To test reflexes"],
+        "correct": 0,
+        "rationale": "Performed before ABG sampling from the radial artery."
+    },
+    {
+        "id": 162,
+        "question": "Which mask delivers the highest concentration of oxygen?",
+        "options": ["Nasal cannula", "Venturi mask", "Simple face mask", "Non-rebreather mask"],
+        "correct": 3,
+        "rationale": "NRB delivers up to 90-100% O2."
+    },
+    {
+        "id": 163,
+        "question": "A patient is hypotensive and tachycardic. The nurse suspects:",
+        "options": ["Pain", "Shock", "Hypertension", "Sleep"],
+        "correct": 1,
+        "rationale": "Hypotension + Tachycardia = Shock until proven otherwise."
+    },
+    {
+        "id": 164,
+        "question": "Which drug causes 'Red Man Syndrome'?",
+        "options": ["Penicillin", "Vancomycin", "Gentamicin", "Ceftriaxone"],
+        "correct": 1,
+        "rationale": "Rapid infusion of Vancomycin causes histamine release (Red Man Syndrome)."
+    },
+    {
+        "id": 165,
+        "question": "True or False: A patient with TB requires Droplet precautions.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "TB requires Airborne precautions (N95, negative pressure)."
+    },
+    {
+        "id": 166,
+        "question": "What is 'Steatorrhea'?",
+        "options": ["Blood in stool", "Fat in stool", "Mucus in stool", "Hard stool"],
+        "correct": 1,
+        "rationale": "Fatty, foul-smelling stool, often seen in Pancreatitis or Malabsorption."
+    },
+    {
+        "id": 167,
+        "question": "Which condition is associated with 'Barrel Chest'?",
+        "options": ["Pneumonia", "Emphysema (COPD)", "Asthma", "TB"],
+        "correct": 1,
+        "rationale": "Air trapping in COPD leads to increased A-P diameter (Barrel Chest)."
+    },
+    {
+        "id": 168,
+        "question": "What is the antidote for Acetaminophen (Tylenol) overdose?",
+        "options": ["Naloxone", "Acetylcysteine (Mucomyst)", "Flumazenil", "Activated Charcoal"],
+        "correct": 1,
+        "rationale": "N-acetylcysteine prevents liver damage."
+    },
+    {
+        "id": 169,
+        "question": "A patient has low platelets (Thrombocytopenia). The nurse avoids:",
+        "options": ["Oral care", "IM injections", "Walking", "Eating"],
+        "correct": 1,
+        "rationale": "IM injections can cause hematomas. Bleeding precautions needed."
+    },
+    {
+        "id": 170,
+        "question": "True or False: The left lung has 3 lobes.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Left has 2 lobes; Right has 3."
+    },
+    {
+        "id": 171,
+        "question": "Which symptom is associated with Carbon Monoxide poisoning?",
+        "options": ["Cyanosis", "Cherry red skin", "Pale skin", "Jaundice"],
+        "correct": 1,
+        "rationale": "CO binds to hemoglobin creating bright red carboxyhemoglobin."
+    },
+    {
+        "id": 172,
+        "question": "What is 'Dysphagia'?",
+        "options": ["Difficulty speaking", "Difficulty swallowing", "Difficulty breathing", "Difficulty walking"],
+        "correct": 1,
+        "rationale": "Dysphagia = swallowing difficulty. Dysphasia = speech difficulty."
+    },
+    {
+        "id": 173,
+        "question": "Which position is best for administering an enema?",
+        "options": ["Supine", "Right lateral", "Left lateral (Sims)", "Prone"],
+        "correct": 2,
+        "rationale": "Left lateral allows gravity to flow fluid into the sigmoid colon."
+    },
+    {
+        "id": 174,
+        "question": "A patient has 'ascites'. Which procedure is used to drain it?",
+        "options": ["Thoracentesis", "Paracentesis", "Lumbar puncture", "Dialysis"],
+        "correct": 1,
+        "rationale": "Paracentesis drains fluid from the peritoneal cavity."
+    },
+    {
+        "id": 175,
+        "question": "True or False: Insulin must be checked by two nurses.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "Insulin is a high-alert medication requiring dual verification."
+    },
+    {
+        "id": 176,
+        "question": "Which assessment finding indicates Deep Vein Thrombosis (DVT)?",
+        "options": ["Pale cool leg", "Unilateral leg swelling and warmth", "Pulselessness", "Bruising"],
+        "correct": 1,
+        "rationale": "DVT causes inflammation, swelling, and redness in one leg."
+    },
+    {
+        "id": 177,
+        "question": "What is the main function of 'Platelets'?",
+        "options": ["Carry oxygen", "Fight infection", "Blood clotting", "Regulate pH"],
+        "correct": 2,
+        "rationale": "Platelets form plugs to stop bleeding."
+    },
+    {
+        "id": 178,
+        "question": "Which fluid is best for burn resuscitation (Parkland formula)?",
+        "options": ["D5W", "Lactated Ringer's", "Normal Saline", "Albumin"],
+        "correct": 1,
+        "rationale": "LR is the preferred crystalloid for burns to prevent acidosis."
+    },
+    {
+        "id": 179,
+        "question": "A patient has a 'stoma'. A healthy stoma should be:",
+        "options": ["Pale", "Pink/Red and moist", "Black", "Purple"],
+        "correct": 1,
+        "rationale": "Pink/Red indicates good blood supply. Dark means ischemia."
+    },
+    {
+        "id": 180,
+        "question": "True or False: A patient with a pacemaker cannot have an MRI.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "Older pacemakers are incompatible, but many modern ones are MRI-conditional. However, generally it's a contraindication unless specified. So True is the safer general answer."
+    },
+    {
+        "id": 181,
+        "question": "Which assessment is 'Glascow Coma Scale' used for?",
+        "options": ["Pain", "Sedation", "Level of consciousness", "Delirium"],
+        "correct": 2,
+        "rationale": "GCS measures LOC based on Eye, Verbal, and Motor response."
+    },
+    {
+        "id": 182,
+        "question": "What is 'Anuria'?",
+        "options": ["Painful urination", "Blood in urine", "No urine output (<100mL/24h)", "Frequent urination"],
+        "correct": 2,
+        "rationale": "Anuria is the absence of urine production."
+    },
+    {
+        "id": 183,
+        "question": "Which drug is a loop diuretic?",
+        "options": ["Spironolactone", "Furosemide (Lasix)", "Hydrochlorothiazide", "Mannitol"],
+        "correct": 1,
+        "rationale": "Lasix acts on the Loop of Henle."
+    },
+    {
+        "id": 184,
+        "question": "A patient has 'hemoptysis'. This means:",
+        "options": ["Vomiting blood", "Coughing up blood", "Blood in urine", "Nosebleed"],
+        "correct": 1,
+        "rationale": "Hemoptysis is coughing up blood."
+    },
+    {
+        "id": 185,
+        "question": "True or False: Alcohol hand rub is effective against C. difficile.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Alcohol does NOT kill C. diff spores. Soap and water must be used."
+    },
+    {
+        "id": 186,
+        "question": "Which condition requires a 'low residue' diet?",
+        "options": ["Constipation", "Diverticulitis flare-up", "High cholesterol", "Diabetes"],
+        "correct": 1,
+        "rationale": "Low fiber/residue rests the bowel during inflammation."
+    },
+    {
+        "id": 187,
+        "question": "What is the normal heart rate for an adult?",
+        "options": ["40-60 bpm", "60-100 bpm", "100-120 bpm", "80-120 bpm"],
+        "correct": 1,
+        "rationale": "Normal sinus rhythm is 60-100."
+    },
+    {
+        "id": 188,
+        "question": "Which vital sign change indicates increased Intracranial Pressure?",
+        "options": ["Tachycardia", "Widening pulse pressure", "Hypotension", "Fever"],
+        "correct": 1,
+        "rationale": "Widening pulse pressure (Systolic rises, Diastolic stays) is part of Cushing's triad."
+    },
+    {
+        "id": 189,
+        "question": "A patient has a 'do not resuscitate' (DNR) order. This means:",
+        "options": ["Do not treat", "Do not feed", "Do not perform CPR", "Give only comfort care"],
+        "correct": 2,
+        "rationale": "DNR specifically means no CPR/intubation in arrest. Other treatments continue."
+    },
+    {
+        "id": 190,
+        "question": "True or False: Normal saline is used for blood transfusions.",
+        "options": ["True", "False"],
+        "correct": 0,
+        "rationale": "0.9% NaCl is the ONLY fluid compatible with blood products."
+    },
+    {
+        "id": 191,
+        "question": "Which symptom suggests Hypoglycemia?",
+        "options": ["Thirst", "Polyuria", "Diaphoresis and tremors", "Flushed skin"],
+        "correct": 2,
+        "rationale": "Cool, clammy, shaky, and sweaty are signs of low sugar."
+    },
+    {
+        "id": 192,
+        "question": "What is 'Orthopnea'?",
+        "options": ["Difficulty breathing when lying flat", "Fast breathing", "Slow breathing", "No breathing"],
+        "correct": 0,
+        "rationale": "Common in HF; patients need pillows to sleep."
+    },
+    {
+        "id": 193,
+        "question": "Which electrolyte is affected by Parathyroid hormone?",
+        "options": ["Sodium", "Potassium", "Calcium", "Chloride"],
+        "correct": 2,
+        "rationale": "PTH regulates Calcium levels."
+    },
+    {
+        "id": 194,
+        "question": "A patient has 'petechiae'. These are:",
+        "options": ["Large bruises", "Small red/purple spots", "Hives", "Blisters"],
+        "correct": 1,
+        "rationale": "Pinpoint hemorrhages indicating bleeding disorder."
+    },
+    {
+        "id": 195,
+        "question": "True or False: A foley catheter should be kept on the floor.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "The bag should be below the bladder but NOT touching the floor (infection risk)."
+    },
+    {
+        "id": 196,
+        "question": "Which assessment is priority after extubation?",
+        "options": ["Check BP", "Assess for stridor", "Offer water", "Check urine"],
+        "correct": 1,
+        "rationale": "Stridor indicates laryngeal edema/spasm, an airway emergency."
+    },
+    {
+        "id": 197,
+        "question": "What is 'crepitus'?",
+        "options": ["Fluid in lungs", "Grating sound/feeling under skin", "Wheezing", "Heart murmur"],
+        "correct": 1,
+        "rationale": "Subcutaneous emphysema or bone grating feels like Rice Krispies."
+    },
+    {
+        "id": 198,
+        "question": "Which drug is a bronchodilator?",
+        "options": ["Prednisone", "Albuterol", "Furosemide", "Metoprolol"],
+        "correct": 1,
+        "rationale": "Albuterol is a beta-agonist bronchodilator."
+    },
+    {
+        "id": 199,
+        "question": "A patient has 'dysuria'. This is:",
+        "options": ["Blood in urine", "Painful urination", "Frequent urination", "No urine"],
+        "correct": 1,
+        "rationale": "Dysuria = pain/burning during urination."
+    },
+    {
+        "id": 200,
+        "question": "True or False: The nurse should recap used needles.",
+        "options": ["True", "False"],
+        "correct": 1,
+        "rationale": "Never recap used needles to prevent needlestick injuries."
+    }
+];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

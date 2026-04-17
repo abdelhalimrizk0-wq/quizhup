@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">First Aid in Poisoning</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "What is the priority nursing intervention for an unconscious poisoned patient who is vomiting?",
+                options: ["Place in supine position", "Place in recovery position", "Administer oral activated charcoal", "Induce emesis immediately"],
+                correct: 1,
+                rationale: "Prevent vomitus aspiration by nursing the patient on the recovery position."
+            },
+            {
+                id: 2,
+                question: "Which antidote is indicated for Acetaminophen overdose?",
+                options: ["Naloxone", "Flumazenil", "N-acetylcysteine", "Atropine"],
+                correct: 2,
+                rationale: "N-acetylcysteine (Mucomyst) is the specific antidote for Acetaminophen toxicity."
+            },
+            {
+                id: 3,
+                question: "True or False: Induction of emesis is the preferred decontamination method for corrosive poisoning.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Induction of emesis is contraindicated in poisoning with corrosives and petroleum products due to risk of re-injury."
+            },
+            {
+                id: 4,
+                question: "Which toxidrome is characterized by hot dry skin, dilated pupils, and tachycardia?",
+                options: ["Cholinergic", "Sympatholytic", "Anticholinergic", "Sympathomimetic"],
+                correct: 2,
+                rationale: "Anticholinergic syndrome presents with widely dilated pupils, flushed hot dry skin, and tachycardia."
+            },
+            {
+                id: 5,
+                question: "Carbon monoxide causes tissue anoxia primarily by which mechanism?",
+                options: ["Paralyzing respiratory muscles", "Destroying lung tissue directly", "Displacing oxygen from hemoglobin", "Blocking cellular uptake of oxygen"],
+                correct: 2,
+                rationale: "CO combines with hemoglobin with much greater affinity than O2, replacing O2 and leading to tissue anoxia."
+            },
+            {
+                id: 6,
+                question: "What does the 'S' in the SLUDGE mnemonic for Organophosphate poisoning stand for?",
+                options: ["Seizures", "Salivation", "Sleepiness", "Skin rash"],
+                correct: 1,
+                rationale: "SLUDGE stands for Salivation, Lacrimation, Urination, Diarrhea, GI Upset, and Emesis."
+            },
+            {
+                id: 7,
+                question: "Which triad of symptoms indicates severe opioid intoxication?",
+                options: ["Hypertension, tachycardia, dilated pupils", "Coma, respiratory depression, pinpoint pupils", "Diarrhea, lacrimation, seizures", "Hyperthermia, rigidity, confusion"],
+                correct: 1,
+                rationale: "Severe opioid intoxication causes coma, respiratory depression, and constricted (pinpoint) pupils."
+            },
+            {
+                id: 8,
+                question: "What is the recommended duration for flushing skin under lukewarm water during decontamination?",
+                options: ["5 to 10 minutes", "15 to 30 minutes", "45 to 60 minutes", "1 to 2 hours"],
+                correct: 1,
+                rationale: "The skin should be flooded under running lukewarm water for 15 to 30 minutes."
+            },
+            {
+                id: 9,
+                question: "A single ingestion of Salicylates is considered significant acute intoxication if it exceeds which amount?",
+                options: ["50 mg/kg", "100 mg/kg", "150 mg/kg", "200 mg/kg"],
+                correct: 3,
+                rationale: "A single ingestion of more than 200 mg/kg of salicylate is likely to produce significant acute intoxication."
+            },
+            {
+                id: 10,
+                question: "What is the first step in the management of a poisoned patient?",
+                options: ["Administering the antidote", "Identifying the poison", "Assessing Airway, Breathing, and Circulation", "Performing gastric lavage"],
+                correct: 2,
+                rationale: "The first step in management is assessment and stabilization of A, B, C, D (Airway, Breathing, Circulation, Disability)."
+            },
+            {
+                id: 11,
+                question: "True or False: Activated charcoal is effective for neutralizing Iron poisoning.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Activated charcoal is not used for poisoning with Iron, Lithium, Alcohols, or Corrosives."
+            },
+            {
+                id: 12,
+                question: "Botulism toxin causes paralysis by binding to which structure?",
+                options: ["Central nervous system neurons", "Peripheral neuromuscular junction", "Cardiac muscle receptors", "Liver hepatocytes"],
+                correct: 1,
+                rationale: "Botulism toxin binds irreversibly to the peripheral neuromuscular junction causing pre-synaptic block."
+            },
+            {
+                id: 13,
+                question: "Which vital sign changes are consistent with Sympathomimetic Syndrome?",
+                options: ["Hypotension and bradycardia", "Hypertension and tachycardia", "Hypothermia and bradypnea", "Normal blood pressure and pulse"],
+                correct: 1,
+                rationale: "Sympathomimetic syndrome causes elevated blood pressure, elevated pulse rate, and elevated temperature."
+            },
+            {
+                id: 14,
+                question: "Cocaine exerts its toxic effects primarily by which mechanism?",
+                options: ["Blocking catecholamine reuptake", "Inhibiting acetylcholinesterase", "Stimulating opioid receptors", "Blocking sodium channels only"],
+                correct: 0,
+                rationale: "Cocaine blocks neuronal catecholamine reuptake and inhibits serotonin reuptake."
+            },
+            {
+                id: 15,
+                question: "Glucagon is the specific antidote for which type of poisoning?",
+                options: ["Beta-blocking agents", "Opioids", "Organophosphates", "Salicylates"],
+                correct: 0,
+                rationale: "Glucagon is the antidote for Beta-blocking agents and Calcium channel blockers."
+            },
+            {
+                id: 16,
+                question: "Which vitamin is a component of the 'Coma Cocktail' used for unconscious patients?",
+                options: ["Vitamin C", "Vitamin K", "Thiamine", "Vitamin B12"],
+                correct: 2,
+                rationale: "The Coma Cocktail consists of Oxygen, Thiamine, Dextrose, and Naloxone."
+            },
+            {
+                id: 17,
+                question: "True or False: Tramadol acts on opioid receptors despite being chemically unrelated to opioids.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Tramadol is an analgesic unrelated chemically to opioids but acts on opioid receptors."
+            },
+            {
+                id: 18,
+                question: "In Salicylate toxicity, Potassium Chloride is administered to treat which condition?",
+                options: ["Hyperkalemia", "Hypokalemia", "Hypernatremia", "Hyponatremia"],
+                correct: 1,
+                rationale: "Potassium chloride is given to manage hypokalemia associated with salicylate toxicity."
+            },
+            {
+                id: 19,
+                question: "What is the definition of a Toxidrome?",
+                options: ["A specific antidote for a poison", "A group of signs associated with a specific class of toxins", "A method of gastric decontamination", "A type of blood test for poisons"],
+                correct: 1,
+                rationale: "A toxidrome is a group of signs and symptoms associated with overdose or exposure to a particular category of drugs and toxins."
+            },
+            {
+                id: 20,
+                question: "At what rate should Whole Bowel Irrigation solution be administered?",
+                options: ["100 to 200 ml per hour", "500 ml per hour", "1 to 2 liters per hour", "3 to 4 liters per hour"],
+                correct: 2,
+                rationale: "The goal of whole-bowel irrigation is to give large volumes rapidly at 1 to 2 L/hour."
+            },
+            {
+                id: 21,
+                question: "What is the loading dose for N-acetylcysteine in Acetaminophen poisoning?",
+                options: ["70 mg/kg", "100 mg/kg", "140 mg/kg", "200 mg/kg"],
+                correct: 2,
+                rationale: "The loading dose for N-acetylcysteine (Mucomyst) is 140 mg/kg orally."
+            },
+            {
+                id: 22,
+                question: "Which finding is expected in a patient with Cholinergic Syndrome?",
+                options: ["Dry mucous membranes", "Urinary retention", "Hyperperistalsis", "Mydriasis"],
+                correct: 2,
+                rationale: "Cholinergic syndrome causes hyperperistalsis, sweating, excessive salivation, and miosis."
+            },
+            {
+                id: 23,
+                question: "Naloxone is the specific antagonist for which class of drugs?",
+                options: ["Benzodiazepines", "Opioids", "Anticholinergics", "Salicylates"],
+                correct: 1,
+                rationale: "The specific opioid antagonist is Naloxone."
+            },
+            {
+                id: 24,
+                question: "True or False: Sympatholytic Syndrome typically causes hyperthermia.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Sympatholytic syndrome is associated with low temperature, decreased BP, and decreased pulse."
+            },
+            {
+                id: 25,
+                question: "What is the immediate priority for a patient with chemical exposure to the eyes?",
+                options: ["Cover with a sterile patch", "Apply antibiotic ointment", "Irrigate with water or saline", "Administer analgesic drops"],
+                correct: 2,
+                rationale: "Immediate irrigation (flushing) with warm water or normal saline is the priority for eye decontamination."
+            },
+            {
+                id: 26,
+                question: "Which two agents are used as antidotes for Organophosphate poisoning?",
+                options: ["Atropine and Pralidoxime", "Naloxone and Flumazenil", "Vitamin K and Plasma", "Charcoal and Sorbitol"],
+                correct: 0,
+                rationale: "The antidotes for Organophosphates are Atropine and Oximes (pralidoxime)."
+            },
+            {
+                id: 27,
+                question: "Symptoms of Botulism typically begin within what timeframe after ingestion?",
+                options: ["Within 1 hour", "Within 12 hours", "Within 72 hours", "After 1 week"],
+                correct: 2,
+                rationale: "Symptoms of botulism begin within 72 hours following ingestion of the toxin."
+            },
+            {
+                id: 28,
+                question: "How do pupils typically appear in Sympathomimetic Syndrome?",
+                options: ["Pinpoint", "Normal", "Dilated", "Unequal"],
+                correct: 2,
+                rationale: "In Sympathomimetic syndrome, pupils are dilated (mydriasis)."
+            },
+            {
+                id: 29,
+                question: "Which substance is a contraindication for inducing emesis?",
+                options: ["Expired food", "Petroleum products", "Overdose of vitamins", "Non-corrosive medications"],
+                correct: 1,
+                rationale: "Induction of emesis is contraindicated in poisoning with corrosives and petroleum products."
+            },
+            {
+                id: 30,
+                question: "True or False: Carbon Monoxide is a gas with a distinct, pungent odor.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Carbon Monoxide is a colorless, odorless, tasteless, and non-irritating gas."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

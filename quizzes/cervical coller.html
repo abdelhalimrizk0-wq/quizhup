@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport meta tag is essential for responsive design on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cervical Collar Quiz</title>
+    
+    <!-- All styles are inlined here to ensure the file works offline. No external CSS files. -->
+    <style>
+        /* Global resets and box-sizing */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* Basic body and typography styling */
+        html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            /* Applying the requested red-brown theme */
+            background-color: #3b0d0c;
+            color: #f9fafb;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Header and Title Styling */
+        header {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background-color: #4f0f0d;
+            border-bottom: 3px solid #6a1a17;
+        }
+
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+
+        /* Arabic credit line */
+        .credit {
+            font-size: 1rem;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+            direction: rtl; /* Ensures correct rendering of Arabic text */
+        }
+
+        /* Live Score Tracker Styling */
+        #score-tracker {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: rgba(79, 15, 13, 0.9);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid #6a1a17;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #f9fafb;
+        }
+
+        #score-value {
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            background: #3b0d0c;
+            border-radius: 8px;
+            border: 1px solid #6a1a17;
+        }
+
+        /* Main quiz container */
+        main {
+            max-width: 800px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Individual Question Card Styling */
+        .question-card {
+            background: #4f0f0d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border: 1px solid #6a1a17;
+            transition: all 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Keyword highlighting */
+        .highlight {
+            color: #facc15; /* Yellow */
+            font-weight: 800;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+
+        /* Options container */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        /* Individual Option Button Styling */
+        .option {
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 3rem; /* Padding to make room for the icon */
+            font-size: 1rem;
+            font-weight: 500;
+            color: #f9fafb;
+            text-align: left;
+            background: #3b0d0c;
+            border: 2px solid #6a1a17;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            -webkit-tap-highlight-color: transparent; /* Removes blue flash on tap (iOS) */
+        }
+
+        /* Hover state for non-disabled options */
+        .option:hover:not(:disabled) {
+            background: #6a1a17;
+            border-color: #a12b28;
+        }
+
+        /* Disabled state for all options after answering */
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 1; /* Keep opacity high to show colors */
+        }
+
+        /*
+         * Custom Checkmark (✓) and X (×) Icons
+         * These are hidden by default and shown with JS by adding classes.
+        */
+        .status-icon {
+            display: none;
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            line-height: 1; /* Ensures icon is centered */
+        }
+
+        /* Show the correct icon (✓) */
+        .option.answered.correct .correct-icon {
+            display: flex;
+            background: #22c55e; /* Bright Green */
+        }
+        
+        /* Show the incorrect icon (×) */
+        .option.answered.incorrect .incorrect-icon {
+            display: flex;
+            background: #ef4444; /* Bright Red */
+            font-size: 1.2rem; /* Make the '×' slightly larger */
+        }
+
+
+        /* Styling for the *chosen* correct answer */
+        .option.correct {
+            background: #22c55e; /* Bright Green */
+            border-color: #16a34a;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Styling for the *chosen* incorrect answer */
+        .option.incorrect {
+            background: #ef4444; /* Bright Red */
+            border-color: #dc2626;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Styling for unselected, disabled options */
+        .option.disabled:not(.correct):not(.incorrect) {
+            background: #4b5563; /* Muted Gray */
+            color: #d1d5db;
+            opacity: 0.7;
+            border-color: #4b5563;
+        }
+
+        /* Rationale Box Styling */
+        .rationale {
+            display: none; /* Hidden by default */
+            margin-top: 1.25rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        /* Rationale for a correct answer */
+        .rationale.correct {
+            display: block;
+            background: #dcfce7; /* Light Green */
+            color: #14532d;
+            border: 1px solid #22c55e;
+        }
+        
+        /* Rationale for an incorrect answer */
+        .rationale.incorrect {
+            display: block;
+            background: #fee2e2; /* Light Red */
+            color: #7f1d1d;
+            border: 1px solid #ef4444;
+        }
+
+        .rationale strong {
+            color: #1f2937;
+        }
+
+        /* Final Score Container */
+        #final-score-container {
+            text-align: center;
+            background: #4f0f0d;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem auto;
+            border: 1px solid #6a1a17;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        #final-score-container h2 {
+            margin-top: 0;
+            font-size: 1.75rem;
+            color: #facc15;
+        }
+
+        #final-score-message {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        /* Utility class to hide elements */
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive design for smaller screens (e.g., iPhones) */
+        @media (max-width: 600px) {
+            body {
+                font-size: 16px; /* Ensures readability on mobile */
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .credit {
+                font-size: 0.9rem;
+            }
+
+            main {
+                margin-top: 1rem;
+            }
+
+            .question-card {
+                padding: 1rem;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .option {
+                padding: 0.75rem 0.75rem 0.75rem 3rem; /* Adjust padding for mobile */
+                font-size: 0.95rem;
+            }
+
+            #final-score-container {
+                padding: 1.5rem;
+            }
+
+            #final-score-message {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Cervical Collar Quiz</h1>
+        <div class="credit">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</div>
+    </header>
+
+    <!-- Live Score Tracker (Sticky) -->
+    <div id="score-tracker">
+        Score: <span id="score-value">0 / 25</span>
+    </div>
+
+    <!-- Main Quiz Content Area -->
+    <main id="quiz-container">
+
+        <!-- Question 1 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">1. What is the definition of a cervical collar?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. A medical device, also known as a neck brace, used to support a person's neck.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. A device used exclusively for monitoring heart rate through the carotid artery.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. A soft cushion used only for sleeping to prevent neck pain.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. A decorative piece of medical equipment with no therapeutic purpose.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A cervical collar, also known as a neck brace, is a medical device used to support a person's neck. It can help realign the spinal cord and relieve pain.
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">2. What is a primary purpose of a cervical collar?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To increase range of motion in the neck.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To increase muscle spasms to promote healing.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To immobilize the c-spine to limit motion.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To apply axial loading to the spine.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> One of the main purposes is to "Immobilize the c-spine to limit motion" and "prevent further injury."
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">3. A cervical collar is designed to restrict which of the following motions?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Axial loading and shoulder shrugging.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Neck flexion, extension, and lateral tilt.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Swallowing and speaking only.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Only axial rotation (looking side to side).
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The purpose is to "Immobilize the c-spine to limit motion. Restricts neck flexion, extension, and lateral tilt (bending & rotation)."
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">4. While a cervical collar restricts most neck movements, which motion does it <strong class="highlight">NOT</strong> restrict?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Flexion (bending forward)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Extension (bending backward)
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Lateral tilt (bending side to side)
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Axial loading (compressive force from the top)
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The document states that a collar "Restricts neck flexion, extension, and lateral tilt... however, doesn't restrict axial loading."
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">5. Which of the following is an example of a "non-acute injury" indication for a cervical collar?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Arthritis
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Strained cervical injuries
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Cervical metastasis
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Spinal cord injury after a car crash
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The document lists "strained cervical injuries" as an example of a non-acute injury. Arthritis and metastasis are listed as chronic conditions.
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">6. Arthritis or cervical metastasis are examples of what kind of indication for a cervical collar?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Non-acute injuries
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Acute injuries
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Chronic conditions
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Preventative use only
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The document lists "arthritis or cervical metastasis" as examples of "Chronic conditions."
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">7. In an acute injury, a cervical collar is primarily used for:</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Prevention of cervical spine fracture or spinal cord injury.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Curing cervical spondylotic myelopathy.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Relieving headaches.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Decreasing muscle strength.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> An indication is the "Prevention of cervical spine fracture or spinal cord injury after an acute injury."
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">8. Which type of collar is flexible, made of polyurethane foam, and secured with Velcro?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Hard Collar
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Philadelphia Collar
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Soft Collar
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Miami J Collar
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Soft collars are flexible and made of polyurethane foam rubber. These collars are easily wrapped around the neck and secured with Velcro."
+            </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">9. What is the <strong class="highlight">MAIN</strong> purpose of a soft collar?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To provide rigid immobilization after a major fracture.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To help transition the patient from a rigid collar to no brace.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To completely stop all neck movement, including axial loading.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To be used only for patients with cervical metastasis.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Soft collars are usually worn after a more rigid collar. "The main purpose of a soft collar is to help you gradually transition to not wearing a brace."
+            </div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">10. True or False: Hard collars are made of a soft polyurethane foam material.</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. True
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. False
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> False. "Hard collars look similar to soft collars, but they are made of a hard polyethylene material."
+            </div>
+        </div>
+
+        <!-- Question 11 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">11. Which collar is described as a stiff foam collar made of 2 pieces attached with Velcro, supporting the lower jaw and upper thoracic spine?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Soft Collar
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Hard Collar
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Philadelphia Collar
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Basic Foam Collar
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "A Philadelphia collar is a stiff foam collar composed of 2 pieces that are attached on the sides with Velcro. The upper portion... supports the lower jaw and the brace extends down to cover the upper thoracic spine."
+            </div>
+        </div>
+
+        <!-- Question 12 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">12. Why is a Philadelphia collar often prescribed after cervical spine surgery?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Because it is the softest and most comfortable option.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Because it is very effective at limiting movement, promoting healthy recovery.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Because it is the cheapest type of collar available.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Because it allows for the greatest range of motion.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Because it's so effective at limiting movement, the Philadelphia collar is often prescribed after cervical spine surgery to promote a healthy recovery."
+            </div>
+        </div>
+
+        <!-- Question 13 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">13. True or False: An individual's height has a direct relationship to the length of their neck, making sizing easy.</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. True
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. False
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> False. The document states, "It is crucial to note that the height of an individual has no relationship to the length of his or her neck."
+            </div>
+        </div>
+
+        <!-- Question 14 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">14. What is the common method described for measuring a cervical collar size?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Using one's fingers to measure from the base of the shoulder to an imaginary line from the chin.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Using a tape measure to find the circumference of the thickest part of the neck.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Asking the patient their T-shirt size.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Comparing the patient's neck length to their forearm length.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The method described involves resting an outstretched hand on the shoulder and counting the number of fingers from the pinky to an imaginary line extending from the patient's chin.
+            </div>
+        </div>
+
+        <!-- Question 15 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">15. When fitting a cervical collar, it should be snug enough to prevent nodding, but <strong class="highlight">NOT</strong> so tight that it:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Touches the patient's skin.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Is visible above the shirt line.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Keeps the patient from opening their mouth.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Can be fastened with the Velcro.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Once secured, the collar should be snug enough to keep your patient from nodding... but not so tight as to keep him from opening his mouth."
+            </div>
+        </div>
+
+        <!-- Question 16 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">16. What is a key tip for wearing a cervical collar?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Rest and sit as much as possible to avoid muscle strain.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Focus on good posture and avoid slouching.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Sit in soft, low chairs to promote comfort.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Remove the collar whenever it feels uncomfortable.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A key tip is to "Focus on good posture. Try not to slouch or hunch over." The document specifically says to AVOID soft, low chairs.
+            </div>
+        </div>
+
+        <!-- Question 17 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">17. Patients wearing a cervical collar should avoid:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Walking
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Sitting in firm chairs
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Sitting in soft, low chairs
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Keeping their back straight
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The tips include "Avoid sitting in soft, low chairs" as this can affect posture and put extra pressure on the neck.
+            </div>
+        </div>
+
+        <!-- Question 18 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">18. What is a major complication of cervical collars related to skin?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Pressure ulcers
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Improved skin hydration
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Decreased risk of DVT
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Increased sensory perception
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A listed complication is "Skin Damage, especially at risk for pressure ulcers." Specific areas of concern include the chin, ears, and sternum.
+            </div>
+        </div>
+
+        <!-- Question 19 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">19. Cervical collars can cause limitations in swallowing, coughing, and breathing, which can potentially lead to what complication?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Pneumonia
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Deep Vein Thrombosis (DVT)
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Aspiration
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Increased intracranial pressure
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The document lists "Swallowing, coughing, breathing, and vomiting limitations, potentially causing aspiration" as a complication.
+            </div>
+        </div>
+
+        <!-- Question 20 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">20. In the procedure for application, what is the role of the <strong class="highlight">FIRST</strong> aider (First Aider One)?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To measure the patient's neck size.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To stabilize the head in a neutral position.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To slide the collar under the patient's chest.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To secure the Velcro fastener.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The first aider (one) is responsible to "Stabilize the head in the neutral position by both hands and spread fingers."
+            </div>
+        </div>
+
+        <!-- Question 21 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">21. What is the role of the <strong class="highlight">SECOND</strong> aider (First Aider Two) during application?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. To hold the patient's hands still.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. To only stabilize the head.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. To measure the neck, select the size, and apply the collar.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. To explain the procedure to the family.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The second aider is responsible for measuring the neck, selecting/adjusting the collar, and sliding it into place.
+            </div>
+        </div>
+
+        <!-- Question 22 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">22. According to Patient Education, what must a patient <strong class="highlight">NOT</strong> do while wearing a collar?</p>
+            <div class="options-container">
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Drive a car.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. Walk.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Sit in a firm chair.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Use their arm and leg muscles to stand up.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> The patient education section explicitly states, "Should not drive." It also says to take care *when* walking, not to avoid it entirely.
+            </div>
+        </div>
+
+        <!-- Question 23 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">23. How should a patient move from a lying to a standing position?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. By twisting their spine quickly.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. By bending their neck forward first.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. By asking someone to pull them up.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. By using their arm and leg muscles to keep their spine in proper alignment.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> Patient education includes: "When moving from a lying to a standing position, they must use their arm and leg muscles to keep their spine in proper alignment."
+            </div>
+        </div>
+
+        <!-- Question 24 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">24. For skin care, how often should the skin under the collar be inspected?</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Once per week.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. At least twice a day.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Only if the patient complains of pain.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. Never, the collar should not be removed.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> "Inspect patient's skin under and around the cervical collar at least twice a day."
+            </div>
+        </div>
+
+        <!-- Question 25 -->
+        <div class="question-card" data-answered="false">
+            <p class="question-text">25. A safety consideration is to remind the patient to inform the nurse if they experience:</p>
+            <div class="options-container">
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    A. Hunger or thirst.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    B. A desire to sleep.
+                </button>
+                <button class="option" data-answer="correct">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    C. Sudden neck/back pain, numbness, or tingling.
+                </button>
+                <button class="option">
+                    <span class="status-icon incorrect-icon">×</span><span class="status-icon correct-icon">✓</span>
+                    D. The collar feeling comfortable.
+                </button>
+            </div>
+            <div class="rationale">
+                <strong>Rationale:</strong> A key safety consideration is to "Remind the patient to inform you (if able) and/or physician if he/she experiences any sudden neck or back pain, and/or numbness or tingling."
+            </div>
+        </div>
+
+
+        <!-- Final Score Section -->
+        <div id="final-score-container" class="hidden">
+            <h2>Quiz Complete!</h2>
+            <p id="final-score-message">You answered 0 out of 0 correctly — 0%</p>
+        </div>
+
+    </main>
+
+    <!-- 
+      All JavaScript is inlined here to ensure the file works offline.
+      No external .js files or CDN links are used.
+    -->
+    <script>
+        // Wait for the DOM to be fully loaded before running scripts
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Enable :active pseudo-class on iOS Safari for touch feedback ---
+            // This is a common fix to make touch events feel more responsive on iOS
+            document.addEventListener("touchstart", function() {}, true);
+
+            // --- Element Selections ---
+            const quizContainer = document.getElementById('quiz-container');
+            const scoreTracker = document.getElementById('score-value');
+            const finalScoreContainer = document.getElementById('final-score-container');
+            const finalScoreMessage = document.getElementById('final-score-message');
+            const allQuestions = document.querySelectorAll('.question-card');
+
+            // --- State Variables ---
+            const totalQuestions = allQuestions.length; // This will correctly be 25
+            let score = 0;
+            let questionsAnswered = 0;
+
+            // --- Function to Highlight Keywords ---
+            // Wraps specified keywords in a <strong class="highlight"> tag
+            function highlightKeywords() {
+                const keywords = ['NOT', 'EXCEPT', 'FIRST', 'MAINLY'];
+                const questionTexts = document.querySelectorAll('.question-text');
+
+                questionTexts.forEach(element => {
+                    let html = element.innerHTML;
+                    // Use a RegExp to find whole words, case-insensitive, but replace with uppercase
+                    keywords.forEach(kw => {
+                        const regex = new RegExp(`\\b(${kw})\\b`, 'gi');
+                        html = html.replace(regex, `<strong class="highlight">${kw.toUpperCase()}</strong>`);
+                    });
+                    element.innerHTML = html;
+                });
+            }
+
+            // --- Function to Update Live Score ---
+            function updateScore() {
+                scoreTracker.textContent = `${score} / ${totalQuestions}`;
+            }
+
+            // --- Function to Show Final Score ---
+            function showFinalScore() {
+                const percentage = Math.round((score / totalQuestions) * 100);
+                finalScoreMessage.innerHTML = `You answered <strong>${score}</strong> out of <strong>${totalQuestions}</strong> correctly — <strong>${percentage}%</strong>`;
+                finalScoreContainer.classList.remove('hidden');
+                // Scroll to the final score box for a better user experience
+                finalScoreContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // --- Main Quiz Logic (Event Delegation) ---
+            // A single event listener on the main container is more efficient
+            // than adding one to every single button.
+            quizContainer.addEventListener('click', (e) => {
+                // Check if the clicked element is an option button
+                if (e.target.classList.contains('option')) {
+                    const selectedOption = e.target;
+                    const questionCard = selectedOption.closest('.question-card');
+
+                    // --- Prevent Re-answering ---
+                    // If the 'data-answered' attribute is 'true', do nothing.
+                    if (questionCard.dataset.answered === 'true') {
+                        return;
+                    }
+                    
+                    // Mark the question as answered
+                    questionCard.dataset.answered = 'true';
+                    questionsAnswered++;
+
+                    // --- Check Answer ---
+                    const isCorrect = selectedOption.dataset.answer === 'correct';
+                    const rationale = questionCard.querySelector('.rationale');
+                    const allOptions = questionCard.querySelectorAll('.option');
+
+                    // Add 'answered' class to the selected option to trigger icon display
+                    selectedOption.classList.add('answered');
+
+                    if (isCorrect) {
+                        score++;
+                        selectedOption.classList.add('correct');
+                        rationale.classList.add('correct');
+                    } else {
+                        selectedOption.classList.add('incorrect');
+                        rationale.classList.add('incorrect');
+                        
+                        // If wrong, find and highlight the correct answer
+                        const correctOption = questionCard.querySelector('[data-answer="correct"]');
+                        correctOption.classList.add('correct');
+                    }
+
+                    // --- Disable All Options for this Question ---
+                    allOptions.forEach(opt => {
+                        opt.disabled = true;
+                        // Add 'disabled' class to unselected options for graying out
+                        if (opt !== selectedOption && opt.dataset.answer !== 'correct') {
+                            opt.classList.add('disabled');
+                        }
+                    });
+
+                    // --- Update UI ---
+                    updateScore();
+
+                    // --- Check for Quiz Completion ---
+                    if (questionsAnswered === totalQuestions) {
+                        // Use a short delay to allow the user to see the last answer
+                        setTimeout(showFinalScore, 1000);
+                    }
+                }
+            });
+
+            // --- Initialization ---
+            // Run the keyword highlighter and set the initial score on load.
+            highlightKeywords();
+            updateScore(); // Sets the initial score to "0 / 25"
+        });
+    </script>
+
+</body>
+</html>

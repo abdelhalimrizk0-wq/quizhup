@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Delirium in ICU</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "Which neurotransmitter imbalance is primarily associated with the development of delirium in ICU patients?",
+                options: ["Increased acetylcholine levels", "Reduced cholinergic function", "Decreased dopamine levels", "Increased gamma-aminobutyric acid"],
+                correct: 1,
+                rationale: "Acetylcholine plays a key role in pathogenesis; a reduction in cholinergic function leads to imbalances in other neurotransmitters."
+            },
+            {
+                id: 2,
+                question: "A patient in the ICU is agitated, combative, and attempting to remove intravenous lines. Which type of delirium does this describe?",
+                options: ["Hypoactive delirium", "Hyperactive delirium", "Mixed delirium", "Chronic dementia"],
+                correct: 1,
+                rationale: "Hyperactive delirium is characterized by agitation, combativeness, and disorientation, often with sympathetic nervous system responses."
+            },
+            {
+                id: 3,
+                question: "Which assessment finding distinguishes delirium from dementia?",
+                options: ["The condition develops over months", "The condition is usually permanent", "The onset is acute and fluctuates", "The patient remains fully alert"],
+                correct: 2,
+                rationale: "Delirium develops over a short period (hours to days) and fluctuates, whereas dementia has a gradual onset over months or years."
+            },
+            {
+                id: 4,
+                question: "The nurse is using the CAM-ICU tool. Which feature is considered Feature 2 of this assessment?",
+                options: ["Altered level of consciousness", "Disorganized thinking", "Acute change in mental status", "Inattention"],
+                correct: 3,
+                rationale: "Feature 2 of the CAM-ICU is Inattention, often measured by asking the patient to squeeze a hand on a specific letter."
+            },
+            {
+                id: 5,
+                question: "Which medication is identified as the neuroleptic agent of choice for treating delirium in critically ill patients?",
+                options: ["Midazolam", "Haloperidol", "Morphine", "Lorazepam"],
+                correct: 1,
+                rationale: "Guidelines recommend haloperidol for the treatment of delirium due to its effectiveness and fewer side effects compared to other agents."
+            },
+            {
+                id: 6,
+                question: "A patient has a Richmond Agitation Sedation Scale (RASS) score of +4. How should the nurse interpret this score?",
+                options: ["The patient is alert and calm", "The patient is combative and violent", "The patient pulls at tubes but is not violent", "The patient is drowsy but responsive"],
+                correct: 1,
+                rationale: "A RASS score of +4 indicates the patient is combative, violent, and presents an immediate danger to staff."
+            },
+            {
+                id: 7,
+                question: "Hypoactive delirium is often associated with which clinical condition?",
+                options: ["Alcohol withdrawal", "Sympathetic storm", "Hepatic encephalopathy", "Acute pain crisis"],
+                correct: 2,
+                rationale: "Hypoactive delirium is observed in patients with states like hepatic encephalopathy and hypercapnia."
+            },
+            {
+                id: 8,
+                question: "According to the Critical-Care Pain Observation Tool (CPOT), a score of 3 or higher indicates which finding?",
+                options: ["The patient is completely pain-free", "The patient has mild discomfort", "The patient has significant pain", "The patient is over-sedated"],
+                correct: 2,
+                rationale: "A CPOT score greater than or equal to 3 is indicative of significant pain requiring intervention."
+            },
+            {
+                id: 9,
+                question: "Which environmental factor is a known cause of delirium in the ICU?",
+                options: ["Frequent reorientation", "Presence of family members", "Sleep deprivation", "Natural lighting"],
+                correct: 2,
+                rationale: "Sleep deprivation, along with sensory overload or deprivation, is a major environmental cause of delirium."
+            },
+            {
+                id: 10,
+                question: "True or False: Delirium is a permanent condition that does not resolve after discharge.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Delirium usually clears up after a few days to weeks, whereas dementia is typically a permanent condition."
+            },
+            {
+                id: 11,
+                question: "Which electrolyte imbalance is a risk factor for developing delirium?",
+                options: ["Normal magnesium levels", "Electrolyte stability", "Sodium imbalance", "Normal calcium levels"],
+                correct: 2,
+                rationale: "Electrolyte imbalances (metabolic causes) are significant risk factors for the development of delirium."
+            },
+            {
+                id: 12,
+                question: "A patient demonstrates daytime sedation with nocturnal agitation. This pattern is commonly referred to as which syndrome?",
+                options: ["Sundown syndrome", "Locked-in syndrome", "Withdrawal syndrome", "Serotonin syndrome"],
+                correct: 0,
+                rationale: "Sundown syndrome refers to symptoms and hallucinations that seem to worsen during the night."
+            },
+            {
+                id: 13,
+                question: "Which inflammatory mediators are thought to contribute to ICU delirium by crossing the blood-brain barrier?",
+                options: ["Insulin and glucagon", "Cytokines and tumor necrosis factor", "Adrenaline and cortisol", "Renin and aldosterone"],
+                correct: 1,
+                rationale: "Inflammatory mediators like cytokines and tumor necrosis factor-alpha increase vascular permeability in the brain."
+            },
+            {
+                id: 14,
+                question: "What is the recommended duration for a Spontaneous Breathing Trial (SBT)?",
+                options: ["5 to 10 minutes", "30 to 120 minutes", "4 to 6 hours", "12 to 24 hours"],
+                correct: 1,
+                rationale: "SBT duration should be at least 30 minutes and not longer than 120 minutes."
+            },
+            {
+                id: 15,
+                question: "Which non-pharmacological nursing intervention is most appropriate for preventing delirium?",
+                options: ["Isolating the patient completely", "Frequent room transfers", "Re-orientation strategies", "Keeping the room dark 24/7"],
+                correct: 2,
+                rationale: "Using re-orientation strategies (clocks, calendars) and involving family helps prevent and manage delirium."
+            },
+            {
+                id: 16,
+                question: "True or False: Benzodiazepines are a common pharmacological cause of delirium.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Benzodiazepines are listed as a pharmacological cause and their use can contribute to delirium."
+            },
+            {
+                id: 17,
+                question: "In the WHIMPS mnemonic for causes of delirium, what does the 'W' stand for?",
+                options: ["Weight loss", "Water intoxication", "Withdrawal", "Weakness"],
+                correct: 2,
+                rationale: "W stands for Withdrawal (e.g., Ethanol, opiate)."
+            },
+            {
+                id: 18,
+                question: "Which patient is at the highest risk for developing delirium?",
+                options: ["A 30-year-old elective surgery patient", "A 50-year-old with no comorbidities", "A patient older than 70 years", "A patient with corrected vision"],
+                correct: 2,
+                rationale: "Being older than 70 years is a specifically listed risk factor for the development of delirium."
+            },
+            {
+                id: 19,
+                question: "What is the primary action of Haloperidol in the treatment of delirium?",
+                options: ["It acts as a dopamine receptor antagonist", "It increases acetylcholine levels", "It stimulates GABA receptors", "It blocks serotonin reuptake"],
+                correct: 0,
+                rationale: "Haloperidol is a dopamine receptor antagonist that works by increasing dopamine levels to treat positive symptoms."
+            },
+            {
+                id: 20,
+                question: "When using the CAM-ICU, a diagnosis of delirium requires Feature 1, Feature 2, and which other condition?",
+                options: ["Feature 3 only", "Feature 4 only", "Either Feature 3 or Feature 4", "Neither Feature 3 nor 4"],
+                correct: 2,
+                rationale: "Diagnosis requires Feature 1 (Acute change) AND Feature 2 (Inattention) AND either Feature 3 (Disorganized thinking) OR Feature 4 (Altered LoC)."
+            },
+            {
+                id: 21,
+                question: "True or False: Hypoactive delirium is often referred to as 'quiet delirium' and frequently goes undiagnosed.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Because the patient is withdrawn and lethargic rather than agitated, it is often underestimated or missed."
+            },
+            {
+                id: 22,
+                question: "Which score on the Behavioral Pain Scale (BPS) is considered to reflect unacceptable pain?",
+                options: ["Score of 3", "Score of 4", "Score of 5 or higher", "Score of 12 only"],
+                correct: 2,
+                rationale: "A BPS score of 5 or higher is considered to reflect unacceptable pain."
+            },
+            {
+                id: 23,
+                question: "Which antibiotics are explicitly mentioned as potential pharmacological causes of delirium?",
+                options: ["Penicillin and Amoxicillin", "Tetracycline and Cephalexin", "Vancomycin and Meropenem", "Gentamicin and Tobramycin"],
+                correct: 1,
+                rationale: "Tetracycline and cephalexin are listed under antibiotics that can cause delirium."
+            },
+            {
+                id: 24,
+                question: "True or False: The use of physical restraints is recommended as the first-line intervention for delirium.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Management involves using the least restrictive restraint possible only if necessary; physical restraints are a risk factor for delirium."
+            },
+            {
+                id: 25,
+                question: "Which micronutrient deficiency is a patient with delirium at risk for, especially if they have a history of alcohol abuse?",
+                options: ["Vitamin C", "Vitamin D", "Thiamine", "Iron"],
+                correct: 2,
+                rationale: "Patients are at risk for micronutrient deficiencies like thiamine, especially if alcoholic."
+            },
+            {
+                id: 26,
+                question: "What is the correct interpretation of a RASS score of -5?",
+                options: ["Light sedation", "Combative", "Unarousable", "Alert and calm"],
+                correct: 2,
+                rationale: "A RASS score of -5 indicates the patient is unarousable, with no response to voice or physical stimulation."
+            },
+            {
+                id: 27,
+                question: "Which of the following is a component of the CAM-ICU assessment for disorganized thinking?",
+                options: ["Asking the patient to name the date", "Asking if a stone floats on water", "Checking pupil reactivity", "Asking the patient to close their eyes"],
+                correct: 1,
+                rationale: "Disorganized thinking is assessed with logic questions such as 'Will a stone float on water?' or 'Are there fish in the sea?'."
+            },
+            {
+                id: 28,
+                question: "True or False: Anticholinergic drugs are less likely to cause acute confusion in the elderly.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. Anticholinergic drugs cause delirium and are *more* likely to lead to acute confusion in the elderly."
+            },
+            {
+                id: 29,
+                question: "Which neurotransmitter excess contributes to hyperactive delirium?",
+                options: ["Acetylcholine", "Dopamine", "Serotonin", "GABA"],
+                correct: 1,
+                rationale: "Dopamine excesses may contribute to hyperactive delirium, which is linked with acetylcholine decreases."
+            },
+            {
+                id: 30,
+                question: "The Intensive Care Delirium Screening Checklist (ICDSC) assesses how many features of delirium?",
+                options: ["Four features", "Six features", "Eight features", "Ten features"],
+                correct: 2,
+                rationale: "The ICDSC assesses eight features, including altered LoC, inattention, hallucinations, etc."
+            },
+            {
+                id: 31,
+                question: "True or False: Visual and hearing impairments are considered risk factors for delirium.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Sensory deficits like visual or hearing impairment are risk factors."
+            },
+            {
+                id: 32,
+                question: "Which strategy is part of the 'SBT' (Spontaneous Breathing Trial)?",
+                options: ["Deep sedation", "Continuous muscle paralysis", "T-piece trial", "High pressure support ventilation"],
+                correct: 2,
+                rationale: "SBT strategies include a T-piece trial where only supplemental oxygen is supplied."
+            },
+            {
+                id: 33,
+                question: "A patient with a Sedation-Agitation Scale (SAS) score of 7 is demonstrating which behavior?",
+                options: ["Dangerous agitation", "Calm and cooperative", "Sedated", "Unarousable"],
+                correct: 0,
+                rationale: "A SAS score of 7 corresponds to dangerous agitation (pulling ET tube, climbing over bedrail)."
+            },
+            {
+                id: 34,
+                question: "Which intervention helps reduce misinterpretations in the ICU environment?",
+                options: ["Keeping the room silent", "Providing appropriate lighting", "Removing all clocks", "Limiting all visitors"],
+                correct: 1,
+                rationale: "Providing appropriate lighting to reduce shadows helps reduce misinterpretations and promotes sleep."
+            },
+            {
+                id: 35,
+                question: "True or False: Pain assessment should be performed before administering pain relief.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Assessment of pain is the first step before administering pain relief."
+            },
+            {
+                id: 36,
+                question: "Which subscale is included in the Behavioral Pain Scale (BPS)?",
+                options: ["Muscle tension", "Compliance with ventilation", "Verbal response", "Eye opening"],
+                correct: 1,
+                rationale: "The BPS includes Facial expression, Upper limbs, and Compliance with ventilation."
+            },
+            {
+                id: 37,
+                question: "True or False: Cortisol circadian rhythm disruption is associated with delirium.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "True. Delirium has been associated with the disruption of cortisol and beta-endorphin circadian rhythms."
+            },
+            {
+                id: 38,
+                question: "What is the primary purpose of the 'Daily interruption of Sedation'?",
+                options: ["To increase the length of stay", "To shorten the duration of mechanical ventilation", "To increase narcotic usage", "To induce deep sedation"],
+                correct: 1,
+                rationale: "Daily interruption is used to shorten the duration of mechanical ventilation and ICU length of stay."
+            },
+            {
+                id: 39,
+                question: "True or False: A RASS score of 0 indicates the patient is anxious and apprehensive.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "False. A RASS score of 0 indicates the patient is Alert and Calm. +1 is Restless/Anxious."
+            },
+            {
+                id: 40,
+                question: "Which finding is a contraindication for starting a Spontaneous Awakening Trial (SAT)?",
+                options: ["Stable vital signs", "Absence of seizures", "Active alcohol withdrawal", "Adequate oxygenation"],
+                correct: 2,
+                rationale: "The SAT safety screen requires the absence of seizures, alcohol withdrawal, paralysis, and increased ICP."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

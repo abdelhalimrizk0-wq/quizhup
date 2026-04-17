@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Fluids and Electrolytes Lecture</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "Which of the following is the most sensitive and reliable indicator of changes in body water content in a critical care setting?",
+                options: ["Daily serial weights", "Hourly urine output", "Serum sodium levels", "Skin turgor assessment"],
+                correct: 0,
+                rationale: "The most sensitive indices of changes in body water content are serial weights and intake and output patterns."
+            },
+            {
+                id: 2,
+                question: "A patient presents with a serum potassium level of 6.2 mEq/L. Which immediate intervention helps move potassium back into the cells?",
+                options: ["Administration of insulin and IV glucose", "Administration of oral potassium supplements", "Administration of spironolactone", "Administration of IV normal saline"],
+                correct: 0,
+                rationale: "Administering insulin and IV glucose helps move potassium back into the cells to treat hyperkalemia."
+            },
+            {
+                id: 3,
+                question: "Which electrolyte is the most abundant in the intracellular fluid?",
+                options: ["Potassium", "Sodium", "Calcium", "Chloride"],
+                correct: 0,
+                rationale: "The most abundant electrolyte in intracellular fluid is potassium."
+            },
+            {
+                id: 4,
+                question: "True or False: Oncotic pressure is the pressure created by the protein content of blood, specifically albumin, that holds water inside the vascular compartment.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Oncotic pressure is created by protein content (albumin) and holds water inside the vascular compartment."
+            },
+            {
+                id: 5,
+                question: "A nurse is assessing a patient for hypocalcemia. Which clinical sign would confirm this condition?",
+                options: ["Positive Trousseau's sign", "Decreased deep tendon reflexes", "Shortened QT interval", "Profound lethargy"],
+                correct: 0,
+                rationale: "Hypocalcemia symptoms include positive Trousseau's and Chvostek's signs, and hyperactive reflexes."
+            },
+            {
+                id: 6,
+                question: "What is the primary mechanism of 'third-spacing' of fluid?",
+                options: ["Movement of fluid from vascular to interstitial space due to altered capillary permeability", "Excessive excretion of fluid by the kidneys due to diuretics", "Movement of fluid from interstitial space into the blood vessels", "Loss of fluid through the skin due to severe burns"],
+                correct: 0,
+                rationale: "Third-spacing is the movement of fluid from the vascular space to the interstitial space due to alteration in capillary permeability."
+            },
+            {
+                id: 7,
+                question: "Which urine output rate warrants immediate notification of the provider for a patient at risk for kidney dysfunction?",
+                options: ["Less than 30 mL/hour", "Less than 60 mL/hour", "Less than 100 mL/hour", "Less than 50 mL/hour"],
+                correct: 0,
+                rationale: "If a patient demonstrates less than 30 mL/hour (or 0.5 mL/kg/hour) of urine output, the provider should be notified."
+            },
+            {
+                id: 8,
+                question: "True or False: Active transport requires energy to move solutes from an area of higher concentration to an area of lower concentration.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Active transport moves solutes from lower to higher concentration (against the gradient) and requires energy."
+            },
+            {
+                id: 9,
+                question: "Which laboratory finding is consistent with a diagnosis of dehydration (fluid volume deficit)?",
+                options: ["Increased hemoglobin levels", "Decreased blood urea nitrogen", "Serum osmolality below 275 mOsm/kg", "Decreased urine specific gravity"],
+                correct: 0,
+                rationale: "Laboratory values for dehydration may include increased hemoglobin levels due to hemoconcentration."
+            },
+            {
+                id: 10,
+                question: "A patient with heart failure is showing signs of fluid volume excess. Which symptom would the nurse expect to find?",
+                options: ["Distended neck veins", "Flat neck veins", "Dry mucous membranes", "Hypotension"],
+                correct: 0,
+                rationale: "Symptoms of fluid overload include distended neck and hand veins, crackles, and edema."
+            },
+            {
+                id: 11,
+                question: "Which IV solution is indicated for the treatment of severe dehydration to restore fluid and electrolyte balance?",
+                options: ["Isotonic sodium chloride", "Dextrose 50% in water", "Sterile water", "Total Parenteral Nutrition"],
+                correct: 0,
+                rationale: "Severe dehydration requires administration of intravenous fluids using isotonic sodium chloride solutions or Ringer's infusion."
+            },
+            {
+                id: 12,
+                question: "What is the normal range for serum sodium levels?",
+                options: ["135-145 mEq/L", "125-135 mEq/L", "145-155 mEq/L", "3.5-5.0 mEq/L"],
+                correct: 0,
+                rationale: "Sodium levels in the blood typically range from 135-145 mEq/L."
+            },
+            {
+                id: 13,
+                question: "True or False: The lungs eliminate approximately 400 mL of fluid daily and play a major role in acid-base balance.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Lungs maintain homeostasis through exhalation, eliminate approx 400 mL/day, and play a major role in acid-base balance."
+            },
+            {
+                id: 14,
+                question: "A patient is prescribed sodium polystyrene sulfonate (Kayexalate). What is the therapeutic effect of this medication?",
+                options: ["Exchange sodium ions for potassium ions in the intestine", "Push potassium into the cells using insulin", "Increase renal excretion of potassium rapidly", "Stabilize the myocardial membrane"],
+                correct: 0,
+                rationale: "Kayexalate is administered to exchange sodium ions for potassium ions in the intestine."
+            },
+            {
+                id: 15,
+                question: "Which condition is a common cause of Hypernatremia?",
+                options: ["Diabetes insipidus", "Syndrome of inappropriate antidiuretic hormone", "Excessive water intake", "Heart failure"],
+                correct: 0,
+                rationale: "Causes of hypernatremia include water loss from polyuria resulting from diabetes insipidus."
+            },
+            {
+                id: 16,
+                question: "True or False: In critically ill patients, a positive fluid balance is generally preferred over a near-negative fluid balance.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Near negative fluids balance is preferred than positive fluids balance in critically ill patients."
+            },
+            {
+                id: 17,
+                question: "Which ECG change is most associated with Hypokalemia?",
+                options: ["Cardiac arrhythmias", "Shortened QT interval", "Peaked T waves", "Widened QRS complex"],
+                correct: 0,
+                rationale: "Hypokalemia signs include ECG changes (cardiac arrhythmias)."
+            },
+            {
+                id: 18,
+                question: "A patient has a serum calcium level of 12.0 mg/dL. Which medication might be administered to inhibit bone reabsorption?",
+                options: ["Plicamycin", "Calcium gluconate", "Vitamin D", "Thiazide diuretics"],
+                correct: 0,
+                rationale: "Occasionally, Plicamycin is administered for hypercalcemia as it inhibits bone reabsorption."
+            },
+            {
+                id: 19,
+                question: "Which of the following is a cause of Hyponatremia?",
+                options: ["Syndrome of inappropriate antidiuretic hormone (SIADH)", "Diabetes insipidus", "Excessive sodium intake", "Cushing syndrome"],
+                correct: 0,
+                rationale: "SIADH is listed as a cause for Hyponatremia."
+            },
+            {
+                id: 20,
+                question: "True or False: Total Body Water (TBW) accounts for approximately 60% of body weight.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "TBW (Total body water) = 0.6 X body weight."
+            },
+            {
+                id: 21,
+                question: "What is the primary role of the sodium-potassium pump?",
+                options: ["Maintain higher sodium in ECF and higher potassium in ICF", "Maintain higher sodium in ICF and higher potassium in ECF", "Equalize concentrations of sodium and potassium via diffusion", "Transport water across the membrane against a gradient"],
+                correct: 0,
+                rationale: "The sodium-potassium pump uses energy to maintain higher levels of sodium in ECF and higher potassium in ICF."
+            },
+            {
+                id: 22,
+                question: "A patient with liver failure presents with ascites and edema. What is the underlying pathophysiological cause?",
+                options: ["Hypoalbuminemia decreasing oncotic pressure", "Increased oncotic pressure pulling fluid into vessels", "Decreased hydrostatic pressure in capillaries", "Excessive lymphatic drainage"],
+                correct: 0,
+                rationale: "Hypoalbuminemia causes edema due to leakage of fluid into interstitial areas because of decreased oncotic pressure."
+            },
+            {
+                id: 23,
+                question: "True or False: Severe hypokalemia is defined as a serum potassium level below 2.5 mEq/L.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Severe hypokalemia: serum potassium level below 2.5 mEq/L."
+            },
+            {
+                id: 24,
+                question: "Which assessment finding indicates a patient is experiencing Hyperkalemia?",
+                options: ["Muscle weakness and paralysis", "Hyperactive deep tendon reflexes", "Positive Chvostek's sign", "Severe constipation"],
+                correct: 0,
+                rationale: "Signs of hyperkalemia include muscle weakness and paralysis."
+            },
+            {
+                id: 25,
+                question: "When calculating insensible fluid loss for an intubated patient, what adjustment is made to the standard formula?",
+                options: ["The calculated value is divided by 2", "The calculated value is multiplied by 2", "The value remains unchanged", "You subtract 500 mL from the total"],
+                correct: 0,
+                rationale: "The value was divided by 2 if the patient was intubated."
+            },
+            {
+                id: 26,
+                question: "True or False: Calcium Gluconate is administered to decrease myocardial irritability in patients with Hyperkalemia.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Management of hyperkalemia includes administering calcium gluconate to decrease myocardial irritability."
+            },
+            {
+                id: 27,
+                question: "Which patient is at the highest risk for developing Digoxin toxicity?",
+                options: ["A patient with Hypokalemia", "A patient with Hypernatremia", "A patient with Hypercalcemia", "A patient with Hypermagnesemia"],
+                correct: 0,
+                rationale: "Hypokalemia causes reduced sensitivity to digoxin or increases the risk of toxicity (implied by 'reduced sensitivity' context in text, though classic medical knowledge links hypokalemia to toxicity directly)."
+            },
+            {
+                id: 28,
+                question: "What clinical manifestation is associated with Hypernatremia?",
+                options: ["Thirst and dry, sticky mucous membranes", "Abdominal cramping and diarrhea", "Positive Trousseau's sign", "Distended neck veins"],
+                correct: 0,
+                rationale: "Signs of hypernatremia include thirst, rough dry tongue, and dry sticky mucous membranes."
+            },
+            {
+                id: 29,
+                question: "True or False: Intravascular fluid makes up the majority of the Extracellular Fluid (ECF) volume.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Interstitial fluid is 3/4 of ECF (10.5L) while Plasma (intravascular) is 1/4 (3L)."
+            },
+            {
+                id: 30,
+                question: "Which of the following is a cause of Third-Spacing?",
+                options: ["SIRS and Pancreatitis", "High protein diet", "Hypertension", "Diuretic therapy"],
+                correct: 0,
+                rationale: "Causes of third-spacing include infection, SIRS (pancreatitis), hypoalbuminemia, burns, etc."
+            },
+            {
+                id: 31,
+                question: "How does the body compensate for metabolic alkalosis in the context of potassium balance?",
+                options: ["It is not explicitly discussed as compensation, but alkalosis is a cause of hypokalemia", "It retains potassium to lower pH", "It increases respiratory rate", "It excretes sodium"],
+                correct: 0,
+                rationale: "The text lists alkalosis as a cause for Hypokalemia."
+            },
+            {
+                id: 32,
+                question: "A lab result showing 'Pseudohyperkalemia' may be caused by which factor?",
+                options: ["Hemolysis of the blood sample", "Renal failure", "Adrenal insufficiency", "Excessive dietary intake"],
+                correct: 0,
+                rationale: "A falsely elevated potassium level (pseudohyperkalemia) can result from hemolysis or prolonged tourniquet application."
+            },
+            {
+                id: 33,
+                question: "True or False: Diffusion is the movement of water through a semipermeable membrane from low solute to high solute concentration.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "This definition describes Osmosis. Diffusion is the movement of solutes from high to low concentration."
+            },
+            {
+                id: 34,
+                question: "Which food item would be most appropriate to recommend to a patient with Hypokalemia?",
+                options: ["Bananas and orange juice", "Cheese and yogurt", "Green leafy vegetables (spinach)", "Whole grain bread"],
+                correct: 0,
+                rationale: "Encourage intake of high-potassium foods, such as bananas, dried fruit, and orange juice."
+            },
+            {
+                id: 35,
+                question: "A patient has a serum sodium level of 152 mEq/L. Which type of IV fluid might be contraindicated or used with extreme caution?",
+                options: ["Hypertonic saline", "Hypotonic saline", "Dextrose 5% in water", "Sterile water"],
+                correct: 0,
+                rationale: "The patient has Hypernatremia. Adding more sodium (Hypertonic saline) would worsen the condition."
+            },
+            {
+                id: 36,
+                question: "Which fluid compartment contains approximately 2/3 of the Total Body Water?",
+                options: ["Intracellular Fluid (ICF)", "Extracellular Fluid (ECF)", "Interstitial Fluid", "Intravascular Fluid"],
+                correct: 0,
+                rationale: "Intracellular fluid volume (ICF) is 2/3rd of TBW."
+            },
+            {
+                id: 37,
+                question: "True or False: Decreased urine production is considered a late sign of dehydration.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Decreased urine production is an EARLY sign of dehydration."
+            },
+            {
+                id: 38,
+                question: "Which vital sign change is an early indication of dehydration?",
+                options: ["Increased heart rate", "Bradycardia", "Hypertension", "Widened pulse pressure"],
+                correct: 0,
+                rationale: "Compensated symptoms of dehydration include increased heart rate."
+            },
+            {
+                id: 39,
+                question: "What is the recommended IV fluid to replace normal insensible water loss after the first 24 hours?",
+                options: ["Dextrose 5% in water", "0.9% Normal Saline", "Lactated Ringer's", "Albumin"],
+                correct: 0,
+                rationale: "Dextrose 5% in water may be used to replace normal insensible water loss."
+            },
+            {
+                id: 40,
+                question: "A patient with hyperparathyroidism is at greatest risk for which electrolyte imbalance?",
+                options: ["Hypercalcemia", "Hypocalcemia", "Hyperkalemia", "Hyponatremia"],
+                correct: 0,
+                rationale: "Causes of Hypercalcemia include Hyperparathyroidism."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Central Venous/Right Atrial Pressure Monitoring</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-check text-4xl text-blue-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- GENERATE 40 QUESTIONS HERE BASED ON INPUT MATERIAL ---
+        const quizData = [
+            {
+                id: 1,
+                question: "A nurse is preparing to measure Central Venous Pressure using a hemodynamic monitoring system. What is the normal value range expected for this method?",
+                options: ["5 to 10 cmH2O", "2 to 6 mmHg", "8 to 12 mmHg", "10 to 15 cmH2O"],
+                correct: 1, 
+                rationale: "According to the text, when using a hemodynamic monitoring system, the normal CVP value is 2 to 6 mmHg."
+            },
+            {
+                id: 2,
+                question: "A patient is being monitored using a water manometer system attached to the central venous catheter. Which range indicates a normal reading?",
+                options: ["2 to 6 cmH2O", "15 to 20 cmH2O", "5 to 10 cmH2O", "1 to 4 cmH2O"],
+                correct: 2, 
+                rationale: "For the water manometer system, the text states the normal CVP value is 5 to 10 cmH2O."
+            },
+            {
+                id: 3,
+                question: "A nurse observes a low CVP reading on the monitor. Which intervention is generally indicated for this finding?",
+                options: ["Administer diuretics", "Increase IV fluids", "Restrict oral intake", "Perform phlebotomy"],
+                correct: 1, 
+                rationale: "The text states that a low CVP is an indicator of hypovolemia generally calling for an increase in IV fluids."
+            },
+            {
+                id: 4,
+                question: "A patient has a consistently high CVP reading. Which condition is a potential cause of this finding?",
+                options: ["Fluid loss", "Venous dilatation", "Constrictive pericarditis", "Blood loss"],
+                correct: 2, 
+                rationale: "Constrictive pericarditis is listed in the text as a condition causing increased CVP. The other options cause decreased CVP."
+            },
+            {
+                id: 5,
+                question: "When selecting a site for central venous pressure monitoring, why is the femoral catheter not recommended?",
+                options: ["It increases infection risk", "It is too distant from right atrium", "It causes venous dilatation", "It obstructs blood flow"],
+                correct: 1, 
+                rationale: "The text notes that monitoring CVC from the femoral catheter is not recommended because the catheter is too distant from the right atrium to produce reliable data."
+            },
+            {
+                id: 6,
+                question: "To ensure an accurate CVP measurement, where should the nurse locate the zero point on the patient's chest?",
+                options: ["Fourth intercostal space at midaxillary line", "Fifth intercostal space at midaxillary line", "Fourth intercostal space at midclavicular line", "Fifth intercostal space at sternal border"],
+                correct: 1, 
+                rationale: "The text instructs to locate the zero point in the patient chest at the fifth intercostal space at the midaxillary line."
+            },
+            {
+                id: 7,
+                question: "During the measurement of CVP using a water manometer, at which point in the respiratory cycle should the nurse read the fluctuation?",
+                options: ["At the end of inspiration", "At the peak of inspiration", "At the end of expiration", "Midway through expiration"],
+                correct: 2, 
+                rationale: "The nurse should watch for fluid fluctuation and read the CVP at the end of expiration to minimize the effect of intrathoracic pressure."
+            },
+            {
+                id: 8,
+                question: "Before measuring CVP, why is it important for the nurse to assess the patient's last feeding time?",
+                options: ["To prevent aspiration from supine position", "To calculate fluid balance accurately", "To determine electrolyte levels", "To assess for hyperglycemia"],
+                correct: 0, 
+                rationale: "Assessing the last feeding time is done to prevent aspiration from the supine position required for the procedure."
+            },
+            {
+                id: 9,
+                question: "Which clinical sign would lead a nurse to suspect a patient has a fluid volume deficit?",
+                options: ["Dependent edema", "Increased urine specific gravity", "Jugular vein distention", "Pulmonary congestion"],
+                correct: 1, 
+                rationale: "Increased urine specific gravity is listed as a sign and symptom of fluid volume deficit. The other options are signs of fluid volume excess."
+            },
+            {
+                id: 10,
+                question: "A nurse is assessing a patient for fluid volume excess. Which finding is consistent with this condition?",
+                options: ["Decreased urine specific gravity", "Increased urine specific gravity", "Decreased skin turgor", "Dry mucous membrane"],
+                correct: 0, 
+                rationale: "Decreased urine specific gravity is listed as a sign of fluid volume excess, whereas the other options indicate deficit."
+            },
+            {
+                id: 11,
+                question: "What is a specific complication risk associated with using a water manometer system compared to a hemodynamic monitoring system?",
+                options: ["Cardiac tamponade", "Risk of infection", "Venous dilatation", "Pulmonary hypertension"],
+                correct: 1, 
+                rationale: "The text states the water manometer system exposes the patient to complications of infection and air embolism."
+            },
+            {
+                id: 12,
+                question: "Why must the nurse stop IV solutions connected to the line before taking a CVP reading?",
+                options: ["To prevent air embolism", "To get accurate CVP reading", "To avoid fluid overload", "To prevent blood backflow"],
+                correct: 1, 
+                rationale: "The rationale for stopping IV infusion is to get an accurate CVP reading."
+            },
+            {
+                id: 13,
+                question: "A patient with a high CVP reading is diagnosed with hypervolemia. What is the usual treatment strategy?",
+                options: ["Diuresing the patient", "Increasing IV fluids", "Administering vasopressors", "Blood transfusion"],
+                correct: 0, 
+                rationale: "A high CVP caused by hypervolemia is usually treated by diuresing the patient."
+            },
+            {
+                id: 14,
+                question: "During the procedure, why does the nurse perform a flush back on the line?",
+                options: ["To calibrate the manometer", "To ensure patency of catheter", "To zero the transducer", "To clean the skin site"],
+                correct: 1, 
+                rationale: "Performing a flush back is done to ensure proper placement and patency of the Central Venous Catheter (CVC)."
+            },
+            {
+                id: 15,
+                question: "For a patient on mechanical ventilation, what is the recommendation regarding CVP measurement?",
+                options: ["Disconnect for 1 minute", "Disconnect briefly for reading", "Do not disconnect patient", "Turn off PEEP only"],
+                correct: 2, 
+                rationale: "The recommendation from national research is: Don't disconnect patient from mechanical ventilation to obtain CVP reading."
+            },
+            {
+                id: 16,
+                question: "How frequently should a nurse monitor CVP using the water manometer method to detect changes in patient condition?",
+                options: ["Every 2 hours", "Every 4 hours", "Every 8 hours", "Once per shift"],
+                correct: 0, 
+                rationale: "The text states to measure CVP every 2 hours using water manometer method to detect any change in patient condition."
+            },
+            {
+                id: 17,
+                question: "Which condition is a cause of decreased Central Venous Pressure?",
+                options: ["Pulmonary hypertension", "Venous dilatation", "Right ventricular failure", "Positive pressure ventilation"],
+                correct: 1, 
+                rationale: "Venous dilatation (drug induced) is listed as a condition causing decreased CVP. The other options cause increased CVP."
+            },
+            {
+                id: 18,
+                question: "When using a hemodynamic monitoring system, why must the transducer be elevated to the phlebostatic axis?",
+                options: ["To increase fluid flow", "To reduce risk of air embolism", "To prevent blood clotting", "To improving visualization"],
+                correct: 1, 
+                rationale: "Elevating the transducer to the phlebostatic axis reduces the risk of air embolism while measuring the CVP."
+            },
+            {
+                id: 19,
+                question: "A nurse identifies 'thirst' and 'tachycardia' in a patient. These are signs of which condition?",
+                options: ["Fluid volume excess", "Fluid volume deficit", "Cardiac tamponade", "Right ventricular infarct"],
+                correct: 1, 
+                rationale: "Thirst and tachycardia are listed as signs and symptoms of fluid volume deficit."
+            },
+            {
+                id: 20,
+                question: "What is the primary purpose of CVP measurement regarding the heart?",
+                options: ["Evaluate left ventricular afterload", "Evaluate right ventricular preload", "Measure systemic blood pressure", "Assess lung compliance"],
+                correct: 1, 
+                rationale: "The purpose of CVP measurement is to assess patient intravascular volume status and right ventricular preload."
+            }
+        ];
+
+        // --- SHUFFLE LOGIC ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Randomize options for each question independently on load
+        quizData.forEach(q => {
+            const correctOptionText = q.options[q.correct];
+            shuffleArray(q.options);
+            q.correct = q.options.indexOf(correctOptionText);
+        });
+        // ---------------------
+
+        const container = document.getElementById('quiz-container');
+        let score = 0;
+        let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3">
+                        ${q.options.map((opt, i) => `
+                            <button onclick="checkAnswer(${index}, ${i})" 
+                                class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white">
+                                <span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center group-hover:border-blue-400">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-blue-900 text-sm mb-1">Rationale</p>
+                                <p class="text-blue-800 text-sm leading-relaxed">${q.rationale}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const question = quizData[qIndex];
+            const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+            const buttons = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (feedbackEl.classList.contains('block')) return; 
+            feedbackEl.classList.remove('hidden-content');
+            feedbackEl.classList.add('block');
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'bg-white');
+                const iconContainer = btn.lastElementChild;
+                if (i === question.correct) {
+                    btn.classList.add('correct-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-check text-green-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else if (i === optIndex) {
+                    btn.classList.add('wrong-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-times text-red-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+            answeredCount++;
+            if (optIndex === question.correct) score++;
+            if (answeredCount === quizData.length) {
+                const resultDiv = document.getElementById('result-summary');
+                resultDiv.classList.remove('hidden-content');
+                document.getElementById('score-display').textContent = score;
+                document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+                const messageEl = document.getElementById('score-message');
+                const percentage = (score / quizData.length) * 100;
+                if (percentage === 100) messageEl.textContent = "Perfect Score!";
+                else if (percentage >= 75) messageEl.textContent = "Great Job!";
+                else if (percentage >= 50) messageEl.textContent = "Good effort.";
+                else messageEl.textContent = "Keep studying!";
+                setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

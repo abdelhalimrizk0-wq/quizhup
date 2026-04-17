@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Oxygen therapy</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-check text-4xl text-blue-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- GENERATE 40 QUESTIONS HERE BASED ON INPUT MATERIAL ---
+        const quizData = [
+            {
+                id: 1,
+                question: "A patient presents with mild to moderate hypoxemia. Which cardiovascular sign would the nurse most likely observe?",
+                options: ["Bradycardia", "Tachycardia", "Hypotension", "Cyanosis"],
+                correct: 1, 
+                rationale: "According to the signs and symptoms of hypoxemia, mild to moderate hypoxemia is characterized by tachycardia and hypertension in the cardiovascular system, whereas severe hypoxemia causes bradycardia."
+            },
+            {
+                id: 2,
+                question: "The nurse is assessing a patient's central nervous system status. Which finding indicates severe hypoxemia?",
+                options: ["Restlessness", "Confusion", "Agitation", "Lethargy"],
+                correct: 3, 
+                rationale: "Severe hypoxemia manifests in the Central Nervous System as lethargy and obtunded mental status, while mild to moderate hypoxemia presents as confusion, agitation, and restlessness."
+            },
+            {
+                id: 3,
+                question: "A patient is prescribed oxygen via nasal cannula at 2 L/min. What is the approximate FiO2 delivered?",
+                options: ["24%", "28%", "32%", "36%"],
+                correct: 1, 
+                rationale: "For a nasal cannula, 1 L/min delivers 24% and 2 L/min delivers 28% oxygen concentration."
+            },
+            {
+                id: 4,
+                question: "Which condition is classified as a short-term indication for oxygen therapy?",
+                options: ["Cystic Fibrosis", "Sleep Apnea", "Pneumonia", "Heart Failure"],
+                correct: 2, 
+                rationale: "Pneumonia (acute hypoxemia) is listed as a short-term indication. Cystic Fibrosis, Sleep Apnea, and late-stage heart failure are long-term indications."
+            },
+            {
+                id: 5,
+                question: "Which device is classified as a high-flow oxygen delivery system?",
+                options: ["Simple Mask", "Nasal Cannula", "Venturi Mask", "Non-rebreather"],
+                correct: 2, 
+                rationale: "The Venturi Mask is a high flow device. Nasal cannulas, simple masks, and non-rebreather masks are classified as low flow devices."
+            },
+            {
+                id: 6,
+                question: "A nurse uses a simple face mask for a patient. What is the minimum flow rate range typically recommended for this device?",
+                options: ["1 to 4 L/min", "5 to 10 L/min", "10 to 15 L/min", "12 to 15 L/min"],
+                correct: 1, 
+                rationale: "The simple face mask delivers 40% to 60% oxygen on a flow rate of 5 to 10 liters per minute."
+            },
+            {
+                id: 7,
+                question: "Which complication is caused by washing out nitrogen from the alveoli during 100% oxygen delivery?",
+                options: ["Oxygen toxicity", "Retinopathy", "Atelectasis", "Apnea"],
+                correct: 2, 
+                rationale: "Absorption Atelectasis occurs when nitrogen is washed out and replaced by oxygen, which diffuses quickly into the blood, causing the alveoli to collapse."
+            },
+            {
+                id: 8,
+                question: "A patient with COPD requires oxygen. Which device is best suited to provide a precise oxygen concentration without depressing respiratory drive?",
+                options: ["Nasal Cannula", "Venturi Mask", "Simple Mask", "Oxygen Tent"],
+                correct: 1, 
+                rationale: "The Venturi Mask is useful in hypoxemic COPD patients because it delivers a very predictable FiO2, preventing the delivery of excessive oxygen."
+            },
+            {
+                id: 9,
+                question: "What is the primary mechanism of Retinopathy of Prematurity in newborns?",
+                options: ["Vasodilation", "Vasoconstriction", "Hypertension", "Infection"],
+                correct: 1, 
+                rationale: "Retinopathy of prematurity causes blindness due to vasoconstriction and ischemia in premature infants."
+            },
+            {
+                id: 10,
+                question: "A patient is using a non-rebreathing mask. What is the expected oxygen concentration delivery?",
+                options: ["40-60%", "60-80%", "80-95%", "24-44%"],
+                correct: 2, 
+                rationale: "The Non-rebreathing Mask (NRBM) ensures that a high concentration of oxygen is delivered, ranging from 80-95%."
+            },
+            {
+                id: 11,
+                question: "Which oxygen delivery device allows the patient to eat and drink most easily?",
+                options: ["Venturi Mask", "Simple Mask", "Nasal Cannula", "Non-rebreather"],
+                correct: 2, 
+                rationale: "A specific advantage of the Nasal Cannula is that it allows the patient to eat and drink."
+            },
+            {
+                id: 12,
+                question: "What is a potential disadvantage of using a simple oxygen mask?",
+                options: ["Aspiration", "Pressure sores", "Dry mucosa", "Low humidity"],
+                correct: 0, 
+                rationale: "Disadvantages of the simple mask include possible aspiration of vomitus while the mask is in place."
+            },
+            {
+                id: 13,
+                question: "To prevent oxygen toxicity, oxygen concentrations greater than 50% should generally not be administered for longer than which duration?",
+                options: ["12-24 hours", "24-48 hours", "48-72 hours", "3-5 days"],
+                correct: 1, 
+                rationale: "Oxygen concentration greater than 50% over 24-28 hr (often rounded to 24-48 in clinical context, but text specifies 24-28 hr) can cause pathological changes."
+            },
+            {
+                id: 14,
+                question: "Which cellular structure is primarily damaged by high concentrations of oxygen, leading to surfactant deficiency?",
+                options: ["Cilia", "Type I cells", "Type II cells", "Macrophages"],
+                correct: 2, 
+                rationale: "Oxygen in high concentrations is toxic to the type II alveolar cells, which are responsible for the production of surfactant."
+            },
+            {
+                id: 15,
+                question: "What is a characteristic feature of the partial rebreathing mask?",
+                options: ["Two-way valve", "One-way valve", "No reservoir", "Venturi jet"],
+                correct: 0, 
+                rationale: "The partial rebreathing mask has a two-way valve connecting the reservoir bag and face mask, allowing the first 1/3rd of breath to enter the bag."
+            },
+            {
+                id: 16,
+                question: "Which substance must be avoided when using oxygen therapy to prevent fire hazards?",
+                options: ["Saline", "Water", "Vaseline", "Alcohol"],
+                correct: 2, 
+                rationale: "Cautions for oxygen therapy state: Do not use any petroleum products or petroleum byproducts e.g. petroleum jelly/Vaseline."
+            },
+            {
+                id: 17,
+                question: "A PaO2 of less than 60 mmHg indicates which severity of hypoxemia?",
+                options: ["Mild", "Moderate", "Severe", "Chronic"],
+                correct: 2, 
+                rationale: "Severe hypoxemia is characterized by a PaO2 < 60 mmHg."
+            },
+            {
+                id: 18,
+                question: "Which device typically uses color-coded jet adapters to set the oxygen concentration?",
+                options: ["Oxygen Hood", "Venturi Mask", "T-piece", "Ambu Bag"],
+                correct: 1, 
+                rationale: "The Venturi Mask is designed with wide-bore tubing and various color-coded jet adapters corresponding to precise oxygen concentrations."
+            },
+            {
+                id: 19,
+                question: "What is the flow rate range for a Non-Rebreathing Mask?",
+                options: ["1-6 L/min", "5-10 L/min", "10-15 L/min", "4-8 L/min"],
+                correct: 2, 
+                rationale: "The Non-rebreathing Mask operates at a flow rate of 10-15 L/min."
+            },
+            {
+                id: 20,
+                question: "Which symptom is associated with respiratory depression in COPD patients receiving high levels of oxygen?",
+                options: ["Tachypnea", "Agitation", "Hypoventilation", "Hypertension"],
+                correct: 2, 
+                rationale: "Respiratory depression/arrest occurs in COPD patients receiving high levels of oxygen, leading to depression of the respiratory drive (implied hypoventilation/arrest)."
+            },
+            {
+                id: 21,
+                question: "What is a specific disadvantage of the Nasal Cannula?",
+                options: ["Claustrophobia", "Pressure sores", "Aspiration", "Rebreathing"],
+                correct: 1, 
+                rationale: "Disadvantages of the nasal cannula include that it may cause pressure sores around the ears and nose."
+            },
+            {
+                id: 22,
+                question: "Which device is indicated for chronic oxygen therapy needs and fits over a tracheostomy tube?",
+                options: ["T-piece", "Trach Collar", "Face Tent", "Venturi Mask"],
+                correct: 1, 
+                rationale: "The Tracheostomy Collar/Mask is a clear mask designed to fit over a tracheostomy tube and is indicated for chronic O2 therapy need."
+            },
+            {
+                id: 23,
+                question: "An Oxygen Hood is primarily used for which patient population?",
+                options: ["Elderly", "Adults", "Babies", "Adolescents"],
+                correct: 2, 
+                rationale: "An oxygen hood is used for babies who can breathe on their own but still need extra oxygen."
+            },
+            {
+                id: 24,
+                question: "Which gas composes approximately 21% of the air we breathe?",
+                options: ["Nitrogen", "Oxygen", "Carbon", "Helium"],
+                correct: 1, 
+                rationale: "The introduction states that the air that we breathe contains approximately 21% oxygen."
+            },
+            {
+                id: 25,
+                question: "What is a main purpose of oxygen therapy regarding the myocardium?",
+                options: ["Increase rate", "Decrease stress", "Increase output", "Decrease rhythm"],
+                correct: 1, 
+                rationale: "One of the purposes of oxygen therapy is to decrease the stress on the myocardium."
+            },
+            {
+                id: 26,
+                question: "Which long-term indication for oxygen therapy involves a genetic disorder affecting the lungs?",
+                options: ["Asthma", "Cystic Fibrosis", "Bronchitis", "Pneumonia"],
+                correct: 1, 
+                rationale: "Cystic Fibrosis is listed under long-term indications for oxygen therapy."
+            },
+            {
+                id: 27,
+                question: "What is the maximum typical flow rate for a Nasal Cannula?",
+                options: ["4 L/min", "5 L/min", "6 L/min", "8 L/min"],
+                correct: 2, 
+                rationale: "The nasal cannula is connected to an oxygen source on O2 Flow 1-6 L/min."
+            },
+            {
+                id: 28,
+                question: "Which device is defined as a 'Low flow device'?",
+                options: ["Venturi Mask", "Trach Collar", "Partial Rebreather", "T-piece"],
+                correct: 2, 
+                rationale: "Low flow devices include nasal cannula, simple face mask, partial re-breather mask, and non-rebreather mask."
+            },
+            {
+                id: 29,
+                question: "What is a major disadvantage of the Tracheostomy Collar?",
+                options: ["Low humidity", "Heavy tubing", "Secretions", "Pressure sores"],
+                correct: 2, 
+                rationale: "A disadvantage is that secretions can accumulate in the tracheostomy collar."
+            },
+            {
+                id: 30,
+                question: "The T-piece is primarily attached to which type of airway?",
+                options: ["Nasal airway", "Oral airway", "Endotracheal", "Laryngeal mask"],
+                correct: 2, 
+                rationale: "The T-piece is a T-shaped plastic piece attached to an endotracheal or tracheostomy tube."
+            },
+            {
+                id: 31,
+                question: "Retinopathy of prematurity occurs when PaO2 exceeds 80 mmHg for what duration?",
+                options: ["1 hour", "2 hours", "3 hours", "4 hours"],
+                correct: 2, 
+                rationale: "Retinopathy of prematurity occurs when PaO2 is more than 80 mmHg for 3 hours in a newborn."
+            },
+            {
+                id: 32,
+                question: "Which skin manifestation indicates severe hypoxemia?",
+                options: ["Pallor", "Flushing", "Cyanosis", "Jaundice"],
+                correct: 2, 
+                rationale: "Severe hypoxemia is associated with cyanosis of the skin."
+            },
+            {
+                id: 33,
+                question: "What is the flow rate range for a Partial Rebreathing Mask?",
+                options: ["1-6 L/min", "5-10 L/min", "7-15 L/min", "10-15 L/min"],
+                correct: 2, 
+                rationale: "On 7-15 L/min, the partial rebreathing mask delivers 60% to 80% oxygen."
+            },
+            {
+                id: 34,
+                question: "High oxygen flow rates in masks can cause which side effect?",
+                options: ["Eye irritation", "Ear pain", "Headache", "Nausea"],
+                correct: 0, 
+                rationale: "High oxygen flow rates may cause drying and irritation to the eyes (mentioned for Simple, Non-rebreather, Partial rebreather, and Venturi masks)."
+            },
+            {
+                id: 35,
+                question: "Which system supplies oxygen from a central source in the wall?",
+                options: ["Cylinder", "Concentrator", "Wall outlet", "Liquid system"],
+                correct: 2, 
+                rationale: "Sources of oxygen include Oxygen wall outlets."
+            },
+            {
+                id: 36,
+                question: "Which component prevents room air from entering the bag of a non-rebreathing mask?",
+                options: ["One-way valve", "Two-way valve", "Filter", "Humidifier"],
+                correct: 0, 
+                rationale: "Another one-way valve lets the exhaled air flow out but prevents atmospheric air from entering into it (and the bag)."
+            },
+            {
+                id: 37,
+                question: "What is the oxygen concentration delivered by an Oxygen Hood?",
+                options: ["24-40%", "40-60%", "60-80%", "80-90%"],
+                correct: 3, 
+                rationale: "Oxygen concentration of 80 to 90% can be achieved with an oxygen hood."
+            },
+            {
+                id: 38,
+                question: "Which sign is observed in the respiratory system during mild to moderate hypoxemia?",
+                options: ["Bradypnea", "Apnea", "Dyspnea", "Cheyne-Stokes"],
+                correct: 2, 
+                rationale: "Mild to moderate hypoxemia in the respiratory system presents as dyspnea, tachypnea, and shallow labored breathing."
+            },
+            {
+                id: 39,
+                question: "What is the definition of Oxygen Therapy?",
+                options: ["Room air", "21% Oxygen", "Supplemental O2", "Ventilation"],
+                correct: 2, 
+                rationale: "Oxygen therapy is the administration of oxygen at a concentration greater than that found in the environmental atmosphere."
+            },
+            {
+                id: 40,
+                question: "Where should oxygen cylinders NOT be stored?",
+                options: ["Cool places", "Hot places", "Upright", "Secured"],
+                correct: 1, 
+                rationale: "Cautions for oxygen therapy state: Do not store oxygen cylinders in hot places."
+            }
+        ];
+
+        const container = document.getElementById('quiz-container');
+        let score = 0;
+        let answeredCount = 0;
+
+        // Shuffle options logic
+        function prepareQuiz() {
+            quizData.forEach(q => {
+                // Create an array of objects containing the text and whether it is correct
+                let optionsWithMetadata = q.options.map((opt, originalIndex) => ({
+                    text: opt,
+                    isCorrect: originalIndex === q.correct
+                }));
+
+                // Shuffle this array
+                for (let i = optionsWithMetadata.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [optionsWithMetadata[i], optionsWithMetadata[j]] = [optionsWithMetadata[j], optionsWithMetadata[i]];
+                }
+
+                // Store the shuffled version in the question object
+                q.shuffledOptions = optionsWithMetadata;
+            });
+        }
+
+        function renderQuiz() {
+            // Run shuffle before rendering
+            prepareQuiz();
+            
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3">
+                        ${q.shuffledOptions.map((opt, i) => `
+                            <button onclick="checkAnswer(${index}, ${i})" 
+                                class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white">
+                                <span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt.text}</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center group-hover:border-blue-400">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-blue-900 text-sm mb-1">Rationale</p>
+                                <p class="text-blue-800 text-sm leading-relaxed">${q.rationale}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        window.checkAnswer = function(qIndex, selectedShuffledIndex) {
+            const question = quizData[qIndex];
+            const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+            const buttons = document.querySelectorAll(`.option-btn-${qIndex}`);
+            
+            if (feedbackEl.classList.contains('block')) return; 
+            
+            feedbackEl.classList.remove('hidden-content');
+            feedbackEl.classList.add('block');
+            
+            // Find the index of the correct answer within the *shuffled* array to highlight it green
+            const correctShuffledIndex = question.shuffledOptions.findIndex(opt => opt.isCorrect);
+            const isUserCorrect = (selectedShuffledIndex === correctShuffledIndex);
+
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'bg-white');
+                const iconContainer = btn.lastElementChild;
+                
+                if (i === correctShuffledIndex) {
+                    btn.classList.add('correct-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-check text-green-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else if (i === selectedShuffledIndex && !isUserCorrect) {
+                    btn.classList.add('wrong-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-times text-red-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            answeredCount++;
+            if (isUserCorrect) score++;
+
+            if (answeredCount === quizData.length) {
+                const resultDiv = document.getElementById('result-summary');
+                resultDiv.classList.remove('hidden-content');
+                
+                document.getElementById('score-display').textContent = score;
+                document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+                
+                const messageEl = document.getElementById('score-message');
+                const percentage = (score / quizData.length) * 100;
+                
+                if (percentage === 100) messageEl.textContent = "Perfect Score!";
+                else if (percentage >= 75) messageEl.textContent = "Great Job!";
+                else if (percentage >= 50) messageEl.textContent = "Good effort.";
+                else messageEl.textContent = "Keep studying!";
+                
+                setTimeout(() => {
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 500);
+            }
+        };
+
+        renderQuiz();
+    </script>
+</body>
+</html>

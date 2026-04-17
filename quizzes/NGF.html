@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Nasogastric Gastric Feeding</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-check text-4xl text-blue-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- GENERATE 20 QUESTIONS HERE BASED ON INPUT MATERIAL ---
+        const quizData = [
+            {
+                id: 1,
+                question: "Which of the following is the most common indication for the use of tube feedings in the elderly?",
+                options: ["Inadequate oral intake", "Dysphagia with frequent aspiration", "Extensive burns", "Comatose state"],
+                correct: 1,
+                rationale: "According to the text, dysphagia with frequent aspiration is the most common indication for use of tube feedings in the elderly."
+            },
+            {
+                id: 2,
+                question: "When assessing the patient before feeding, why must the nurse auscultate bowel sounds?",
+                options: ["To confirm tube placement", "To assess motility of GIT", "To check for fluid volume excess", "To determine gastric residual volume"],
+                correct: 1,
+                rationale: "The rationale listed for assessing bowel sounds before feeding is specifically 'To assess motility of GIT'."
+            },
+            {
+                id: 3,
+                question: "A nurse is preparing to check the pH of gastric content to confirm tube placement. What is a critical prerequisite for this test?",
+                options: ["The patient must be in a lateral position", "The patient has not received food or medication within one hour", "The patient must have a GRV less than 250ml", "The tube must be flushed with 30ml of water first"],
+                correct: 1,
+                rationale: "The text states: 'Be sure that the patient has not received food or medication within one hour before the pH check.'"
+            },
+            {
+                id: 4,
+                question: "During placement verification using air injection, how much air should the nurse inject?",
+                options: ["5-10 cc", "10-20 cc", "30-50 cc", "60 cc"],
+                correct: 1,
+                rationale: "The procedure specifies: 'Inject of 10-20 cc of air and listen by stethoscope in the epigastric region.'"
+            },
+            {
+                id: 5,
+                question: "A nurse assesses the Gastric Residual Volume (GRV) and finds it to be 200 ml. What is the appropriate action?",
+                options: ["Discard the aspirate and pause feeding", "Return it to the stomach and continue feeding", "Return half and discard the rest", "Notify the physician immediately"],
+                correct: 1,
+                rationale: "The protocol states: 'If GRV is less than 250ml return it again to stomach & continue feeding.'"
+            },
+            {
+                id: 6,
+                question: "If the Gastric Residual Volume (GRV) is found to be exactly 500 ml, what is the correct intervention?",
+                options: ["Return 250ml to stomach, discard the rest, and continue feeding", "Return all contents and slow the feeding rate", "Discard all contents and stop the feeding", "Stop feeding and administer prokinetic agents"],
+                correct: 0,
+                rationale: "The text instructs: 'If GRV is 500ml return 250ml to stomach and discard the rest and document it as output and continue feeding.'"
+            },
+            {
+                id: 7,
+                question: "At what GRV level should the nurse stop feeding and consider the use of prokinetic agents?",
+                options: ["More than 250 cc", "More than 300 cc", "More than 400 cc", "More than 500 cc"],
+                correct: 3,
+                rationale: "The text states: 'If GRV more than 500cc stop feeding, consider use of prokinetic agents.'"
+            },
+            {
+                id: 8,
+                question: "What is the primary rationale for checking the feeding formula's type, color, and consistency?",
+                options: ["To prevent infection at the insertion site", "To deliver adequate nutrition with appropriate calorie density", "To ensure the formula is at body temperature", "To prevent tube occlusion"],
+                correct: 1,
+                rationale: "The rationale provided is: 'To select the formula with appropriate density of calories as dietitian order to deliver adequate nutrition to the patient.'"
+            },
+            {
+                id: 9,
+                question: "What is the correct patient positioning during nasogastric feeding preparation?",
+                options: ["Supine with a pillow", "Trendelenburg position", "Fowler or lateral with elevated head of bed", "Prone position"],
+                correct: 2,
+                rationale: "The procedure lists: 'Position patient (fowler /lateral with elevated HOB head of bed) to prevent aspiration.'"
+            },
+            {
+                id: 10,
+                question: "During intermittent bolus feeding, why should the nurse pinch the feeding tube before disconnecting the syringe?",
+                options: ["To measure residual volume", "To prevent air from entering the tube", "To check for tube patency", "To increase flow rate"],
+                correct: 1,
+                rationale: "The text states: 'Pinch feeding tube to prevent air from entering tube.'"
+            },
+            {
+                id: 11,
+                question: "How much water should be used to irrigate the NGT before pouring the feeding into the syringe barrel?",
+                options: ["10 ml", "30 ml", "60 ml", "100 ml"],
+                correct: 1,
+                rationale: "The procedure step is: 'Irrigate NGT with water (30)ml'."
+            },
+            {
+                id: 12,
+                question: "By what mechanism should the feeding flow into the stomach during intermittent bolus feeding?",
+                options: ["By gravity", "By rapid manual pressure", "By an infusion pump", "By negative pressure"],
+                correct: 0,
+                rationale: "The text explicitly states: 'Allow feeding to flow in by gravity.'"
+            },
+            {
+                id: 13,
+                question: "What is the purpose of flushing the tube with water after the feeding is completed?",
+                options: ["To cool down the stomach", "To ensure tube patency and optimize daily water requirement", "To neutralize gastric pH", "To sterilize the tube"],
+                correct: 1,
+                rationale: "The rationale for flushing after feeding is: 'To ensure patency of the tube & optimize daily water requirement.'"
+            },
+            {
+                id: 14,
+                question: "When using a feeding bag, at what height should the bag be hung?",
+                options: ["Level with the patient's stomach", "12 inches above the patient's head", "18 inches above the patient's head", "24 inches above the patient's head"],
+                correct: 2,
+                rationale: "The text specifies: 'Hang bag on IV pole so that it is 18 inches above the patients head.'"
+            },
+            {
+                id: 15,
+                question: "Why is it important to remove air from the bag's tubing before connecting it to the patient?",
+                options: ["To prevent tube blockage", "To prevent air entry into the stomach and decrease diarrhea risk", "To ensure accurate volume measurement", "To maintain the temperature of the formula"],
+                correct: 1,
+                rationale: "The rationale is: 'To prevent air from entering stomach & to decrease the risk of diarrhea.'"
+            },
+            {
+                id: 16,
+                question: "How often should the enteral feeding bag and administration set be changed?",
+                options: ["Every 12 hours", "Every 24 hours", "Every 48 hours", "Every week"],
+                correct: 1,
+                rationale: "The procedure states: 'label enteral feeding bag and administration set with date and time, change the bag and set every 24 hours.'"
+            },
+            {
+                id: 17,
+                question: "Why must the nurse set the prescribed infusion flow rate carefully?",
+                options: ["To prevent rapid flow causing nausea, vomiting, and diarrhea", "To finish the feeding as quickly as possible", "To prevent the formula from spoiling", "To reduce the risk of tube dislodgement"],
+                correct: 0,
+                rationale: "The rationale for setting the flow rate is: 'To avoid rapid flow rate which may cause problem as nausea, vomiting, and diarrhea.'"
+            },
+            {
+                id: 18,
+                question: "After feeding, how long should the patient maintain an elevated head of bed position?",
+                options: ["10-15 minutes", "30-45 minutes", "60-90 minutes", "2 hours"],
+                correct: 1,
+                rationale: "The Post Care instructions state: 'Maintain patient's position for at least 30-45 min (elevated HOB).'"
+            },
+            {
+                id: 19,
+                question: "How frequently should oral hygiene be provided for a patient with enteral nutrition?",
+                options: ["Once daily", "Every 2-4 hours", "Every 8 hours", "Every 12 hours"],
+                correct: 1,
+                rationale: "The Post Care section states: 'Provide oral hygiene every 2-4 hours.'"
+            },
+            {
+                id: 20,
+                question: "Where should the nurse store the open feeding formula?",
+                options: ["At the bedside", "In a dark cupboard", "In the refrigerator", "In a warm water bath"],
+                correct: 2,
+                rationale: "The Post Care section explicitly states: 'Keep feeding in refrigerator.'"
+            }
+        ];
+
+        // --- New Logic: Shuffle Options Randomly ---
+        quizData.forEach(q => {
+            const correctAnswerText = q.options[q.correct]; // Save the text of the correct answer
+            
+            // Fisher-Yates Shuffle Algorithm
+            for (let i = q.options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+            }
+            
+            // Update the correct index based on new position
+            q.correct = q.options.indexOf(correctAnswerText);
+        });
+        // -------------------------------------------
+
+        const container = document.getElementById('quiz-container');
+        let score = 0;
+        let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3">
+                        ${q.options.map((opt, i) => `
+                            <button onclick="checkAnswer(${index}, ${i})" 
+                                class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white">
+                                <span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center group-hover:border-blue-400">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-blue-900 text-sm mb-1">Rationale</p>
+                                <p class="text-blue-800 text-sm leading-relaxed">${q.rationale}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const question = quizData[qIndex];
+            const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+            const buttons = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (feedbackEl.classList.contains('block')) return; 
+            feedbackEl.classList.remove('hidden-content');
+            feedbackEl.classList.add('block');
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'bg-white');
+                const iconContainer = btn.lastElementChild;
+                if (i === question.correct) {
+                    btn.classList.add('correct-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-check text-green-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else if (i === optIndex) {
+                    btn.classList.add('wrong-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-times text-red-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+            answeredCount++;
+            if (optIndex === question.correct) score++;
+            if (answeredCount === quizData.length) {
+                const resultDiv = document.getElementById('result-summary');
+                resultDiv.classList.remove('hidden-content');
+                document.getElementById('score-display').textContent = score;
+                document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+                const messageEl = document.getElementById('score-message');
+                const percentage = (score / quizData.length) * 100;
+                if (percentage === 100) messageEl.textContent = "Perfect Score!";
+                else if (percentage >= 75) messageEl.textContent = "Great Job!";
+                else if (percentage >= 50) messageEl.textContent = "Good effort.";
+                else messageEl.textContent = "Keep studying!";
+                setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

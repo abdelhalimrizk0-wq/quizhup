@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Family's Experience with Critical Illness</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "According to Selye, which hormones are primarily released during the alarm stage of the stress syndrome?",
+                options: ["Insulin and glucagon", "Norepinephrine and epinephrine", "Cortisol and aldosterone", "Thyroxine and triiodothyronine"],
+                correct: 1,
+                rationale: "The alarm stage involves releasing the catecholamines norepinephrine and epinephrine through the sympathetic nervous system."
+            },
+            {
+                id: 2,
+                question: "Which of the following is a core component of the Critical Care Family Assistance Program (CCFAP) related to environmental changes?",
+                options: ["Providing hotel discounts", "Establishing ICU Navigators", "Expanding the waiting area", " offering music therapy"],
+                correct: 2,
+                rationale: "Environmental changes in the CCFAP include examples such as expanding the waiting area, brightening the room look, and acquiring comfortable furniture."
+            },
+            {
+                id: 3,
+                question: "True or False: The resistance stage of stress attempts to maintain the body's resistance to stress.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The resistance stage follows the alarm stage and attempts to maintain the body's resistance to stress."
+            },
+            {
+                id: 4,
+                question: "What is the primary goal of Patient and Family-Centered Care (PFCC) regarding staff perspective?",
+                options: ["To increase the workload of nursing staff", "To reconnect staff with their values and motivation", "To reduce the amount of time spent with patients", "To focus solely on technological advancements"],
+                correct: 1,
+                rationale: "PFCC changes the perspective of staff delivering care and helps them reconnect with their values and motivation for working in health care."
+            },
+            {
+                id: 5,
+                question: "Which coping mechanism is demonstrated when a family member refuses to leave the bedside to gain a sense of control?",
+                options: ["Acceptance", "Rationalization", "Denial", "Seeking control"],
+                correct: 3,
+                rationale: "The family attempts to obtain some sense of control over the situation, often demonstrated by refusing to leave the bedside."
+            },
+            {
+                id: 6,
+                question: "Research indicates that the top needs of families of critically ill patients include information, hope, and which of the following?",
+                options: ["Financial assistance", "Support from hospital staff", "Private luxury rooms", "Legal counsel"],
+                correct: 1,
+                rationale: "Recent research has shown that the top needs are the need for information, the need for support from hospital staff, and the need for hope."
+            },
+            {
+                id: 7,
+                question: "When implementing Patient and Family-Centered Care, who should be the first group to learn about the process?",
+                options: ["Junior nursing staff", "The patients only", "All senior leaders", "External auditors"],
+                correct: 2,
+                rationale: "Step 1 of implementation is to implement a process for all senior leaders to learn about patient and family-centered care."
+            },
+            {
+                id: 8,
+                question: "True or False: Visiting hours in CCUs were historically restricted based on the rationale that rest and a quiet environment were therapeutic.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Visiting hours were restricted with the rationale that rest, quiet, and an undisturbed environment were therapeutic nursing interventions."
+            },
+            {
+                id: 9,
+                question: "Which nursing intervention is most appropriate when communicating with a family in crisis?",
+                options: ["Giving false reassurance to boost hope", "Speaking openly and honestly about the illness", "Avoiding discussion of the patient's condition", "Limiting all communication to one minute"],
+                correct: 1,
+                rationale: "Nurses should speak openly to the patient and family about the critical illness and be realistic and honest, taking care not to give false reassurance."
+            },
+            {
+                id: 10,
+                question: "What characterizes the 'Participation' principle of Patient and Family-Centered Care?",
+                options: ["Families must perform all medical procedures", "Families are excluded from decision making", "Families are encouraged to participate in care at the level they choose", "Families are only allowed to observe from a distance"],
+                correct: 2,
+                rationale: "Participation means patients and families are encouraged and supported in participating in care and decision-making at the level they choose."
+            },
+            {
+                id: 11,
+                question: "Which stage of the General Adaptation Syndrome leads to death or a wearing down of the human body if adaptation fails?",
+                options: ["Alarm stage", "Resistance stage", "Exhaustion stage", "Recovery stage"],
+                correct: 2,
+                rationale: "If the person is unsuccessful at adaptation, the exhaustion stage follows, which can lead to death or a wearing down of the human body."
+            },
+            {
+                id: 12,
+                question: "True or False: Interprofessional collaboration is solely the responsibility of the nursing staff.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Communication with families is not the responsibility of a single profession; it involves multiple health care workers from different backgrounds."
+            },
+            {
+                id: 13,
+                question: "Which of the following is considered a 'Hospitality Program' under the CCFAP model?",
+                options: ["Pet therapy", "ICU Navigators", "Meals for families", "Information kiosks"],
+                correct: 2,
+                rationale: "Hospitality Programs examples include hotel discounts and meals for families."
+            },
+            {
+                id: 14,
+                question: "A nurse identifies 'Risk for loneliness' in a patient's care plan. This is an example of which part of the nursing process?",
+                options: ["Assessment", "Nursing Diagnosis", "Implementation", "Evaluation"],
+                correct: 1,
+                rationale: "Risk for loneliness is listed as a potential Nursing Diagnosis in the provided text."
+            },
+            {
+                id: 15,
+                question: "How does the text define 'Stressors'?",
+                options: ["Stimuli that produce tension and disequilibrium", "The body's natural healing process", "A state of complete relaxation", "Only physical injuries"],
+                correct: 0,
+                rationale: "Selye discussed the role of stressors as the stimuli that produce tension and that could contribute to disequilibrium."
+            },
+            {
+                id: 16,
+                question: "Which of the following is a physiological response found in the alarm stage?",
+                options: ["Decreased heart rate", "Vasodilation", "Increased blood pressure", "Decreased alertness"],
+                correct: 2,
+                rationale: "Hormones released in the alarm stage are responsible for increased heart rate, increased blood pressure, and vasoconstriction."
+            },
+            {
+                id: 17,
+                question: "True or False: Coping mechanisms are always healthy responses to environmental changes.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Coping mechanisms are defined as a person's response to a change in the environment; they can be healthy or unhealthy."
+            },
+            {
+                id: 18,
+                question: "What is the recommended approach for 'Information Sharing' under PFCC principles?",
+                options: ["Withholding bad news to protect the family", "Sharing unbiased, complete, and timely information", "Sharing information only with the patient", "Using complex medical terminology"],
+                correct: 1,
+                rationale: "Health care practitioners communicate and share complete and unbiased information with patients and families in ways that are affirming and useful."
+            },
+            {
+                id: 19,
+                question: "Which service is categorized under 'Other Services' in the CCFAP model?",
+                options: ["Music therapy", "Internet access", "Waiting area expansion", "Weekly group sessions"],
+                correct: 0,
+                rationale: "Other Services examples include music therapy and pet therapy."
+            },
+            {
+                id: 20,
+                question: "Which action is a key component of the 'Dignity and Respect' principle?",
+                options: ["Enforcing strict visiting hours", "Honoring patient and family values and beliefs", "Prioritizing hospital policy over patient preference", "Minimizing family interaction"],
+                correct: 1,
+                rationale: "Health care practitioners listen to and honor patient and family perspectives and choices, incorporating their values and beliefs into care."
+            },
+            {
+                id: 21,
+                question: "True or False: Palliative care is only focused on the patient and excludes the family.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Important components of palliative care are the inclusion of the family in decision making and the provision of patient care."
+            },
+            {
+                id: 22,
+                question: "What is a recommended strategy to help families deal with the critical care environment?",
+                options: ["Restrict information about equipment", "Prepare them regarding equipment and its purpose", "Keep them in the waiting room at all times", "Discourage them from asking questions"],
+                correct: 1,
+                rationale: "Nurses should prepare the family for the critical care environment, especially regarding equipment and purposes of the equipment."
+            },
+            {
+                id: 23,
+                question: "Which role is essential for the successful implementation of PFCC in step 2 of the process?",
+                options: ["A temporary volunteer", "An executive sponsor", "A financial auditor", "A part-time consultant"],
+                correct: 1,
+                rationale: "Step 2 is to identify an executive sponsor(s) for patient and family-centered care."
+            },
+            {
+                id: 24,
+                question: "What is the primary function of 'ICU Navigators' in the CCFAP model?",
+                options: ["Providing medical treatment", "Communication and assertiveness skills", "Cleaning the environment", "Cooking meals for families"],
+                correct: 1,
+                rationale: "ICU Navigators are an example of the Communication component, providing information and assertiveness skills."
+            },
+            {
+                id: 25,
+                question: "True or False: Stressors in the critical care environment can be both physiologic and psychological.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The critical care environment is rich in both physiologic and psychosocial stressors."
+            },
+            {
+                id: 26,
+                question: "Which reaction is often followed by irrational acts during a crisis?",
+                options: ["A sense of calm", "Acceptance", "Panic, shock, or disbelief", "Strategic planning"],
+                correct: 2,
+                rationale: "A sense of fear, panic, shock, or disbelief is sometimes followed by irrational acts."
+            },
+            {
+                id: 27,
+                question: "According to the nursing assessment guidelines, what is now viewed as the 'unit of care'?",
+                options: ["The patient only", "The doctor and nurse", "The patient and the family", "The hospital administration"],
+                correct: 2,
+                rationale: "The patient and the family are now viewed as the unit of care."
+            },
+            {
+                id: 28,
+                question: "What is the purpose of 'Collaboration' in the PFCC principles?",
+                options: ["To limit family influence on policy", "To allow families to clean the hospital", "To involve families in policy and program development", "To reduce staff responsibility"],
+                correct: 2,
+                rationale: "Patients, families, and leaders collaborate in policy and program development, implementation, and evaluation."
+            },
+            {
+                id: 29,
+                question: "Which of the following is a suggested nursing intervention regarding family privacy?",
+                options: ["Advise families to go home for privacy", "Determine if there is space in the hospital for family privacy", "Tell families privacy is not possible in ICU", "Use the patient's room for all discussions"],
+                correct: 1,
+                rationale: "Determine whether there is space available in the hospital near the unit where the family can be alone and have privacy."
+            },
+            {
+                id: 30,
+                question: "True or False: Family members often interpreted restricted visiting hours as denying access to their loved ones.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Families often interpreted these restrictions as denying access to their loved ones."
+            },
+            {
+                id: 31,
+                question: "What is the expected outcome of using the CCFAP model regarding the cost of care?",
+                options: ["Cost of delivery will increase significantly", "Cost of critical care delivery will decrease", "Cost remains exactly the same", "Cost is transferred to the family"],
+                correct: 1,
+                rationale: "The expanded use of the CCFAP model increases quality, whereas cost of critical care delivery will decrease."
+            },
+            {
+                id: 32,
+                question: "Which of the following is NOT a listed nursing diagnosis for families of critically ill patients?",
+                options: ["Hopelessness", "Dysfunctional family process", "Excessive happiness", "Knowledge deficit"],
+                correct: 2,
+                rationale: "Excessive happiness is not a nursing diagnosis listed; others like Hopelessness, Dysfunctional family process, and Knowledge deficit are."
+            },
+            {
+                id: 33,
+                question: "What should educational materials in the CCFAP be characterized by?",
+                options: ["Written in high-level technical language", "Outdated but classic information", "Written in nontechnical language", "Focused solely on billing"],
+                correct: 2,
+                rationale: "Educational materials should be up-to-date and written in nontechnical language."
+            },
+            {
+                id: 34,
+                question: "True or False: Terminal weaning and organ donor support are considered suitable situations for family presence.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Terminal weaning, support of an organ donor, and planned invasive procedures seem suitable situations for the family to be present."
+            },
+            {
+                id: 35,
+                question: "Step 4 of implementing PFCC involves assessing the current implementation using which method?",
+                options: ["A long annual audit", "A brief initial self-assessment tool", "Hiring an expensive consultant", "Guessing based on feelings"],
+                correct: 1,
+                rationale: "Assess the extent to which concepts are implemented using a brief initial self-assessment tool."
+            },
+            {
+                id: 36,
+                question: "Which coping style is described as 'minimizing the severity of the illness'?",
+                options: ["Confrontation", "Denial", "Acceptance", "Problem-solving"],
+                correct: 1,
+                rationale: "The family attempts to obtain control, often demonstrated by minimizing the severity of the illness through denial."
+            },
+            {
+                id: 37,
+                question: "What defines 'Palliative Care' in the context of critical illness?",
+                options: ["Curative treatment only", "Prevention and relief of suffering to improve quality of life", "Focusing solely on extending life duration", "Excluding psychosocial problems"],
+                correct: 1,
+                rationale: "Palliative care improves quality of life through the prevention and relief of suffering by means of early identification and assessment."
+            },
+            {
+                id: 38,
+                question: "True or False: The alarm stage is followed directly by the exhaustion stage.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The alarm stage is followed by the stage of resistance."
+            },
+            {
+                id: 39,
+                question: "Which item is an example of an 'Information Kiosk' service in CCFAP?",
+                options: ["Electronic messaging system", "Comfortable furniture", "Music therapy", "ICU Navigator"],
+                correct: 0,
+                rationale: "Information Kiosk examples include electronic messaging systems, Internet access, and satisfaction surveys."
+            },
+            {
+                id: 40,
+                question: "What is a critical nursing intervention regarding family feelings?",
+                options: ["Ignore feelings to focus on facts", "Help the family identify and focus on feelings", "Tell the family to suppress their emotions", "Distract the family with other topics"],
+                correct: 1,
+                rationale: "Nurses should help the family identify and focus on feelings."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

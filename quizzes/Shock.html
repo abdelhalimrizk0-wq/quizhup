@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Shock</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "What is the primary definition of shock?",
+                options: ["Inadequate tissue perfusion", "Acute respiratory failure", "Increased cardiac output", "Severe hypertension"],
+                correct: 0,
+                rationale: "Shock is defined as inadequate tissue perfusion, a generalized systematic response where oxygen delivery fails to meet metabolic demands."
+            },
+            {
+                id: 2,
+                question: "Early shock is considered a reversible condition.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The text states that early shock is reversible, but untreated shock leads to cellular hypoxia and organ dysfunction."
+            },
+            {
+                id: 3,
+                question: "Which metabolic change occurs when oxygen delivery cannot meet demand?",
+                options: ["Anaerobic metabolism", "Increased oxidation", "Decreased lactate", "Alkalotic state"],
+                correct: 0,
+                rationale: "If oxygen delivery cannot increase to meet stress demands, the body switches to anaerobic metabolism, leading to lactic acid production."
+            },
+            {
+                id: 4,
+                question: "Which hormone is released to increase water and sodium retention during compensation?",
+                options: ["Antidiuretic hormone", "Insulin", "Thyroxine", "Glucagon"],
+                correct: 0,
+                rationale: "ADH leads to water and sodium retention, which increases preload and cardiac output."
+            },
+            {
+                id: 5,
+                question: "Under normal conditions, oxygen consumption depends on oxygen delivery.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Under normal conditions, oxygen consumption (VO2) does not depend on delivery (DO2), but under stress, it does."
+            },
+            {
+                id: 6,
+                question: "What is the primary effect of the Renin-Angiotensin system during shock?",
+                options: ["Vasoconstriction", "Vasodilation", "Diuresis", "Bradycardia"],
+                correct: 0,
+                rationale: "Renin-angiotensin leads to vasoconstriction to help increase blood pressure."
+            },
+            {
+                id: 7,
+                question: "How does the respiratory system initially compensate for shock?",
+                options: ["Faster and deeper breathing", "Slower shallow breathing", "Apneic episodes", "Bronchoconstriction"],
+                correct: 0,
+                rationale: "Compensatory respiratory mechanisms involve faster and deeper breathing."
+            },
+            {
+                id: 8,
+                question: "Cardiogenic shock is caused by the loss of blood volume.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Cardiogenic shock is caused by pump failure, whereas hypovolemic shock is caused by loss of blood or fluid."
+            },
+            {
+                id: 9,
+                question: "Which finding characterizes the initial stage of shock?",
+                options: ["Mild cardiac output drop", "Severe metabolic acidosis", "Multi organ failure", "Unresponsiveness"],
+                correct: 0,
+                rationale: "The initial stage is characterized by a mild drop in cardiac output and the beginning of anaerobic metabolism."
+            },
+            {
+                id: 10,
+                question: "What represents the Mean Arterial Pressure drop in the compensatory stage?",
+                options: ["10 to 15 mmHg", "30 to 40 mmHg", "Greater than 50 mmHg", "Less than 5 mmHg"],
+                correct: 0,
+                rationale: "In the compensatory stage, the MAP drops by 10-15 mmHg."
+            },
+            {
+                id: 11,
+                question: "Anaphylactic shock involves bronchoconstriction.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Pathophysiology of anaphylactic shock includes histamine release, vasodilation, capillary leak, and bronchoconstriction."
+            },
+            {
+                id: 12,
+                question: "Which stage is characterized by a Mean Arterial Pressure drop of more than 20%?",
+                options: ["Progressive", "Initial", "Compensatory", "Refractory"],
+                correct: 0,
+                rationale: "The progressive stage is marked by a MAP drop of greater than 20% and failure of compensatory mechanisms."
+            },
+            {
+                id: 13,
+                question: "What electrolyte imbalance commonly develops during the progressive stage?",
+                options: ["Hyperkalemia", "Hypocalcemia", "Hypernatremia", "Hypomagnesemia"],
+                correct: 0,
+                rationale: "A state of acidosis with hyperkalemia develops during the progressive stage."
+            },
+            {
+                id: 14,
+                question: "Which sign indicates the refractory stage of shock?",
+                options: ["Widespread cellular death", "Increased urine output", "Rapid blood pressure recovery", "Normal mental status"],
+                correct: 0,
+                rationale: "In the refractory stage, tissues are anoxic, and cellular death is widespread; death is likely."
+            },
+            {
+                id: 15,
+                question: "Neurogenic shock presents with bradycardia.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Neurogenic shock is characterized by loss of sympathetic tone, leading to vasodilation and bradycardia."
+            },
+            {
+                id: 16,
+                question: "Which condition is a common cause of hypovolemic shock?",
+                options: ["Burns", "Myocardial infarction", "Spinal cord injury", "Allergic reaction"],
+                correct: 0,
+                rationale: "Hypovolemic shock causes include blood loss, dehydration, and burns."
+            },
+            {
+                id: 17,
+                question: "What is a classic sign of hypovolemic shock?",
+                options: ["Cool clammy skin", "Warm flushed skin", "Bradycardia", "Polyuria"],
+                correct: 0,
+                rationale: "Signs of hypovolemic shock include cool, clammy skin, tachycardia, and hypotension."
+            },
+            {
+                id: 18,
+                question: "Which fluid is appropriate for rapid replacement in hypovolemic shock?",
+                options: ["Normal Saline", "Dextrose 50 percent", "Sterile Water", "Total Parenteral Nutrition"],
+                correct: 0,
+                rationale: "Management includes rapid fluid replacement with NS (Normal Saline) or LR."
+            },
+            {
+                id: 19,
+                question: "The progressive stage involves a MAP drop of less than 10 mmHg.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The progressive stage involves a MAP drop of greater than 20%; a 10-15 mmHg drop is characteristic of the compensatory stage."
+            },
+            {
+                id: 20,
+                question: "What is the primary cause of cardiogenic shock?",
+                options: ["Pump failure", "Fluid loss", "Sepsis", "Anaphylaxis"],
+                correct: 0,
+                rationale: "Cardiogenic shock is defined as pump failure."
+            },
+            {
+                id: 21,
+                question: "Which medication is used to improve contractility in cardiogenic shock?",
+                options: ["Dobutamine", "Adenosine", "Furosemide", "Lisinopril"],
+                correct: 0,
+                rationale: "Inotropes like dobutamine and milrinone are used in cardiogenic shock management."
+            },
+            {
+                id: 22,
+                question: "What is the underlying pathophysiology of anaphylactic shock?",
+                options: ["Massive vasodilation", "Severe vasoconstriction", "Pump failure", "Fluid loss"],
+                correct: 0,
+                rationale: "Anaphylactic shock involves antigen/antibody reaction leading to massive vasodilation and increased capillary permeability."
+            },
+            {
+                id: 23,
+                question: "Broad-spectrum antibiotics are immediate management for septic shock.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Management of septic shock includes blood cultures followed immediately by broad-spectrum antibiotics."
+            },
+            {
+                id: 24,
+                question: "Which substance release triggers the capillary leak in anaphylactic shock?",
+                options: ["Histamine", "Adrenaline", "Insulin", "Cortisol"],
+                correct: 0,
+                rationale: "Histamine release causes vasodilation and capillary leak."
+            },
+            {
+                id: 25,
+                question: "What is the immediate first-line medication for anaphylactic shock?",
+                options: ["Epinephrine", "Diphenhydramine", "Methylprednisolone", "Albuterol"],
+                correct: 0,
+                rationale: "Management requires Epinephrine IM immediately."
+            },
+            {
+                id: 26,
+                question: "Where is the injury located to cause neurogenic shock?",
+                options: ["Above T6", "Below L2", "Lumbar region", "Sacral region"],
+                correct: 0,
+                rationale: "Neurogenic shock is caused by spinal cord injury above T6."
+            },
+            {
+                id: 27,
+                question: "Hypovolemic shock leads to increased cardiac output.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Hypovolemic shock pathophysiology involves decreased venous return leading to decreased cardiac output."
+            },
+            {
+                id: 28,
+                question: "Which sign is distinctive to neurogenic shock compared to hypovolemic shock?",
+                options: ["Warm skin", "Tachycardia", "Cool skin", "Hypertension"],
+                correct: 0,
+                rationale: "Neurogenic shock presents with warm skin due to vasodilation, unlike the cool skin of hypovolemic shock."
+            },
+            {
+                id: 29,
+                question: "What is the primary pathophysiological defect in neurogenic shock?",
+                options: ["Loss of sympathetic tone", "Loss of parasympathetic tone", "Excessive catecholamines", "Fluid volume deficit"],
+                correct: 0,
+                rationale: "Pathophysiology involves loss of sympathetic tone leading to vasodilation and bradycardia."
+            },
+            {
+                id: 30,
+                question: "Histamine release causes vasoconstriction in anaphylactic shock.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Histamine release leads to vasodilation, not vasoconstriction."
+            },
+            {
+                id: 31,
+                question: "Which microorganism type can cause septic shock?",
+                options: ["Bacteria", "Prions", "Autoantibodies", "Heavy metals"],
+                correct: 0,
+                rationale: "Causes of septic shock include severe infection by bacteria, fungi, or viruses."
+            },
+            {
+                id: 32,
+                question: "What is an early sign of septic shock?",
+                options: ["Fever", "Bradycardia", "Polyuria", "Hypertension"],
+                correct: 0,
+                rationale: "Early signs of septic shock include fever or hypothermia and fast breathing."
+            },
+            {
+                id: 33,
+                question: "Which vasopressor is recommended first for septic shock?",
+                options: ["Norepinephrine", "Dobutamine", "Milrinone", "Nitroprusside"],
+                correct: 0,
+                rationale: "Vasopressors, specifically norepinephrine first, are part of the management."
+            },
+            {
+                id: 34,
+                question: "Fluid resuscitation is a key management step for neurogenic shock.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Management of neurogenic shock includes fluids and vasopressors."
+            },
+            {
+                id: 35,
+                question: "Which nutrition route is preferred in the management of septic shock?",
+                options: ["Enteral", "Parenteral", "NPO", "Sublingual"],
+                correct: 0,
+                rationale: "Management of septic shock includes nutrition, with a preference for enteral feeding."
+            },
+            {
+                id: 36,
+                question: "What happens to oxygen consumption under stress conditions in shock?",
+                options: ["Depends on delivery", "Remains independent", "Decreases rapidly", "Stabilizes automatically"],
+                correct: 0,
+                rationale: "Under stress, VO2 (oxygen consumption) depends on DO2 (oxygen delivery)."
+            },
+            {
+                id: 37,
+                question: "What is the result of untreated shock on the cellular level?",
+                options: ["Lactic acidosis", "Alkalosis", "Increased energy", "Improved perfusion"],
+                correct: 0,
+                rationale: "Untreated shock leads to cellular hypoxia, lactic acidosis, and cell death."
+            },
+            {
+                id: 38,
+                question: "What is a cause of distributive shock?",
+                options: ["Sepsis", "Hemorrhage", "Dehydration", "Heart failure"],
+                correct: 0,
+                rationale: "Distributive shock types include Septic, Anaphylactic, and Neurogenic."
+            },
+            {
+                id: 39,
+                question: "Which system activates the fight or flight response in the compensatory stage?",
+                options: ["Sympathetic nervous system", "Parasympathetic nervous system", "Renal system", "Digestive system"],
+                correct: 0,
+                rationale: "The neural compensatory mechanism leads to SNS (Sympathetic Nervous System) activation."
+            },
+            {
+                id: 40,
+                question: "What is the effect of aldosterone during the compensatory mechanism?",
+                options: ["Water retention", "Potassium retention", "Sodium excretion", "Vasodilation"],
+                correct: 0,
+                rationale: "Aldosterone causes more water and salt retention to support blood pressure."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Principles of Emergency Care</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "What is the recommended minimum radius for the danger zone around an incident site?",
+                options: ["20 feet", "50 feet", "100 feet", "150 feet"],
+                correct: 1,
+                rationale: "A minimum radius of 50 feet should be kept around the incident. This zone may be expanded if fuel is leaking or fire is present."
+            },
+            {
+                id: 2,
+                question: "Which pulse site should be assessed first in an unresponsive infant?",
+                options: ["Radial", "Carotid", "Femoral", "Brachial"],
+                correct: 3,
+                rationale: "For infants, the brachial pulse is checked. For adults and children, the radial or carotid pulses are used."
+            },
+            {
+                id: 3,
+                question: "Capillary refill is a reliable indicator of perfusion in adult patients.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Capillary refill is used in infants and small children to assess perfusion. It is not a reliable adult indicator of perfusion."
+            },
+            {
+                id: 4,
+                question: "Which type of motor vehicle collision is most commonly associated with whiplash injuries?",
+                options: ["Head-on collision", "Rear-impact collision", "Side-impact collision", "Rollover collision"],
+                correct: 1,
+                rationale: "Rear-impact collisions often produce neck injuries (whiplash) from rapid backward acceleration."
+            },
+            {
+                id: 5,
+                question: "What does the 'P' in the DCAP-BTLS mnemonic stand for?",
+                options: ["Pain", "Pallor", "Punctures", "Palpitation"],
+                correct: 2,
+                rationale: "In DCAP-BTLS, 'P' stands for Punctures/Penetrations."
+            },
+            {
+                id: 6,
+                question: "How often should a stable patient be reassessed during transport?",
+                options: ["Every 5 minutes", "Every 10 minutes", "Every 15 minutes", "Every 30 minutes"],
+                correct: 2,
+                rationale: "Stable patients should be reassessed at least every 15 minutes. Unstable patients require reassessment every 5 minutes."
+            },
+            {
+                id: 7,
+                question: "Which of the following is considered a core function of emergency care?",
+                options: ["Long-term rehabilitation", "Preventing irreversible deterioration", "Managing chronic diseases", "Providing elective surgeries"],
+                correct: 1,
+                rationale: "The core function of emergency care is to prevent irreversible physiological deterioration through structured assessment and early intervention."
+            },
+            {
+                id: 8,
+                question: "During the OPQRST assessment, what does the letter 'Q' represent?",
+                options: ["Quantity", "Quality", "Question", "Quickness"],
+                correct: 1,
+                rationale: "Q stands for Quality, which refers to describing the character of the pain or symptom."
+            },
+            {
+                id: 9,
+                question: "If an adult patient is breathing adequately but rapidly at a rate greater than 24 breaths per minute, what is the appropriate intervention?",
+                options: ["No intervention required", "Low-concentration oxygen", "High-concentration oxygen", "Assisted ventilation"],
+                correct: 2,
+                rationale: "Adequate but rapid breathing (>24/min) requires high-concentration oxygen."
+            },
+            {
+                id: 10,
+                question: "Gloves are considered the first line of protection in Body Substance Isolation (BSI).",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Gloves are the first line of protection and should be changed between patients."
+            },
+            {
+                id: 11,
+                question: "What phenomenon is caused by high-velocity projectiles that results in extensive internal damage?",
+                options: ["Cavitation", "Laceration", "Abrasion", "Contusion"],
+                correct: 0,
+                rationale: "High velocity projectiles (like rifles) can cause cavitation and extensive internal damage."
+            },
+            {
+                id: 12,
+                question: "In the AVPU scale, what does 'P' indicate?",
+                options: ["Patient is pale", "Patient has a pulse", "Responds to pain", "Protected airway"],
+                correct: 2,
+                rationale: "In the AVPU scale, 'P' indicates the patient responds only to Painful stimuli."
+            },
+            {
+                id: 13,
+                question: "When is a Focused Trauma Assessment most appropriate?",
+                options: ["The patient is unresponsive", "The patient has multisystem trauma", "The patient is alert with an isolated injury", "The patient shows signs of shock"],
+                correct: 2,
+                rationale: "A focused trauma assessment is performed when the patient is alert, responsive, and the trauma is isolated or limited to a specific region."
+            },
+            {
+                id: 14,
+                question: "What is the very first step of the Scene Size-Up?",
+                options: ["Body Substance Isolation", "Scene Safety", "Determining Mechanism of Injury", "Triage"],
+                correct: 1,
+                rationale: "Scene safety is the first and most critical step. Responders must scan for threats before approaching."
+            },
+            {
+                id: 15,
+                question: "What does the 'M' in the SAMPLE history mnemonic stand for?",
+                options: ["Medical history", "Mechanism of injury", "Medications", "Mental status"],
+                correct: 2,
+                rationale: "In SAMPLE history, 'M' stands for Medications."
+            },
+            {
+                id: 16,
+                question: "Adults who fall from a significant height are most likely to sustain which type of injury?",
+                options: ["Head injury", "Axial loading injury", "Wrist fractures", "Shoulder dislocation"],
+                correct: 1,
+                rationale: "Adults often sustain axial loading injuries (spine, heels), whereas children may land head-first."
+            },
+            {
+                id: 17,
+                question: "Which airway maneuver should be used for a trauma patient with a suspected spinal injury?",
+                options: ["Head-tilt chin-lift", "Jaw thrust", "Neck hyperextension", "Recovery position"],
+                correct: 1,
+                rationale: "For trauma patients, manual cervical stabilization and the jaw thrust maneuver are used to protect the spine."
+            },
+            {
+                id: 18,
+                question: "Trends in a patient's condition are defined as changes noted over time.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Trends are changes over time, such as changes in blood pressure or pulse, and are significant for treatment adjustments."
+            },
+            {
+                id: 19,
+                question: "Which of the following is a behavioral cue indicating potential violence at a scene?",
+                options: ["Erratic movements", "Unusual silence", "Leaking fuel", "Rapid breathing"],
+                correct: 0,
+                rationale: "Behavioral cues of violence include loud shouting, intoxication, and erratic movements."
+            },
+            {
+                id: 20,
+                question: "Skin that is cool, clammy, and pale is often a sign of which condition?",
+                options: ["Heat stroke", "Hypertension", "Shock", "Fever"],
+                correct: 2,
+                rationale: "Cool, moist (clammy), and pale skin signs are indicators of shock."
+            },
+            {
+                id: 21,
+                question: "What does the 'O' in the OPQRST mnemonic stand for?",
+                options: ["Occurrence", "Onset", "Observation", "Outcome"],
+                correct: 1,
+                rationale: "O stands for Onset: what the patient was doing when the symptoms started."
+            },
+            {
+                id: 22,
+                question: "How frequently should an unstable patient be reassessed?",
+                options: ["Every 5 minutes", "Every 10 minutes", "Every 15 minutes", "Every 20 minutes"],
+                correct: 0,
+                rationale: "Unstable patients must be reassessed at least every 5 minutes to monitor for deterioration."
+            },
+            {
+                id: 23,
+                question: "The presence of leaking fuel is an indication to expand the danger zone.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The danger zone may be expanded if fuel is leaking or pooling, active fire is present, or hazardous materials are involved."
+            },
+            {
+                id: 24,
+                question: "Which of the following is NOT one of the three key components of emergency care services?",
+                options: ["Early recognition", "Prompt stabilization", "Long-term therapy", "Safe transport"],
+                correct: 2,
+                rationale: "The three key components are early recognition, prompt stabilization, and safe transport."
+            },
+            {
+                id: 25,
+                question: "What is the primary purpose of placing a patient in the recovery position?",
+                options: ["Improve circulation", "Maintain airway patency", "Reduce pain", "stabilize the spine"],
+                correct: 1,
+                rationale: "The recovery position helps maintain airway patency and reduces aspiration risk in patients without trauma."
+            },
+            {
+                id: 26,
+                question: "When assessing the chest during a physical exam, which technique is specifically mentioned?",
+                options: ["Percussion", "Auscultation", "Deep palpation", "Range of motion"],
+                correct: 1,
+                rationale: "For the chest, auscultation is used to check for breath sounds, alongside inspection and palpation."
+            },
+            {
+                id: 27,
+                question: "A systolic blood pressure below which value is a sign of a high-priority patient?",
+                options: ["120 mmHg", "110 mmHg", "100 mmHg", "90 mmHg"],
+                correct: 2,
+                rationale: "Chest pain with systolic BP <100 mmHg is listed as a criterion for a high-priority patient."
+            },
+            {
+                id: 28,
+                question: "Knives and nails are examples of high-velocity penetrating weapons.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Knives and nails are classified as low velocity; their injuries follow the exact path of the object."
+            },
+            {
+                id: 29,
+                question: "What does the 'L' in the SAMPLE history mnemonic represent?",
+                options: ["Last oral intake", "Last medical exam", "Level of pain", "List of allergies"],
+                correct: 0,
+                rationale: "L stands for Last oral intake, which is important to know if surgery might be required."
+            },
+            {
+                id: 30,
+                question: "If a patient undergoing a focused assessment develops an altered mental status, what should the responder do?",
+                options: ["Continue the focused exam", "Switch to a rapid trauma assessment", "Administer pain medication", "Wait for ALS"],
+                correct: 1,
+                rationale: "A focused trauma exam is no longer appropriate if the patient develops altered mental status; a rapid assessment is required."
+            },
+            {
+                id: 31,
+                question: "The General Impression is formed based on the patient's age, gender, and the environment.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The General Impression is formed within seconds based on environment, chief complaint, age/sex, appearance, and other immediate clues."
+            },
+            {
+                id: 32,
+                question: "Blunt trauma always shows visible external signs of injury.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Blunt trauma can lead to hidden internal bleeding or organ injury even when external signs are minimal."
+            },
+            {
+                id: 33,
+                question: "Which BSI item is necessary when significant fluid exposure, such as childbirth, is expected?",
+                options: ["Mask only", "Gloves only", "Gown", "Helmet"],
+                correct: 2,
+                rationale: "Gowns are necessary when significant fluid exposure is expected, such as childbirth or severe bleeding."
+            },
+            {
+                id: 34,
+                question: "Side-impact collisions carry a high risk for which type of injury due to minimal protection?",
+                options: ["Whiplash", "Pelvic and thoracic trauma", "Lower leg fractures", "Hyperextension"],
+                correct: 1,
+                rationale: "Side-impact collisions have a high risk of pelvic, thoracic, and head trauma due to minimal side protection."
+            },
+            {
+                id: 35,
+                question: "An unresponsive patient should receive a Rapid Medical Assessment.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Unresponsive medical patients require a Rapid Medical Assessment, including a head-to-toe exam (DCAP-BTLS)."
+            },
+            {
+                id: 36,
+                question: "Which of the following is NOT part of the 'S' in OPQRST?",
+                options: ["Severity", "Site", "Symptoms", "Scale"],
+                correct: 2,
+                rationale: "In OPQRST, 'S' stands for Severity. 'Symptoms' belongs to the SAMPLE history mnemonic."
+            },
+            {
+                id: 37,
+                question: "During a scene size-up, unusual silence can indicate an ambush or an unconscious patient.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Unusual silence is listed as a potential hazard indicating an ambush or unconscious patient."
+            },
+            {
+                id: 38,
+                question: "Responders should enter an unsafe scene only if the patient is in critical condition.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Responders must never enter a scene until hazards are controlled. Entering an unsafe environment endangers everyone."
+            },
+            {
+                id: 39,
+                question: "Which assessment tool is used specifically to analyze a patient's pain or symptoms?",
+                options: ["AVPU", "DCAP-BTLS", "OPQRST", "ABCDE"],
+                correct: 2,
+                rationale: "OPQRST (Onset, Provocation, Quality, Radiation, Severity, Time) is used to analyze pain or other symptoms in detail."
+            },
+            {
+                id: 40,
+                question: "In the ongoing assessment, observing that a patient's condition has not changed means no further checks are needed.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Ongoing assessment must continue. Stable patients are checked every 15 minutes and unstable every 5 minutes regardless of apparent stability."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critical Care Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-heartbeat text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Critical Medicine med tirm</h1>
+            <p class="text-gray-500 mb-4">ادعيلي ياخي</p>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+
+        <div id="quiz-container"></div>
+
+        <!-- Result Section -->
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Questions Data - Fixed Order as requested
+        const quizData = [
+            {
+                id: 1,
+                question: "32 years old male presenting with ABG; PH 7.56, PCO2 22, PO2 129, HCO3 16 saturation 100. Which acid base disorder is CORRECT?",
+                options: ["Metabolic acidosis", "Metabolic alkalosis", "Respiratory acidosis", "Respiratory alkalosis"],
+                correct: 3,
+                rationale: "pH > 7.45 indicates alkalemia. Low PCO2 (< 35) indicates a respiratory cause. The low HCO3 is compensatory."
+            },
+            {
+                id: 2,
+                question: "Toxic ingestions as methanol or ethanol cause:",
+                options: ["High anion gap metabolic acidosis", "Normal anion gap metabolic acidosis", "Metabolic alkalosis", "Respiratory alkalosis"],
+                correct: 0,
+                rationale: "Methanol and ethylene glycol are classic causes of High Anion Gap Metabolic Acidosis (HAGMA)."
+            },
+            {
+                id: 3,
+                question: "Acute hypernatremia is treated with:",
+                options: ["Dextrose 5% or 0.45% saline at rate of 0.5 meq/hr", "Dextrose 5% or 0.45% saline at rate of 1 meq/hr", "3% saline at rate of 0.5 meq/hr", "3% saline at rate of 1 meq/hr"],
+                correct: 1,
+                rationale: "Acute hypernatremia (< 48 hrs) can be corrected more rapidly (1-2 mEq/L/hr) using hypotonic fluids."
+            },
+            {
+                id: 4,
+                question: "Hypervolemic hyponatremia is usually caused by",
+                options: ["SIADH", "Diabetes insipidus", "Congestive heart failure", "Cerebral salt wasting"],
+                correct: 2,
+                rationale: "Hypervolemic hyponatremia occurs in edematous states like Congestive Heart Failure (CHF)."
+            },
+            {
+                id: 5,
+                question: "Which of the following drugs causes hyperkalemia?",
+                options: ["Insulin for correction of hyperglycemia", "B2 agonists for asthma", "Succinyl choline muscle relaxant for intubation preparation", "Calcuium gluconate for correction of hypocalcemia"],
+                correct: 2,
+                rationale: "Succinylcholine is a depolarizing muscle relaxant that can cause efflux of potassium from cells, leading to hyperkalemia."
+            },
+            {
+                id: 6,
+                question: "Positive Trousseau sign is present in",
+                options: ["Hypernatremia and hyperphosphatemia", "Hypokalemia and hypomagnesemia", "Hypomagnesemia and hypocalcemia", "Hypercalcemia and hyperphosphatemia"],
+                correct: 2,
+                rationale: "Trousseau sign is a clinical sign of latent tetany found in Hypocalcemia and Hypomagnesemia."
+            },
+            {
+                id: 7,
+                question: "Which of the following patients have the HIGHEST RISK of development of VAP;",
+                options: ["Patient on intermittent non-invasive ventilation", "Patient on invasive ventilation with intermittent sedation", "Patient on invasive ventilation with continuous sedation unable for daily sedation vacation", "Patient on invasive ventilation with continuous sedation but interrupted daily to assess readiness to wean"],
+                correct: 2,
+                rationale: "Continuous sedation without daily interruption prolongs mechanical ventilation and suppresses cough reflex, significantly increasing VAP risk."
+            },
+            {
+                id: 8,
+                question: "The LEAST important Sources of organism causing VAP:",
+                options: ["Hands of health care workers", "Dental plaque", "ICU environment as wall or bed", "Subglottic area between vocal cords"],
+                correct: 2,
+                rationale: "While the environment can play a role, direct sources like hands, dental plaque, and subglottic secretions are much more significant."
+            },
+            {
+                id: 9,
+                question: "To prevent aspiration of contaminated oral secretions, endotracheal cuff pressure should be adjusted between;",
+                options: ["10-20 cmH20", "20-30 cmH20", "30-40 cmH20", "40-50 cmH20"],
+                correct: 1,
+                rationale: "Recommended cuff pressure is 20-30 cmH2O to prevent aspiration while maintaining mucosal perfusion."
+            },
+            {
+                id: 10,
+                question: "Which is correct regarding prevention of Ventilator associated pneumonia;",
+                options: ["Head of bed elevation at angle 20 °", "Avoiding intubation by trying non-invasive ventilation", "weekly sedation vacation and assess readiness to wean", "Oral care with antifungal as daktarin once daily"],
+                correct: 1,
+                rationale: "Non-invasive ventilation (NIV) avoids the endotracheal tube, which is the primary risk factor for VAP."
+            }
+        ];
+
+        // --- Render Logic (No Shuffling) ---
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; 
+        let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            
+            // Prevent multiple answers
+            if (!feedback.classList.contains('hidden-content')) return;
+            
+            feedback.classList.remove('hidden-content');
+            
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { 
+                    btn.classList.add('correct-answer'); 
+                    btn.innerHTML += '<i class="fas fa-check float-right"></i>'; 
+                }
+                else if (i === optIndex) { 
+                    btn.classList.add('wrong-answer'); 
+                    btn.innerHTML += '<i class="fas fa-times float-right"></i>'; 
+                }
+                else { 
+                    btn.classList.add('opacity-50'); 
+                }
+            });
+
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 70 ? "Excellent Job!" : "Good effort, keep reviewing.";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+
+        renderQuiz();
+    </script>
+</body>
+</html>

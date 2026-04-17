@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Assisting in Central Venous Catheter Insertion</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-check text-4xl text-blue-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- GENERATE 40 QUESTIONS HERE BASED ON INPUT MATERIAL ---
+        const quizData = [
+            {
+                id: 1,
+                question: "A nurse is reviewing the anatomy of a Central Venous Catheter (CVC). Where should the catheter tip properly lie?",
+                options: ["Within the right atrium of the heart", "Within the lower third of the vena cava", "Inside the subclavian vein entrance", "At the junction of the jugular vein"],
+                correct: 1, 
+                rationale: "The text states that the catheter tip lies within the lower third of vena cava (superior or inferior)."
+            },
+            {
+                id: 2,
+                question: "Which of the following materials is explicitly listed as a component of a sterile Central Venous Catheter?",
+                options: ["Latex rubber", "Polyethylene", "Polyurethane", "Teflon"],
+                correct: 2, 
+                rationale: "The introduction describes the CVC as a sterile catheter made of polyurethane, polyvinyl chloride, or silicone rubber."
+            },
+            {
+                id: 3,
+                question: "A patient requires long-term medication administration with minimal impact on daily activities. Which type of CVC is most indicated?",
+                options: ["Non-tunneled catheter", "Implanted port", "Femoral vein catheter", "Standard PICC line"],
+                correct: 1, 
+                rationale: "An implanted port requires little daily care and has less impact on a person's activities than a PICC line or tunneled catheter."
+            },
+            {
+                id: 4,
+                question: "Which insertion site is rarely used due to an increased risk of hematoma, bleeding, and infection?",
+                options: ["Subclavian vein", "Internal jugular vein", "Femoral vein", "Cephalic vein"],
+                correct: 2, 
+                rationale: "The text states the femoral vein is rarely used due to increased risk for hematoma, bleeding, and infection."
+            },
+            {
+                id: 5,
+                question: "When preparing a patient for a Subclavian CVC insertion, where should the nurse place a rolled blanket?",
+                options: ["Under the patient's head", "Between the patient's scapulae", "Under the opposite shoulder", "Under the lower back"],
+                correct: 1, 
+                rationale: "For subclavian insertion, a rolled blanket is placed between the patient's scapulae to extend the neck."
+            },
+            {
+                id: 6,
+                question: "A nurse is assisting with a Jugular CVC insertion. What is the correct positioning using a rolled blanket?",
+                options: ["Under the ipsilateral shoulder", "Under the opposite shoulder", "Between the scapulae", "Under the lumbar spine"],
+                correct: 1, 
+                rationale: "For jugular insertion, place a rolled blanket under the opposite shoulder and turn the patient's head away from the insertion site."
+            },
+            {
+                id: 7,
+                question: "Which clinical condition is considered a relative contraindication for CVC insertion?",
+                options: ["Hypotension", "Coagulopathies", "Hypovolemia", "Need for TPN"],
+                correct: 1, 
+                rationale: "Coagulopathies are listed under relative contraindications for CVC insertion."
+            },
+            {
+                id: 8,
+                question: "What is the primary rationale for placing the patient in a supine position during CVC preparation?",
+                options: ["To increase patient comfort", "To decrease intracranial pressure", "To increase CVP and reduce air embolism risk", "To facilitate easier breathing"],
+                correct: 2, 
+                rationale: "Placing the patient in a supine position increases the CVP to reduce the risk for air embolism."
+            },
+            {
+                id: 9,
+                question: "Which antiseptic solution is recommended for preparing the CVC insertion site?",
+                options: ["10% Povidone-iodine", "2% Chlorhexidine-based preparation", "70% Isopropyl alcohol only", "Hydrogen peroxide solution"],
+                correct: 1, 
+                rationale: "The equipment list specifies antiseptic solution (e.g., 2% chlorhexidine-based preparation)."
+            },
+            {
+                id: 10,
+                question: "During the skin preparation with chlorhexidine, which technique must the nurse use?",
+                options: ["Circular motion outward from the center", "Single downward stroke only", "Back and forth motion for 30 seconds", "Circular motion inward to the center"],
+                correct: 2, 
+                rationale: "The nurse should assist with preparing the insertion site using 2% chlorhexidine solution using back & forth motion for 30 sec."
+            },
+            {
+                id: 11,
+                question: "What is the correct scrub boundary for a Subclavian vein insertion?",
+                options: ["Neck to navel and shoulder to shoulder", "Shoulder to contralateral nipple line and neck to nipple", "Mid-clavicular to opposite sternum", "Insertion site only with 2-inch margin"],
+                correct: 1, 
+                rationale: "For subclavian insertion: Scrub shoulder to contralateral nipple line and from neck to nipple."
+            },
+            {
+                id: 12,
+                question: "Trendelenburg position is generally used during insertion to reduce air embolism risk. In which condition is this position contraindicated?",
+                options: ["Hypovolemic shock", "Increased intracranial pressure", "Peripheral edema", "Low central venous pressure"],
+                correct: 1, 
+                rationale: "Trendelenburg is contraindicated in cases of increased ICP, cardiac and respiratory compromise."
+            },
+            {
+                id: 13,
+                question: "Which specific type of Lidocaine is required for the CVC procedure?",
+                options: ["2% Lidocaine with epinephrine", "1% Lidocaine with epinephrine", "1% Lidocaine without epinephrine", "2% Lidocaine gel"],
+                correct: 2, 
+                rationale: "The equipment list specifies 1% lidocaine without epinephrine."
+            },
+            {
+                id: 14,
+                question: "Why does the nurse assist in wiping the top of the lidocaine vial with alcohol and inverting it?",
+                options: ["To warm the medication", "To mix the solution thoroughly", "To decrease infection risk and facilitate aspiration", "To remove particulate matter"],
+                correct: 2, 
+                rationale: "The rationale given is to decrease risk of infection and facilitate aspiration of the anesthetic agent."
+            },
+            {
+                id: 15,
+                question: "What is the primary purpose of priming the CVC lumens with saline before insertion?",
+                options: ["To lubricate the catheter", "To test the catheter patency", "To prevent introduction of air into the blood stream", "To sanitize the internal lumen"],
+                correct: 2, 
+                rationale: "The rationale for priming CVC lumens is to prevent introduction of air into the blood stream."
+            },
+            {
+                id: 16,
+                question: "During the advancement of the catheter, what key physiological parameter must the nurse monitor to detect dysrhythmias?",
+                options: ["Urine output", "Heart rate and ECG", "Temperature", "Blood glucose"],
+                correct: 1, 
+                rationale: "The nurse must monitor the patient's heart rate... for early detection of any dysrhythmia or complications during advancement."
+            },
+            {
+                id: 17,
+                question: "Once the catheter is placed and blood return is ensured, what is the immediate next step?",
+                options: ["Suture the catheter immediately", "Flush the lumens with normal saline", "Apply the sterile dressing", "Send the patient to X-ray"],
+                correct: 1, 
+                rationale: "Once the catheter is placed and blood return is ensured, flush the lumens with normal saline and connect the I.V solution."
+            },
+            {
+                id: 18,
+                question: "To accurately measure hemodynamic pressure, where must the zeroing stopcock be leveled?",
+                options: ["At the level of the clavicle", "At the phlebostatic axis", "At the level of the tragus", "At the mid-axillary line of the abdomen"],
+                correct: 1, 
+                rationale: "Level the zeroing stopcock to the phlebostatic axis."
+            },
+            {
+                id: 19,
+                question: "How frequently should the nurse observe the catheter insertion site for bleeding during the first 2 hours after insertion?",
+                options: ["Every 5 minutes", "Every 15-30 minutes", "Every hour", "Every 2 hours"],
+                correct: 1, 
+                rationale: "Observe the catheter insertion site for bleeding or hematoma /15-30 minute for the first 2hrs after insertion."
+            },
+            {
+                id: 20,
+                question: "What is a listed purpose of obtaining a chest X-ray immediately after CVC insertion?",
+                options: ["To check for lung infection", "To confirm correct placement of the catheter", "To assess heart size", "To visualize the aortic arch"],
+                correct: 1, 
+                rationale: "Prepare the patient for x-ray... To confirm correct placement of the catheter."
+            },
+            {
+                id: 21,
+                question: "A patient is scheduled for a mastectomy at the right subclavian site. How does this affect CVC insertion?",
+                options: ["It is an absolute contraindication for any CVC", "It is a relative contraindication for that specific site", "It has no effect on site selection", "It requires using the same site"],
+                correct: 1, 
+                rationale: "Planned mastectomy at the same subclavian site is listed as a relative contraindication."
+            },
+            {
+                id: 22,
+                question: "Which of the following is defined as a catheter inserted into a vein in the arm with the tip in the superior vena cava?",
+                options: ["Tunneled CVC", "Implanted Port", "PICC", "Midline catheter"],
+                correct: 2, 
+                rationale: "Peripherally inserted central catheter 'PICC': is a central venous catheter inserted into a vein in the arm... tip is positioned in the SVC."
+            },
+            {
+                id: 23,
+                question: "What is the main advantage of a skin tunneled catheter?",
+                options: ["It is easier to insert", "It decreases the risk of infection", "It requires no dressing", "It is used for short-term access only"],
+                correct: 1, 
+                rationale: "Its advantage is to decrease the risk of infection."
+            },
+            {
+                id: 24,
+                question: "Which nursing assessment helps provide baseline data and detect complications early?",
+                options: ["Checking family history", "Checking LOC, V.S, SpO2, and ECG", "Checking dietary preferences", "Checking insurance status"],
+                correct: 1, 
+                rationale: "Check patient for LOC, V.S, SpO2, ECG... To provide baseline data, Prevent and detect complications early."
+            },
+            {
+                id: 25,
+                question: "Why should the nurse apply a full drape to the patient except for the exposure area?",
+                options: ["To keep the patient warm", "To minimize the risk for infection", "To prevent the patient from moving", "To collect fluid runoff"],
+                correct: 1, 
+                rationale: "Applying a full drape to the patient except exposure area... To minimize the risk for infection."
+            },
+            {
+                id: 26,
+                question: "Which complication involves air entering the vascular system during CVC insertion?",
+                options: ["Pneumothorax", "Air embolism", "Hydrothorax", "Cardiac tamponade"],
+                correct: 1, 
+                rationale: "Air, pulmonary Embolism is listed under complications."
+            },
+            {
+                id: 27,
+                question: "What suture material is specified for securing the CVC?",
+                options: ["2-0 Silk", "3-0 or 4-0 Nylon", "Chromic Gut", "Staples"],
+                correct: 1, 
+                rationale: "The equipment list specifies 3-0 or 4-0 nylon suture with curved needle."
+            },
+            {
+                id: 28,
+                question: "When scrubbing the insertion site, how long must the chlorhexidine solution be allowed to dry?",
+                options: ["It should be wiped off immediately", "It does not need to dry", "It must dry completely before insertion", "It should be kept wet"],
+                correct: 2, 
+                rationale: "Let the solution to dry completely before the insertion."
+            },
+            {
+                id: 29,
+                question: "Which of the following is an indication for CVC insertion related to nutrition?",
+                options: ["Enteral feeding", "Total parenteral nutrition (TPN)", "Oral supplementation", "Gastrostomy feeding"],
+                correct: 1, 
+                rationale: "Indications include: Patient on total parenteral nutrition."
+            },
+            {
+                id: 30,
+                question: "What is the scrub boundary for a Femoral vein insertion?",
+                options: ["Entire thigh area", "Femoral area in a 4-6 inches area", "From knee to hip", "Inguinal fold only"],
+                correct: 1, 
+                rationale: "For femoral insertion: Scrub femoral area in a (4-6) inches area."
+            },
+            {
+                id: 31,
+                question: "Which complication relates to fluid accumulation in the mediastinum?",
+                options: ["Pneumothorax", "Hydrothorax (Hydro mediastinum)", "Hemothorax", "Thrombophlebitis"],
+                correct: 1, 
+                rationale: "Hydrothorax (Hydro mediastinum) is listed as a complication."
+            },
+            {
+                id: 32,
+                question: "Why does the nurse verify the patient's chart for medications and lab results prior to the procedure?",
+                options: ["To bill the patient correctly", "To provide baseline data", "To determine the catheter size", "To schedule the X-ray"],
+                correct: 1, 
+                rationale: "Assess patient's chart... To provide baseline data."
+            },
+            {
+                id: 33,
+                question: "Which of the following is a relative contraindication involving the lungs?",
+                options: ["Asthma", "Pneumothorax", "Bronchitis", "Pneumonia"],
+                correct: 1, 
+                rationale: "Pneumothorax is listed as a relative contraindication."
+            },
+            {
+                id: 34,
+                question: "What specific equipment serves as a guide for fluid replacement?",
+                options: ["Pulse oximeter", "Central Venous Catheter", "Sphygmomanometer", "Glucometer"],
+                correct: 1, 
+                rationale: "Purposes of CVC Insertion: To serve as a guide for fluid replacement."
+            },
+            {
+                id: 35,
+                question: "When preparing the infusion system, why must the nurse prime the I.V tubing?",
+                options: ["To warm the fluid", "To remove air bubbles that may cause pulmonary embolism", "To mix medications", "To test the drip rate"],
+                correct: 1, 
+                rationale: "Prime the I.V tubing... To remove the air bubbles that may cause pulmonary embolism."
+            },
+            {
+                id: 36,
+                question: "Which document must be obtained from the patient during the preparation phase?",
+                options: ["Insurance card", "Consent", "Living will", "Visitor log"],
+                correct: 1, 
+                rationale: "Explain the procedure/obtain consent... To obtain patient cooperation."
+            },
+            {
+                id: 37,
+                question: "In the documentation phase, what patient response must be recorded?",
+                options: ["Patient's financial status", "Patient tolerance", "Patient's family reaction", "Patient's meal preference"],
+                correct: 1, 
+                rationale: "Documentation includes: Chest x-ray report, patient tolerance."
+            },
+            {
+                id: 38,
+                question: "Which type of catheter is fixed in place at the insertion site with the attachment protruding directly?",
+                options: ["Tunneled catheter", "Non-tunneled catheter", "Implanted port", "PICC line"],
+                correct: 1, 
+                rationale: "Non-tunneled catheters: are fixed in place at the site of insertion with the catheter and attachment protruding directly."
+            },
+            {
+                id: 39,
+                question: "What action helps minimize infection risk regarding visitors and the environment?",
+                options: ["Allowing visitors to help", "Excusing visitors and pulling curtains", "Keeping the door open", "Increasing room temperature"],
+                correct: 1, 
+                rationale: "Excuse visitors, pull curtains... To maintain patient privacy, decrease infection risk."
+            },
+            {
+                id: 40,
+                question: "Which nerve injury is a potential complication of CVC insertion?",
+                options: ["Sciatic nerve injury", "Nerve injury (general)", "Optic nerve injury", "Femoral nerve injury only"],
+                correct: 1, 
+                rationale: "The text lists 'Nerve Injury' generally as a complication."
+            }
+        ];
+
+        const container = document.getElementById('quiz-container');
+        let score = 0;
+        let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3">
+                        ${q.options.map((opt, i) => `
+                            <button onclick="checkAnswer(${index}, ${i})" 
+                                class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white">
+                                <span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center group-hover:border-blue-400">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-blue-900 text-sm mb-1">Rationale</p>
+                                <p class="text-blue-800 text-sm leading-relaxed">${q.rationale}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const question = quizData[qIndex];
+            const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+            const buttons = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (feedbackEl.classList.contains('block')) return; 
+            feedbackEl.classList.remove('hidden-content');
+            feedbackEl.classList.add('block');
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'bg-white');
+                const iconContainer = btn.lastElementChild;
+                if (i === question.correct) {
+                    btn.classList.add('correct-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-check text-green-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else if (i === optIndex) {
+                    btn.classList.add('wrong-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-times text-red-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+            answeredCount++;
+            if (optIndex === question.correct) score++;
+            if (answeredCount === quizData.length) {
+                const resultDiv = document.getElementById('result-summary');
+                resultDiv.classList.remove('hidden-content');
+                document.getElementById('score-display').textContent = score;
+                document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+                const messageEl = document.getElementById('score-message');
+                const percentage = (score / quizData.length) * 100;
+                if (percentage === 100) messageEl.textContent = "Perfect Score!";
+                else if (percentage >= 75) messageEl.textContent = "Great Job!";
+                else if (percentage >= 50) messageEl.textContent = "Good effort.";
+                else messageEl.textContent = "Keep studying!";
+                setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">First aid in Eye injury</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "What is the absolute first priority nursing intervention when a patient presents with a chemical injury to the eye?",
+                options: ["Cover the eye with a sterile pad", "Flush with water immediately", "Apply antibiotic ointment", "Neutralize the chemical with vinegar"],
+                correct: 1,
+                rationale: "The text states to 'Flush the eye immediately' within seconds to dilute the chemicals. This takes precedence over all other actions."
+            },
+            {
+                id: 2,
+                question: "If a patient has a cut on their eye and blood begins to pool inside the eye, what is the correct intervention?",
+                options: ["Cover both eyes to reduce movement", "Apply direct pressure to stop bleeding", "Flush the eye with saline solution", "Instruct the patient to blink rapidly"],
+                correct: 0,
+                rationale: "If blood begins to pool in the eye, you must cover both eyes to reduce eye movement and seek medical help immediately."
+            },
+            {
+                id: 3,
+                question: "Which symptom is described as an abnormal visual intolerance to light following an eye injury?",
+                options: ["Diplopia", "Photophobia", "Hemianopsia", "Presbyopia"],
+                correct: 1,
+                rationale: "Photophobia is explicitly defined in the text as an abnormal visual intolerance to light."
+            },
+            {
+                id: 4,
+                question: "When treating a chemical burn, how long should the eye be flushed with water?",
+                options: ["At least 5 minutes", "At least 10 minutes", "At least 20 minutes", "At least 60 minutes"],
+                correct: 2,
+                rationale: "The instructions specify to cautiously wash the eye with cold flowing water for at least 20 minutes."
+            },
+            {
+                id: 5,
+                question: "Which item should be stocked in a first aid kit specifically for eye injuries according to the preparation guidelines?",
+                options: ["Flexible fabric patch", "Rigid eye shield", "Cotton wool balls", "Adhesive tape"],
+                correct: 1,
+                rationale: "The text recommends stocking a first aid kit with a rigid eye shield and commercial eyewash."
+            },
+            {
+                id: 6,
+                question: "A patient reports eye pain hours after working with metal. What is the most likely cause?",
+                options: ["Acid burn", "Blunt trauma", "Welder's flash", "Corneal abrasion"],
+                correct: 2,
+                rationale: "If a burn is caused by a welder's flash, the effects are often not felt until several hours afterwards."
+            },
+            {
+                id: 7,
+                question: "What is the correct method to remove a loose foreign particle floating under the upper eyelid?",
+                options: ["Use tweezers to grab it", "Rub the eye vigorously", "Lift upper eyelid over lower lashes", "Apply a pressure bandage"],
+                correct: 2,
+                rationale: "The recommended technique is to lift the upper eyelid over the lashes of the lower lid and blink several times."
+            },
+            {
+                id: 8,
+                question: "Which action is strictly contraindicated for a patient with an eye cut?",
+                options: ["Applying a cold compress", "Covering with sterile gauze", "Applying pressure to stop bleeding", "Keeping the head elevated"],
+                correct: 2,
+                rationale: "The text explicitly states 'DO NOT apply pressure to stop the bleeding' for eye cuts."
+            },
+            {
+                id: 9,
+                question: "What is a potential complication of a foreign object remaining in the eye?",
+                options: ["Glaucoma", "Corneal ulcer", "Cataract", "Macular degeneration"],
+                correct: 1,
+                rationale: "Listed complications for foreign objects include infection, scarring, corneal scratches, and ulcers."
+            },
+            {
+                id: 10,
+                question: "If water is unavailable during a chemical injury emergency, what alternative is suggested?",
+                options: ["Diluted vinegar", "Any drinkable liquid", "Baking soda solution", "Alcohol wipes"],
+                correct: 1,
+                rationale: "The text advises to flush with water or 'any other drinkable liquid' if water is not immediately at hand."
+            },
+            {
+                id: 11,
+                question: "What sign would suggest internal eye damage following a blunt blow to the face?",
+                options: ["One eye sticks out more than the other", "Excessive tearing", "Mild redness of the sclera", "Swelling of the eyelid"],
+                correct: 0,
+                rationale: "Seek emergency care if one eye sticks out more than the other, as this could mean internal eye damage."
+            },
+            {
+                id: 12,
+                question: "How should a nurse manage a contact lens during the immediate flushing of a chemical injury?",
+                options: ["Remove it before flushing", "Flush over the lens", "Wait for the doctor to remove it", "Use tweezers to extract it"],
+                correct: 1,
+                rationale: "If a contact lens is in the eye, begin flushing over the lens immediately. The flushing may dislodge it."
+            },
+            {
+                id: 13,
+                question: "Which of the following is a symptom associated with a foreign object in the eye?",
+                options: ["Subconjunctival hemorrhage", "Pupil constriction", "Dryness of the eye", "Yellow discharge"],
+                correct: 0,
+                rationale: "Bleeding into the white of the eye (subconjunctival hemorrhage) is listed as a symptom of a foreign object."
+            },
+            {
+                id: 14,
+                question: "For a 'Black Eye' or blunt trauma, what is the appropriate initial treatment?",
+                options: ["Warm compress", "Cold compress", "Firm pressure bandage", "Eye ointment"],
+                correct: 1,
+                rationale: "For blunt eye trauma, gently apply a small cold compress to reduce pain and swelling."
+            },
+            {
+                id: 15,
+                question: "What is the primary goal of flushing the eye for 20 minutes after chemical exposure?",
+                options: ["To neutralize pH", "To dilute the chemicals", "To relieve pain", "To stop bleeding"],
+                correct: 1,
+                rationale: "Flush with copious amounts of clean water for about 20 minutes in order to dilute the chemicals."
+            },
+            {
+                id: 16,
+                question: "Which group of people is identified as 'high-risk' for foreign bodies in the eye?",
+                options: ["Office workers", "Swimmers", "Woodcutters", "Drivers"],
+                correct: 2,
+                rationale: "The text identifies high-risk people such as laborers and woodcutters."
+            },
+            {
+                id: 17,
+                question: "If a patient has a cut on the eye and wears contact lenses, what is the correct instruction?",
+                options: ["Remove them immediately", "Do not attempt to remove them", "Remove only if pain is severe", "Use saline to float them out"],
+                correct: 1,
+                rationale: "Don't attempt to remove contact lenses even if they are causing the injured person excessive pain."
+            },
+            {
+                id: 18,
+                question: "What is the first step listed in the general intervention protocol for eye burns?",
+                options: ["Wash eye with water", "Open eyelids", "DRSABCD", "Call triple zero"],
+                correct: 2,
+                rationale: "The first step listed under Intervention for burns is '1. DRSABCD'."
+            },
+            {
+                id: 19,
+                question: "Why should you avoid rubbing the eye when a foreign object is present?",
+                options: ["It causes infection", "It increases tears", "It may cause scratches", "It dilates the pupil"],
+                correct: 2,
+                rationale: "Rubbing the eye is discouraged because it can cause scratches or embed the object further."
+            },
+            {
+                id: 20,
+                question: "Which hazardous agents are specifically mentioned as causes of chemical eye injuries?",
+                options: ["Dust and sand", "Acid and lime", "Wood and metal", "Smoke and fumes"],
+                correct: 1,
+                rationale: "Chemicals such as acid, caustic soda, and lime are listed as causes."
+            },
+            {
+                id: 21,
+                question: "What should be done if a speck in the eye does not wash out with tears or eyewash?",
+                options: ["Use a cotton swab", "See an eye doctor", "Apply eye drops", "Wait 24 hours"],
+                correct: 1,
+                rationale: "If the speck doesn't wash out, see an eye doctor immediately."
+            },
+            {
+                id: 22,
+                question: "Which statement best defines an 'eye injury' according to the text?",
+                options: ["Any redness in the eye", "Trauma resulting in pain and watering", "Loss of vision", "Infection of the eyelid"],
+                correct: 1,
+                rationale: "Definition: An eye injury is trauma or damage to the eye resulting in pain and watering of the eye."
+            },
+            {
+                id: 23,
+                question: "What should be avoided when treating a chemical eye injury regarding bandaging?",
+                options: ["Using sterile gauze", "Bandaging the eye", "Leaving the eye open", "Using a shield"],
+                correct: 1,
+                rationale: "The text explicitly states in the chemical injury section: 'Don't bandage the Eye'."
+            },
+            {
+                id: 24,
+                question: "Following a blunt trauma, immediate medical contact is required if the patient experiences which symptom?",
+                options: ["Mild swelling", "Visual disturbance", "Watering eyes", "Slight redness"],
+                correct: 1,
+                rationale: "If visual disturbance occurs even after a light blow, immediately contact your Eye M.D."
+            },
+            {
+                id: 25,
+                question: "Which of the following causes is associated with 'Black Eye' injuries?",
+                options: ["Caustic soda", "Fast moving projectiles", "Ultraviolet light", "Sand particles"],
+                correct: 1,
+                rationale: "Black eyes are caused by blows from fast moving projectiles like balls or fists."
+            },
+            {
+                id: 26,
+                question: "True or False: You should use tweezers to remove a visible speck from the white part of the eye.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The instructions clearly state: 'DO NOT use tweezers or other items to try and remove the speck.'"
+            },
+            {
+                id: 27,
+                question: "True or False: Simple minor eye injuries can result in permanent loss of vision.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Introduction states: 'Permanent loss of vision can be a result of simple minor injuries.'"
+            },
+            {
+                id: 28,
+                question: "True or False: Applying pressure is the best way to stop bleeding from an eye cut.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The text states 'DO NOT apply pressure to stop the bleeding' for eye cuts."
+            },
+            {
+                id: 29,
+                question: "True or False: You should flush an eye with chemical injury for at least 20 minutes.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "The text states 'Continue flushing for at least 20 minutes' to dilute the chemicals."
+            },
+            {
+                id: 30,
+                question: "True or False: Symptoms of a welder's flash burn are felt immediately.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "If the burn is caused by a welder's flash it will not be until several hours afterwards that you will start to feel the effects."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

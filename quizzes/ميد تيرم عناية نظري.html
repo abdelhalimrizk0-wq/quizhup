@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critical Care & Nursing Concepts Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Critical Care med tirm</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "A 68-year-old diabetic woman is scheduled for a CT scan with contrast. Her baseline creatinine is 1.6 mg/dL. Which intervention helps reduce the risk of contrast-induced nephropathy?",
+                options: ["Restrict fluids before procedure", "Use loop diuretics before contrast", "Give high-protein meal prior to procedure", "Administer N-acetylcysteine before and after contrast exposure"],
+                correct: 3,
+                rationale: "N-acetylcysteine is an antioxidant that may prevent contrast-induced renal failure in high-risk patients (like those with diabetes or elevated creatinine). Fluid restriction and diuretics would worsen the risk by causing dehydration."
+            },
+            {
+                id: 2,
+                question: "In the Synergy Model of Nursing, optimal patient outcomes are achieved when:",
+                options: ["Patient characteristics align with nurse competencies to create effective interaction", "Nurses independently determine care priorities without considering patient variability", "Nurse competencies exceed patient needs in all clinical situations", "Environmental factors are minimized to maintain uniformity of care"],
+                correct: 0,
+                rationale: "The central premise of the AACN Synergy Model is that optimal patient outcomes occur when the nurse's competencies match (align with) the patient's characteristics and needs."
+            },
+            {
+                id: 3,
+                question: "A 50% dextrose IV and 10 units of regular insulin IV bolus were prescribed for an AKI patient. Which type of electrolyte imbalance will these prescribed medications help to correct?",
+                options: ["Hyperkalaemia", "Hypernatremia", "Hypoglycaemia", "Hyperphosphatemia"],
+                correct: 0,
+                rationale: "IV insulin drives potassium back into the cells, lowering serum potassium levels in hyperkalemia. Dextrose is administered concurrently to prevent hypoglycemia."
+            },
+            {
+                id: 4,
+                question: "A 72-year-old man with pre-renal AKI secondary to hypovolemia is admitted to ICU. His BP is 90/60 mmHg, HR 110 bpm, and urinary output 10 mL/h. What is the best initial management?",
+                options: ["Begin colloid fluid restriction", "Start dopamine infusion immediately", "Start IV furosemide to increase urine output", "Administer isotonic saline bolus to restore perfusion"],
+                correct: 3,
+                rationale: "The priority in prerenal AKI due to hypovolemia is volume resuscitation (e.g., isotonic saline) to restore renal perfusion. Diuretics or dopamine would be inappropriate before correcting the volume deficit."
+            },
+            {
+                id: 5,
+                question: "What is the variability of a person's response to environmental changes?",
+                options: ["Responses are universally adaptive", "Responses are solely dependent on external factors", "Responses can have positive or negative consequences", "Responses are predictable and consistent across individuals"],
+                correct: 2,
+                rationale: "According to the concept of resilience and vulnerability, a person's response to stressors varies and can lead to either positive outcomes (adaptive) or negative consequences (maladaptive)."
+            },
+            {
+                id: 6,
+                question: "Within the scope of practice definition, which statement does MOST accurately capture its regulatory and professional intent?",
+                options: ["It limits nurses to only performing basic patient care tasks", "It defines the range of activities nurses can perform regardless training", "It delineates the services a trained professional is competent and legally permitted to undertake", "It serves primarily as a theoretical guide without legal implications"],
+                correct: 2,
+                rationale: "Scope of practice legally defines the procedures, actions, and processes that a healthcare professional is permitted to undertake in keeping with the terms of their professional license and competence."
+            },
+            {
+                id: 7,
+                question: "Why is it important for critical care nurses to understand the coping mechanisms of families?",
+                options: ["To streamline communication between the doctor and the patient", "To facilitate both patient and family well-being during times of stress", "To enforce strict guidelines on emotional responses", "To improve the efficiency of medical procedures"],
+                correct: 1,
+                rationale: "Understanding coping mechanisms allows the nurse to support the family, facilitate adaptive coping, and promote the well-being of the family unit during the crisis of critical illness."
+            },
+            {
+                id: 8,
+                question: "Mr. X is a 55-year-old male who recently underwent major abdominal surgery. The doctor ordered him frequent measurements of intra-abdominal pressure (IAP) every 6 hours. His last three readings of IAP were as follows: 22, 24, and 21 mm Hg. Which of the following conservative measures is the MOST appropriate to be done for Mr. X?",
+                options: ["Avoid a significantly negative fluid balance", "Increase IV fluids administration to improve hydration", "Administer intestinal prokinetic medications to avoid ileus or constipation", "Keep the HOB in high Fowler position to improve abdominal wall compliance"],
+                correct: 2,
+                rationale: "For Intra-abdominal Hypertension (IAP > 20 mmHg), conservative measures include evacuating intraluminal contents using prokinetic medications or enemas. High Fowler's position increases pressure (supine or reverse Trendelenburg is preferred)."
+            },
+            {
+                id: 9,
+                question: "Which of the following best explains the role of inflammation in ICU delirium?",
+                options: ["Inflammatory mediators reduce dopamine levels", "Cytokines increase blood-brain barrier permeability", "Inflammation enhances GABA activity", "Endotoxins suppress serotonin production"],
+                correct: 1,
+                rationale: "Inflammatory mediators (cytokines) produced during critical illness cross the blood-brain barrier (by increasing its permeability) and induce changes in the brain consistent with delirium."
+            },
+            {
+                id: 10,
+                question: "Which phase of sleep is considered anabolic and essential for physical restoration?",
+                options: ["REM sleep", "Stage 1 NREM", "Stage 2 NREM", "Stage 3 NREM"],
+                correct: 3,
+                rationale: "Stage 3 NREM (Deep Sleep) is the anabolic phase where growth hormone is secreted, protein synthesis occurs, and tissue restoration takes place."
+            },
+            {
+                id: 11,
+                question: "Which one of the following is considered a recommended practice for enhancing family-centered care?",
+                options: ["Restricting visiting hours", "Implementing open visiting hours", "Limiting family access to information", "Reducing family involvement in care"],
+                correct: 1,
+                rationale: "Open visiting hours are a key method for enhancing family-centered care, reducing anxiety for both patient and family, and recognizing the family's role in recovery."
+            },
+            {
+                id: 12,
+                question: "Which of the following is CORRECT about simple diffusion in the human body?",
+                options: ["It occurs through the random movement of ions and molecules", "It represents pressure created by the weight of fluid against the wall that contains it", "It requires energy expenditure", "It describes the concentration of solutes or dissolved particles in a solution"],
+                correct: 0,
+                rationale: "Simple diffusion is the passive movement of solutes from high to low concentration via random molecular movement, requiring no energy."
+            },
+            {
+                id: 13,
+                question: "Which ICU-related factor is most likely to contribute to sleep deprivation?",
+                options: ["Use of melatonin", "Daytime mobilization", "Continuous light exposure", "Use of hearing aids"],
+                correct: 2,
+                rationale: "Continuous light exposure, along with noise and care interventions, disrupts circadian rhythms and is a major environmental contributor to sleep deprivation in the ICU."
+            },
+            {
+                id: 14,
+                question: "Open visiting hours are discouraged in critical care units to maintain a quiet environment.",
+                options: ["TRUE", "FALSE"],
+                correct: 1,
+                rationale: "FALSE. While quiet is important, restricting visiting hours is discouraged in modern practice. Open visiting hours are advocated to decrease anxiety and support family-centered care."
+            },
+            {
+                id: 15,
+                question: "Which of the following is considered a behavioral pain indicator?",
+                options: ["Social isolation", "Nausea and anorexia", "Facial expression", "Impaired thought process"],
+                correct: 2,
+                rationale: "Facial expressions (grimacing, frowning) are primary behavioral indicators used to assess pain, especially in non-verbal patients (e.g., in tools like CPOT or BPS)."
+            },
+            {
+                id: 16,
+                question: "Which of the following conditions does increase the endorphin level?",
+                options: ["Anxiety and fear", "Acupuncture", "Prolonged pain", "Recurrent stress"],
+                correct: 1,
+                rationale: "Endorphin levels increase with brief stress, exercise, and therapeutic interventions like acupuncture. They tend to decrease with prolonged pain, recurrent stress, anxiety, and fear."
+            },
+            {
+                id: 17,
+                question: "Which of the following is a sign that indicates hypercalcemia?",
+                options: ["Hypoactive deep tendon reflexes", "Hyperactive deep tendon reflexes", "Positive Trousseau’s sign", "Positive Chvostek’s sign"],
+                correct: 0,
+                rationale: "Hypercalcemia causes sedation of the neuromuscular system, leading to muscle weakness and hypoactive deep tendon reflexes. (Hyperactive reflexes and positive Trousseau/Chvostek signs are signs of Hypocalcemia)."
+            },
+            {
+                id: 18,
+                question: "Which of the following neurotransmitters is decreased in delirium and is associated with reduced attention and consciousness?",
+                options: ["Dopamine", "Acetylcholine", "Glutamate", "Norepinephrine"],
+                correct: 1,
+                rationale: "Acetylcholine deficiency is a key factor in the pathogenesis of delirium, leading to decreased attention and consciousness. (Conversely, Dopamine is often increased)."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC ---
+        const quizData = rawQuizData.map(q => {
+            let opts;
+            if (q.options.length === 2 && (q.options[0].toUpperCase() === 'TRUE' || q.options[0].toUpperCase() === 'FALSE')) {
+                 opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            } else {
+                opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+                for (let i = opts.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [opts[i], opts[j]] = [opts[j], opts[i]];
+                }
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

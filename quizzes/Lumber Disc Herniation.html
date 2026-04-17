@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Lumber Disc Herniation Quiz</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY ---
+        const rawQuizData = [
+            { id: 1, question: "Which age group represents the most common risk factor for developing a herniated lumbar disc?", options: ["Twenty to thirty years", "Thirty five to fifty years", "Fifty five to seventy years", "Seventy five to ninety years"], correct: 1, rationale: "The most common risk factor is being between the ages of 35 and 50 as the body ages, natural biochemical changes cause discs to gradually dry out." },
+            { id: 2, question: "Which surgical procedure involves the removal of the bone between the spinal process and facet pedicle junction?", options: ["Microscopic discectomy", "Spinal foraminotomy", "Lumbar laminectomy", "Intervertebral fusion"], correct: 2, rationale: "Laminectomy involves the removal of the bone between the spinal process and facet pedicle junction to expose the neural elements in the spinal canal." },
+            { id: 3, question: "The immediate symptoms of spinal trauma typically appear within hours and last for several continuous years.", options: ["True", "False"], correct: 1, rationale: "The immediate symptoms of trauma are short-lived, and the herniated disc symptoms do not appear for months or years." },
+            { id: 4, question: "Testing the postoperative wound dressing for glucose is specifically performed to detect which surgical complication?", options: ["Severe epidural hematoma", "Deep soft tissue infection", "Cerebrospinal fluid leakage", "Recurrent disc herniation"], correct: 2, rationale: "The surgical dressing is inspected for excess drainage and tested for glucose to check for cerebrospinal fluid leakage." },
+            { id: 5, question: "How long is strict bed rest generally recommended for patients experiencing severe acute low back pain?", options: ["One to two days", "Three to five days", "One to two weeks", "Three to four weeks"], correct: 0, rationale: "Bed rest for severe pain is best limited to one to two days, as extended rest will lead to stiffness, muscle weakness and more pain." },
+            { id: 6, question: "Women have twice the statistical risk of developing a lumbar herniated disc when compared directly to men.", options: ["True", "False"], correct: 1, rationale: "Men have twice the risk for lumbar herniated discs compared with women." },
+            { id: 7, question: "In which stage of disc herniation does the nucleus pulposus break through the annulus fibrosis but completely remain within the disc?", options: ["General disc degeneration", "Initial disc prolapse", "Advanced disc extrusion", "Complete disc sequestration"], correct: 2, rationale: "During extrusion, the gel-like nucleus pulposus breaks through the tire-like wall but remains within the disc." },
+            { id: 8, question: "A positive straight leg raising test occurs when sciatic pain is experienced at which specific physical angle range?", options: ["Ten to thirty degrees", "Thirty to seventy degrees", "Seventy to ninety degrees", "Ninety to one hundred degrees"], correct: 1, rationale: "The patient has a positive straight leg raising test if they experience sciatic pain when the straight leg is at an angle of between 30 and 70 degrees." },
+            { id: 9, question: "A patient should be immediately placed on a standard bedpan while lying completely flat on their back to maintain proper spinal alignment.", options: ["True", "False"], correct: 1, rationale: "The patient should not be placed on a bedpan while lying on his back. They should roll onto it to maintain proper alignment." },
+            { id: 10, question: "Which sleeping position is considered the most comfortable and appropriate for a patient with a lumbar disc herniation?", options: ["Prone with the head elevated", "Supine with the knees elevated", "Lateral with the hips extended", "Supine with the legs flattened"], correct: 1, rationale: "The most comfortable sleep position is lying on the back using a relatively firm mattress with slightly elevating the knees by placing a flat pillow under them." },
+            { id: 11, question: "Chronic low back pain is medically defined as pain that persists continuously for a minimum of how many weeks?", options: ["Four continuous weeks", "Six continuous weeks", "Eight continuous weeks", "Twelve continuous weeks"], correct: 3, rationale: "Low back pain may be classified by duration as chronic when the pain lasts for more than twelve weeks." },
+            { id: 12, question: "Cauda equina syndrome typically causes an increased muscle tone in the external urinary sphincter.", options: ["True", "False"], correct: 1, rationale: "Cauda equina syndrome causes decreased tone in the external sphincter, along with involuntary overflow incontinence." },
+            { id: 13, question: "Which specific bed turning technique is essential to prevent twisting the spine after lumbar surgery?", options: ["Pivot transfer technique", "Logrolling method process", "Slide board transfer action", "Three point turning shift"], correct: 1, rationale: "The patient is taught to turn as a unit using the logrolling fashion to facilitate turning and avoid twisting the spine." },
+            { id: 14, question: "What precise anatomical structure is physically displaced beyond the intervertebral disc space in a herniated disc?", options: ["Central spinal nerve root", "Internal nucleus pulposus", "Terminal cauda equina bundle", "Outer spinal cord membrane"], correct: 1, rationale: "A herniated disc is a displacement of disc material, specifically the nucleus pulposus or annulus fibrosis, beyond the intervertebral disc space." },
+            { id: 15, question: "Therapeutic ice application is considered most effective when used continuously for the first seven days after back pain suddenly starts.", options: ["True", "False"], correct: 1, rationale: "Ice is most effective for the first forty-eight hours after the back pain has started to decrease initial inflammation." },
+            { id: 16, question: "What specific biochemical change primarily decreases the natural water content of the nucleus pulposus during the aging process?", options: ["Massive increase in calcium deposits", "Progressive loss of protein polysaccharides", "Complete depletion of synovial fluid", "Continuous overproduction of lactic acid"], correct: 1, rationale: "With aging, the loss of protein polysaccharides in the disc decreases the water content of the nucleus pulposus." },
+            { id: 17, question: "Which specific diagnostic tool is utilized to diagnose peripheral nerve impairments and correctly localize the involved spinal nerve roots?", options: ["Standard computed tomography", "Advanced magnetic resonance imaging", "Diagnostic electromyography testing", "Traditional lumbar myelography"], correct: 2, rationale: "Electrophysiological studies like electromyography localize the specific spinal nerve roots involved and diagnose peripheral nerve impairments." },
+            { id: 18, question: "Patients managing a herniated disc should be strictly instructed to completely avoid active range of motion physical exercises.", options: ["True", "False"], correct: 1, rationale: "Patients are actually encouraged to perform active and passive range of motion exercises while avoiding activities that cause straining." },
+            { id: 19, question: "Which distinct surgical procedure permanently fuses the vertebral spinous process with a bone graft to structurally stabilize the spine?", options: ["Minimally partial laminotomy", "Microscopic endoscopic discectomy", "Traditional lumbar laminectomy", "Surgical discectomy with fusion"], correct: 3, rationale: "Discectomy with fusion involves the fusion of the vertebral spinous process with a bone graft to bridge over the defective disk and stabilize the spine." },
+            { id: 20, question: "Which neurological finding represents a classic clinical presentation of the dangerous cauda equina syndrome?", options: ["Severe unilateral foot drop", "Progressive saddle anesthesia", "Hyperactive deep tendon reflexes", "Significantly increased muscle spasticity"], correct: 1, rationale: "Symptoms of cauda equina syndrome include saddle anesthesia, which is the loss of sensation in the buttocks, perineum, and inner thighs." },
+            { id: 21, question: "Surgical intervention should only be considered after completely finishing a full twelve weeks of conservative treatment regardless of symptom severity.", options: ["True", "False"], correct: 1, rationale: "Surgery may be recommended prior to completing six weeks of care if there is severe pain or progressive neurological symptoms." },
+            { id: 22, question: "What is the primary physiological reason for safely providing solid food as early as possible after spinal surgery?", options: ["To prevent severe postoperative hypovolemia", "To effectively stimulate intestinal peristalsis", "To greatly enhance rapid tissue healing", "To directly reduce systemic wound infection"], correct: 1, rationale: "Solid food is given as early as possible after surgery to stimulate peristalsis and to prevent the occurrence of distension." },
+            { id: 23, question: "What physical action typically significantly aggravates the severe radicular pain directly associated with a herniated disc?", options: ["Maintaining strict complete bed rest", "Practicing very shallow breathing exercises", "Experiencing sudden sneezing or coughing", "Lying down in a lateral recumbent position"], correct: 2, rationale: "Radicular pain is aggravated by actions that increase intraspinal fluid pressure, such as bending, lifting, straining, sneezing, or coughing." },
+            { id: 24, question: "Systemic corticosteroid medications are absolutely contraindicated during the initial acute symptomatic phase of a lumbar herniated disc.", options: ["True", "False"], correct: 1, rationale: "Systemic corticosteroids may be used in the acute phase along with muscle relaxants and nonsteroidal anti-inflammatory drugs to decrease inflammation." },
+            { id: 25, question: "A patient verbally shows a lack of recall and makes clear statements of misconception regarding their treatment. Which nursing diagnosis completely applies?", options: ["Ineffective peripheral tissue perfusion", "Significantly impaired physical mobility", "Deficient knowledge regarding the condition", "High risk for urinary elimination alteration"], correct: 2, rationale: "A nursing diagnosis of deficient knowledge is evidenced by requests for information, statements of misconception, and lack of recall." },
+            { id: 26, question: "To properly assess a patient using the standard straight leg raising test, what exact position must the patient's knee be maintained in?", options: ["Maintained completely flexed backward", "Maintained slightly bent comfortably", "Maintained completely straight throughout", "Maintained externally rotated outward"], correct: 2, rationale: "During the straight leg raising test, the examiner lifts the patient's leg to flex the hip while the knee is kept completely straight." },
+            { id: 27, question: "Patients should be heavily instructed to regularly carry household items weighing up to five kilograms to rapidly strengthen their recovering back muscles.", options: ["True", "False"], correct: 1, rationale: "Patients should avoid carrying a weight of more than two kilograms to prevent placing strain on the injured nerves and spine." },
+            { id: 28, question: "What is the primary specific surgical goal when a surgeon performs a routine spinal foraminotomy?", options: ["To replace the completely damaged central disc", "To increase the physical space for the nerve exit", "To remove the entire posterior arch of the vertebra", "To biologically fuse two adjacent vertebral bodies"], correct: 1, rationale: "A foraminotomy involves the removal of the intervertebral foramen to increase the space for the exit of a spinal nerve." },
+            { id: 29, question: "What common distinct physical sign is frequently observed in the back due to severe muscle spasm from a sudden disc herniation?", options: ["Development of excessive lumbar lordosis", "Appearance of noticeable thoracic kyphosis", "Complete loss of the normal lumbar curve", "Formation of extreme lateral spinal scoliosis"], correct: 2, rationale: "Movement of the back is restricted, and the back appears straight with a loss of the normal lumbar curve due to muscle spasm." },
+            { id: 30, question: "Applying a hot thermal compress is considered an excellent medical option for relieving painful muscle spasms immediately during the very first two days.", options: ["True", "False"], correct: 1, rationale: "Heat therapy is helpful for painful muscle spasms, but only after the first forty-eight hours have passed." },
+            { id: 31, question: "Which specific pathological factor accurately represents a severe infectious cause of debilitating low back pain?", options: ["Malignant progressive bone metastasis", "Degenerative central spinal stenosis", "Bacterial progressive osteomyelitis", "Mechanical sudden muscle spasm"], correct: 2, rationale: "Infectious causes of low back pain include osteomyelitis and abscess formations." },
+            { id: 32, question: "Where does the displaced nucleus pulposus primarily lie during the advanced sequestration stage of a herniated disc?", options: ["Safely inside the intact annulus fibrosis", "Entirely within the adjacent bone vertebra", "Completely outside the disc in the spinal canal", "Directly anterior to the solid vertebral body"], correct: 2, rationale: "During sequestration, the nucleus pulposus breaks through the annulus fibrosis and lies outside the disc directly in the spinal canal." },
+            { id: 33, question: "Why are nonsteroidal antiinflammatory drugs typically ordered to be directly taken with antacids for patients treating herniated discs?", options: ["To safely prevent severe gastrointestinal irritation", "To rapidly enhance intestinal medication absorption", "To safely decrease the overall systemic blood pressure", "To chemically stimulate earlier postoperative ambulation"], correct: 0, rationale: "Nonsteroidal anti-inflammatory drugs are ordered to be taken with antacids or food to prevent gastrointestinal irritation." },
+            { id: 34, question: "Which specific furniture item is most appropriate to strongly recommend for a recovering patient when sitting down at home?", options: ["Very soft thickly cushioned living room sofa", "Very firm completely straight backed chair", "Directly on the floor with comfortably crossed legs", "Highly adjustable reclining bedroom lounge chair"], correct: 1, rationale: "It is recommended to use a firm straight-backed chair with feet on a footstool or flat on the floor to maintain proper spinal alignment." },
+            { id: 35, question: "How long should a postoperative patient completely avoid taking full tub baths after safely undergoing standard spinal surgery?", options: ["Around one to two consecutive weeks", "Around three to four consecutive weeks", "Around six to eight consecutive weeks", "Around ten to twelve consecutive weeks"], correct: 1, rationale: "Tub baths should be avoided for three to four weeks depending on the physician's recommendation to prevent surgical site complications." },
+            { id: 36, question: "Which specific alternative conservative therapy involves safely inserting hair thin needles deeply into the skin near the targeted area of pain?", options: ["Direct electrical transcutaneous nerve stimulation", "Deep penetrating localized ultrasound therapy", "Traditional physical meridian acupuncture therapy", "Direct localized targeted epidural steroid injection"], correct: 2, rationale: "Acupuncture is an alternative therapy that uses hair-thin needles inserted into the skin near the area of pain." },
+            { id: 37, question: "When safely turning a patient directly on the very first postoperative day, what essential protective tool should the nursing staff strictly utilize?", options: ["Heavy mechanical ceiling overhead lift", "Simple standardized medical turning sheet", "Heavy weighted physical traction pulley", "Smooth plastic sliding transfer board"], correct: 1, rationale: "A turning sheet and sufficient personnel should be used when turning the patient, especially on the first postoperative day." },
+            { id: 38, question: "Which specific intensive exercise program is generally medically prescribed to stabilize the spine and decrease pain for an advanced disc herniation?", options: ["Vigorous outdoor continuous aerobic running", "Heavy progressively increasing weight lifting", "Prone positioned physical back extension exercises", "Intensive repetitive high impact jumping routines"], correct: 2, rationale: "Back extension exercises in a prone or standing position, along with abdominal strengthening, are prescribed to strengthen the back and decrease pain." },
+            { id: 39, question: "What is the primary important medical purpose of having a patient routinely perform muscle setting exercises carefully before their scheduled surgery?", options: ["To successfully prevent massive gastrointestinal stasis", "To successfully maintain their basic muscle tone", "To successfully reduce their baseline blood pressure", "To successfully increase their deep tendon reflexes"], correct: 1, rationale: "The patient is encouraged to perform deep breathing and muscle setting exercises preoperatively to maintain muscle tone." },
+            { id: 40, question: "Which specific dangerous postoperative complication is physically characterized by severe inflammation of one of the delicate membranes surrounding the spinal cord?", options: ["Massive expanding surgical epidural hematoma", "Progressive debilitating cauda equina syndrome", "Severe localized postoperative surgical arachnoiditis", "Degenerative mechanical central spinal stenosis"], correct: 2, rationale: "Arachnoiditis, which is the inflammation of the arachnoid membrane, is listed as a potential surgical complication of herniated disc procedures." }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acute Gastrointestinal Bleeding Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .correct { background-color: #22c55e !important; color: #ffffff !important; border-color: #16a34a !important; }
+        .incorrect { background-color: #ef4444 !important; color: #ffffff !important; border-color: #dc2626 !important; }
+        .rationale-correct { background-color: #dcfce7; border-color: #22c55e; color: #14532d; }
+        .rationale-incorrect { background-color: #fee2e2; border-color: #ef4444; color: #7f1d1d; }
+        .option-btn:disabled:not(.correct):not(.incorrect) { background-color: #4b5563; opacity: 0.6; cursor: not-allowed; }
+        .option-btn:disabled { cursor: not-allowed; }
+        #score-container { position: sticky; top: 0; z-index: 10; }
+    </style>
+</head>
+<body class="bg-red-950 text-gray-100 p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-2">ACUTE GASTROINTESTINAL HEMORRHAGE</h1>
+        <p class="text-center text-red-300 mb-6">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</p>
+
+        <div id="score-container" class="bg-red-950 py-4 mb-8 border-b-2 border-red-700">
+            <div class="flex justify-between items-center max-w-2xl mx-auto px-4">
+                <div class="text-lg">Score: <span id="score" class="font-bold text-xl text-green-400">0</span></div>
+                <div class="text-lg">Attempted: <span id="attempted" class="font-bold text-xl text-yellow-400">0</span></div>
+                <div class="text-lg">Total: <span id="total-questions" class="font-bold text-xl">0</span></div>
+            </div>
+        </div>
+
+        <div id="quiz-container">
+            <!-- Question 1 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="1">
+                <h2 class="text-xl font-semibold mb-4">1. Which anatomical landmark is used to differentiate between Upper and Lower Gastrointestinal (GI) bleeding?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 1)">A. The Pyloric Sphincter</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 1)">B. The Ileocecal Valve</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 1)">C. The Ligament of Treitz</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 1)">D. The Sphincter of Oddi</button>
+                </div>
+                <div id="rationale-1" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The ligament of Treitz is the anatomic division used to differentiate between the two areas. Bleeding proximal to it is Upper GI, and distal is Lower GI.
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="2">
+                <h2 class="text-xl font-semibold mb-4">2. Melena is characterized by foul-smelling, black, tarry stools. This clinical sign is indicative of an Upper GI source in what percentage of cases?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 2)">A. 50%</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 2)">B. 70%</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 2)">C. 90%</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 2)">D. 100%</button>
+                </div>
+                <div id="rationale-2" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Melena is indicative of upper gastrointestinal bleeding in 90% of cases. It occurs with slow bleeding from an upper GI source.
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="3">
+                <h2 class="text-xl font-semibold mb-4">3. Which bacterial pathogen is cited as the leading cause of upper GI hemorrhage (50-70% of cases)?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 3)">A. Escherichia coli</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 3)">B. Helicobacter pylori</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 3)">C. Staphylococcus aureus</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 3)">D. Clostridium difficile</button>
+                </div>
+                <div id="rationale-3" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The bacterial action of Helicobacter pylori (H. pylori) is the leading cause of upper GI hemorrhage, accounting for 50-70% of cases.
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="4">
+                <h2 class="text-xl font-semibold mb-4">4. Which of the following patients is at highest risk for developing Stress-Related Erosive Syndrome (Stress Ulcers)?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 4)">A. A patient admitted for elective knee surgery.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 4)">B. A patient on mechanical ventilation with extensive burns.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 4)">C. A patient with well-controlled hypertension.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 4)">D. A patient with a history of mild gastritis.</button>
+                </div>
+                <div id="rationale-4" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Patients at high physiologic stress are at greatest risk. Specific risk factors mentioned include mechanical ventilation, extensive burns, severe trauma, shock, or acute neurologic disease.
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="5">
+                <h2 class="text-xl font-semibold mb-4">5. What is the goal gastric fluid pH when monitoring a patient to prevent stress ulcers?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 5)">A. Greater than 2</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 5)">B. Greater than 4</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 5)">C. Less than 4</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 5)">D. Exactly 7</button>
+                </div>
+                <div id="rationale-5" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Routine assessments should include gastric fluid pH monitoring with a goal of keeping the pH greater than 4.
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="6">
+                <h2 class="text-xl font-semibold mb-4">6. Esophagogastric varices are most commonly a secondary result of which condition?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 6)">A. Renal failure</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 6)">B. Chronic NSAID use</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 6)">C. Portal hypertension secondary to hepatic cirrhosis</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 6)">D. Helicobacter pylori infection</button>
+                </div>
+                <div id="rationale-6" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Esophagogastric varices develop as a result of portal hypertension secondary to hepatic cirrhosis, a chronic disease of the liver.
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="7">
+                <h2 class="text-xl font-semibold mb-4">7. A Mallory-Weiss tear is best described as:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 7)">A. A perforation of the stomach lining due to ulcers.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 7)">B. Engorged blood vessels in the esophagus.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 7)">C. A laceration of the distal esophagus often associated with forceful vomiting.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 7)">D. An arterial bleed in the duodenum.</button>
+                </div>
+                <div id="rationale-7" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Mallory-Weiss tears are lacerations of the distal esophagus at the gastroesophageal junction, often associated with heavy alcohol use and forceful vomiting/retching.
+                </div>
+            </div>
+
+            <!-- Question 8 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="8">
+                <h2 class="text-xl font-semibold mb-4">8. Which of the following defines a "Massive" Upper GI hemorrhage?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 8)">A. Loss of more than 500 mL of blood.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 8)">B. Loss of more than 1000 mL of blood.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 8)">C. Loss of more than 1500 mL of blood or 25% of intravascular volume.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 8)">D. Loss of 10% of intravascular volume.</button>
+                </div>
+                <div id="rationale-8" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> A massive UGI hemorrhage is defined as a loss of more than 1500 mL of blood or 25% of intravascular blood volume.
+                </div>
+            </div>
+
+            <!-- Question 9 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="9">
+                <h2 class="text-xl font-semibold mb-4">9. A nurse is reviewing the lab results of a patient with acute GI bleeding. Why might the initial Hematocrit (Hct) and Hemoglobin (Hb) be normal despite significant blood loss?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 9)">A. The body produces new red blood cells immediately.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 9)">B. Initial loss involves equal amounts of plasma and RBCs; plasma redistribution takes time.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 9)">C. Hemoglobin is not affected by acute bleeding.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 9)">D. The lab equipment is likely faulty.</button>
+                </div>
+                <div id="rationale-9" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Initial Hct may be normal because the loss of plasma and RBCs is initially equal. It may take 4 to 6 hours after fluid replacement or up to 72 hours for plasma redistribution to reflect the true loss.
+                </div>
+            </div>
+
+            <!-- Question 10 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="10">
+                <h2 class="text-xl font-semibold mb-4">10. What is the primary diagnostic tool for determining the source of Upper GI bleeding?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 10)">A. Angiography</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 10)">B. Barium Swallow</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 10)">C. CT Scan</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 10)">D. Endoscopy</button>
+                </div>
+                <div id="rationale-10" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Endoscopy is the primary tool for diagnosing the source of UGI bleeding. If performed within 12 hours, it has a 90% effectiveness rate in hemostasis.
+                </div>
+            </div>
+
+             <!-- Question 11 -->
+             <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="11">
+                <h2 class="text-xl font-semibold mb-4">11. A patient arrives in the ER with massive hematemesis. What is the PRIORITY nursing intervention?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 11)">A. Assess and maintain Airway, Breathing, and Circulation (ABC).</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 11)">B. Insert an indwelling urinary catheter.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 11)">C. Administer proton pump inhibitors immediately.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 11)">D. Obtain a detailed family history.</button>
+                </div>
+                <div id="rationale-11" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> In any emergency, specifically with unresponsive or unstable patients, the priority is always Airway, Breathing, and Circulation (ABC). Intubation may be necessary for airway protection.
+                </div>
+            </div>
+
+            <!-- Question 12 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="12">
+                <h2 class="text-xl font-semibold mb-4">12. Which IV solution is recommended as the initial isotonic crystalloid for fluid resuscitation in GI bleeding?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 12)">A. Dextrose 5% in Water (D5W)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 12)">B. Lactated Ringer's Solution</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 12)">C. 0.45% Sodium Chloride</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 12)">D. Albumin</button>
+                </div>
+                <div id="rationale-12" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The text specifies administering isotonic crystalloid solution (e.g., lactated Ringer's solution) for fluid replacement therapy.
+                </div>
+            </div>
+
+            <!-- Question 13 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="13">
+                <h2 class="text-xl font-semibold mb-4">13. Why is an indwelling urinary catheter inserted in a patient with acute GI bleeding?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 13)">A. To prevent skin breakdown.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 13)">B. To collect urine for drug screening.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 13)">C. To accurately assess hourly output as a measure of vital organ perfusion.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 13)">D. To decrease the patient's need to move.</button>
+                </div>
+                <div id="rationale-13" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Urine output is one of the best measures of vital organ perfusion. A catheter allows for accurate hourly assessment (target >0.5 mL/kg/hr).
+                </div>
+            </div>
+
+            <!-- Question 14 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="14">
+                <h2 class="text-xl font-semibold mb-4">14. Which pharmacological agent is administered specifically to decrease acid secretion?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 14)">A. Vasopressin</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 14)">B. Octreotide</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 14)">C. Proton Pump Inhibitors (e.g., Omeprazole)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 14)">D. Vitamin K</button>
+                </div>
+                <div id="rationale-14" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> IV Proton Pump Inhibitors (PPI) therapy (Omeprazole & pantoprazole) are given to decrease acid secretion.
+                </div>
+            </div>
+
+            <!-- Question 15 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="15">
+                <h2 class="text-xl font-semibold mb-4">15. The Sengstaken-Blakemore tube is considered for which specific condition?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 15)">A. Peptic Ulcer Disease</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 15)">B. Esophageal Varices</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 15)">C. Diverticulitis</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 15)">D. Hemorrhoids</button>
+                </div>
+                <div id="rationale-15" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> It is used for hemodynamic instability/massive GI bleeds in cases of known **varices**. It is a temporary measure with significant complication risks.
+                </div>
+            </div>
+
+            <!-- Question 16 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="16">
+                <h2 class="text-xl font-semibold mb-4">16. What is the main purpose of a Transjugular Intrahepatic Portosystemic Shunt (TIPS)?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 16)">A. To remove the acid-producing section of the stomach.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 16)">B. To cauterize bleeding ulcers directly.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 16)">C. To decrease portal pressure by creating a conduit between the hepatic and portal veins.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 16)">D. To sever the vagus nerve.</button>
+                </div>
+                <div id="rationale-16" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> TIPS is a radiologic procedure where a stent creates a conduit between the hepatic and portal vein to decrease portal pressure, often used when endoscopic management of varices fails.
+                </div>
+            </div>
+
+            <!-- Question 17 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="17">
+                <h2 class="text-xl font-semibold mb-4">17. Which surgical procedure involves "severing the section of the vagus nerve which innervates parietal glands"?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 17)">A. Antrectomy</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 17)">B. Oversew</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 17)">C. Highly selective vagotomy</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 17)">D. Bowel resection</button>
+                </div>
+                <div id="rationale-17" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> A highly selective vagotomy involves severing the section of the vagus nerve that innervates parietal glands to decrease gastric acid secretions.
+                </div>
+            </div>
+
+            <!-- Question 18 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="18">
+                <h2 class="text-xl font-semibold mb-4">18. True or False: Upper GI hemorrhage is more common than Lower GI hemorrhage.</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 18)">A. True</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 18)">B. False</button>
+                </div>
+                <div id="rationale-18" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The text explicitly states: "Upper GI hemorrhage is more common than lower gastrointestinal bleeding."
+                </div>
+            </div>
+
+            <!-- Question 19 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="19">
+                <h2 class="text-xl font-semibold mb-4">19. Hematochezia (bright red stools) most often signifies Lower GI bleeding, but it can occur in Upper GI bleeding if:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 19)">A. The patient is taking iron supplements.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 19)">B. The bleeding is slow and occult.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 19)">C. There is brisk bleeding with rapid transit time through the bowel.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 19)">D. The patient has liver cirrhosis.</button>
+                </div>
+                <div id="rationale-19" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Hematochezia could be due to a brisk upper GI bleeding with rapid transit time through the bowel in 10 to 15% of patients.
+                </div>
+            </div>
+
+            <!-- Question 20 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="20">
+                <h2 class="text-xl font-semibold mb-4">20. Which of the following is NOT listed as a cause of Lower GI bleeding in the etiology table?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 20)">A. Diverticulosis</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 20)">B. Hemorrhoids</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 20)">C. Mallory-Weiss tear</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 20)">D. Angiodysplasia</button>
+                </div>
+                <div id="rationale-20" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Mallory-Weiss tears are listed under Upper GI etiology. Diverticulosis, Hemorrhoids, and Angiodysplasia are listed under Lower GI.
+                </div>
+            </div>
+
+            <!-- Question 21 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="21">
+                <h2 class="text-xl font-semibold mb-4">21. NCLEX Style: A patient is admitted with suspected GI bleeding. They are pale, cool, and clammy. BP is 88/50, HR 120. Which assessment finding best indicates the patient is in hypovolemic shock?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 21)">A. Hyperactive bowel sounds.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 21)">B. Urine output < 0.5 mL/kg/hr.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 21)">C. Abdominal pain.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 21)">D. Melena.</button>
+                </div>
+                <div id="rationale-21" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> While hypotension and tachycardia are signs, the text specifically lists urine output <0.5 mL/kg/hr as a sign of hypovolemic shock and a measure of vital organ perfusion.
+                </div>
+            </div>
+
+             <!-- Question 22 -->
+             <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="22">
+                <h2 class="text-xl font-semibold mb-4">22. What is the recommended size for peripheral IVs when establishing access for a GI bleed patient?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 22)">A. 22 gauge</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 22)">B. 20 gauge</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 22)">C. 18 gauge or larger</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 22)">D. Any size is sufficient</button>
+                </div>
+                <div id="rationale-22" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The management protocol requires establishing IV access with at least two large-bore peripheral IVs (18 gauge or larger).
+                </div>
+            </div>
+
+            <!-- Question 23 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="23">
+                <h2 class="text-xl font-semibold mb-4">23. In the context of endoscopic therapy, which of the following is NOT listed as a technique for hemostasis?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 23)">A. Thermal therapy (Electrocautery)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 23)">B. Injection therapy (Sclerotherapy)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 23)">C. Surgical Vagotomy</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 23)">D. Intraarterial infusion of vasopressin</button>
+                </div>
+                <div id="rationale-23" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Vagotomy is a SURGICAL therapy, not an endoscopic one. Thermal therapy, injection therapy, and intraarterial infusions are listed under endoscopic/hemostasis management.
+                </div>
+            </div>
+
+            <!-- Question 24 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="24">
+                <h2 class="text-xl font-semibold mb-4">24. What are the "Hallmarks" of GI hemorrhage?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 24)">A. Pain, Distension, Fever</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 24)">B. Hematemesis, Hematochezia, Melena</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 24)">C. Nausea, Vomiting, Diarrhea</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 24)">D. Hypertension, Bradycardia, Pallor</button>
+                </div>
+                <div id="rationale-24" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The text explicitly lists the Hallmarks of GI hemorrhage as Hematemesis, Hematochezia, and Melena.
+                </div>
+            </div>
+
+             <!-- Question 25 -->
+             <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="25">
+                <h2 class="text-xl font-semibold mb-4">25. When educating a patient on lifestyle modifications to prevent recurrence, which of the following is recommended?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 25)">A. Increasing caffeine intake</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 25)">B. Discontinuing all medications immediately</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 25)">C. Smoking and alcohol cessation</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 25)">D. High-intensity exercise only</button>
+                </div>
+                <div id="rationale-25" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Patient education includes Stress management, Diet modifications, Alcohol cessation, and Smoking cessation.
+                </div>
+            </div>
+
+             <!-- Question 26 -->
+             <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="26">
+                <h2 class="text-xl font-semibold mb-4">26. NCLEX Style: The nurse notes the patient with a GI bleed has a rigid, board-like abdomen and absent bowel sounds. What complication should the nurse suspect immediately?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 26)">A. Constipation</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 26)">B. Gastric Perforation</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 26)">C. Aspiration Pneumonia</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 26)">D. Gastroenteritis</button>
+                </div>
+                <div id="rationale-26" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Signs of Gastric perforation include a tense, rigid, board-like abdomen and the presence or absence of bowel sounds.
+                </div>
+            </div>
+
+            <!-- Question 27 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="27">
+                <h2 class="text-xl font-semibold mb-4">27. Which of the following is an indication for SURGICAL intervention in Acute Upper GI Bleeding?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 27)">A. First episode of mild bleeding.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 27)">B. H. pylori infection confirmed by breath test.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 27)">C. Hemorrhage unresponsive to initial resuscitation.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 27)">D. Presence of melena.</button>
+                </div>
+                <div id="rationale-27" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Indications for surgery include severe hemorrhage unresponsive to initial resuscitation, massive life-threatening bleeding, failed endoscopy, perforation, obstruction, or malignancy.
+                </div>
+            </div>
+
+            <!-- Question 28 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="28">
+                <h2 class="text-xl font-semibold mb-4">28. Antrectomy involves the removal of which portion of the stomach?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 28)">A. The upper portion (Fundus)</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 28)">B. The entire stomach</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 28)">C. The lower portion, which contains acid-producing cells</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 28)">D. The esophageal sphincter</button>
+                </div>
+                <div id="rationale-28" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Antrectomy is the removal of the lower portion of the stomach, which contains the most acid-producing cells.
+                </div>
+            </div>
+
+            <!-- Question 29 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="29">
+                <h2 class="text-xl font-semibold mb-4">29. Angiography is typically used when:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 29)">A. Endoscopy cannot be done or bleeding persists after endoscopic therapy.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 29)">B. The patient has minor bleeding.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 29)">C. The patient is allergic to contrast dye (it is the alternative).</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 29)">D. The patient has a stress ulcer.</button>
+                </div>
+                <div id="rationale-29" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Angiography is used when endoscopy cannot be done or when bleeding persists after endoscopic therapy.
+                </div>
+            </div>
+
+            <!-- Question 30 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="30">
+                <h2 class="text-xl font-semibold mb-4">30. Why is the patient kept NPO (Nothing by Mouth) initially?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 30)">A. To punish the patient for dietary indiscretion.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 30)">B. To prepare for diagnostic procedures and prevent aspiration.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 30)">C. Because digestion stops during bleeding.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 30)">D. To decrease urine output.</button>
+                </div>
+                <div id="rationale-30" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> "Keep patient NPO" is listed under ongoing monitoring/management. This is standard practice to prevent aspiration of emesis and prepare for endoscopy/surgery.
+                </div>
+            </div>
+
+            <!-- Question 31 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="31">
+                <h2 class="text-xl font-semibold mb-4">31. What color is blood from an arterial source typically described as?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 31)">A. Dark red / Black</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 31)">B. Bright red</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 31)">C. Coffee grounds</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 31)">D. Brown</button>
+                </div>
+                <div id="rationale-31" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Bleeding from an arterial source is profuse and bright red because it has not been in contact with gastric HCl acid secretion.
+                </div>
+            </div>
+
+            <!-- Question 32 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="32">
+                <h2 class="text-xl font-semibold mb-4">32. NCLEX Style: A patient has "coffee grounds" emesis. What does this appearance signify?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 32)">A. The bleeding is from the lower GI tract.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 32)">B. The bleeding is extremely fresh and arterial.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 32)">C. The blood has been in the stomach for some time.</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 32)">D. The patient recently drank coffee.</button>
+                </div>
+                <div id="rationale-32" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Hematemesis appearing as brown "coffee grounds" emesis means that the blood has been in the stomach for some time.
+                </div>
+            </div>
+
+            <!-- Question 33 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="33">
+                <h2 class="text-xl font-semibold mb-4">33. Which nursing diagnosis focuses on "alterations in preload"?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 33)">A. Deficient Fluid Volume</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 33)">B. Decreased Cardiac Output</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 33)">C. Risk for Aspiration</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 33)">D. Imbalanced Nutrition</button>
+                </div>
+                <div id="rationale-33" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> "Decreased Cardiac Output related to alterations in preload" is a specific nursing diagnosis listed in the text.
+                </div>
+            </div>
+
+            <!-- Question 34 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="34">
+                <h2 class="text-xl font-semibold mb-4">34. A segmental bowel resection with primary anastomosis is often necessary for:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 34)">A. Stress ulcers</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 34)">B. Esophageal varices</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 34)">C. Definitive treatment of acute lower GI bleeding</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 34)">D. Gastritis</button>
+                </div>
+                <div id="rationale-34" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> The text states: "A segmental bowel resection with a primary anastomosis is often necessary for definitive treatment of acute lower GI bleeding."
+                </div>
+            </div>
+
+            <!-- Question 35 -->
+            <div class="mb-8 p-6 bg-red-900 rounded-lg shadow-lg border border-red-800" data-question-id="35">
+                <h2 class="text-xl font-semibold mb-4">35. Vasopressin is administered via intraarterial infusion into the gastric artery to induce:</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 35)">A. Vasodilation</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" data-answer="correct" onclick="checkAnswer(this, 35)">B. Vasoconstriction</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 35)">C. Platelet aggregation</button>
+                    <button class="option-btn text-left p-4 bg-red-800 rounded-lg hover:bg-red-700 transition duration-200" onclick="checkAnswer(this, 35)">D. Acid neutralization</button>
+                </div>
+                <div id="rationale-35" class="rationale-box mt-4 p-4 rounded-lg border-l-4" style="display: none;">
+                    <strong class="font-bold">Rationale:</strong> Intraarterial infusion of vasopressin into the gastric artery is used to induce **vasoconstriction**, thereby helping to control bleeding.
+                </div>
+            </div>
+
+
+            <!-- Quiz Complete Section -->
+            <div id="quiz-complete" class="text-center p-8 bg-red-900 rounded-lg shadow-lg border border-red-700" style="display: none;">
+                <h2 class="text-3xl font-bold text-green-400 mb-4">Quiz Complete!</h2>
+                <p class="text-xl mb-4">Your final score is: <span id="final-score" class="font-bold"></span> / <span id="final-total"></span></p>
+                <p class="text-2xl font-bold text-yellow-400">Percentage: <span id="final-percentage"></span>%</p>
+            </div>
+        </div>
+
+        <p class="text-center text-sm text-red-400 mt-8">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</p>
+    </div>
+
+    <script>
+        let score = 0;
+        let attempted = 0;
+        // Auto-calculate total based on generated questions
+        const totalQuestions = document.querySelectorAll('[data-question-id]').length;
+        document.getElementById('total-questions').innerText = totalQuestions;
+        document.getElementById('final-total').innerText = totalQuestions;
+
+        function checkAnswer(selectedOption, questionId) {
+            const questionBlock = selectedOption.closest('[data-question-id]');
+            const options = questionBlock.querySelectorAll('.option-btn');
+            const rationaleBox = document.getElementById('rationale-' + questionId);
+            const isCorrect = selectedOption.getAttribute('data-answer') === 'correct';
+
+            attempted++;
+            document.getElementById('attempted').innerText = attempted;
+
+            options.forEach(btn => { btn.disabled = true; });
+            rationaleBox.style.display = 'block';
+
+            if (isCorrect) {
+                selectedOption.classList.add('correct');
+                rationaleBox.classList.add('rationale-correct');
+                score++;
+                document.getElementById('score').innerText = score;
+            } else {
+                selectedOption.classList.add('incorrect');
+                rationaleBox.classList.add('rationale-incorrect');
+                const correctOption = questionBlock.querySelector('[data-answer="correct"]');
+                correctOption.classList.add('correct');
+            }
+
+            if (attempted === totalQuestions) {
+                document.getElementById('quiz-complete').style.display = 'block';
+                document.getElementById('final-score').innerText = score;
+                
+                // Calculate percentage
+                const percentage = Math.round((score / totalQuestions) * 100);
+                document.getElementById('final-percentage').innerText = percentage;
+
+                setTimeout(() => {
+                    document.getElementById('quiz-complete').scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>

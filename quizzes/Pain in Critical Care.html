@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Pain in Critical Care</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "A patient in the ICU is grimacing and clenching their teeth but denies pain when asked. Which action should the nurse prioritize based on the hierarchy of pain assessment?",
+                options: ["Document that the patient has no pain", "Administer a placebo to test the response", "Search for potential causes of pain", "Consult a family member immediately"],
+                correct: 2,
+                rationale: "According to the hierarchy of pain assessment, if self-report is negative but behaviors suggest pain, the nurse should search for potential causes of pain."
+            },
+            {
+                id: 2,
+                question: "Which physiological change is most likely to occur in a patient experiencing acute pain?",
+                options: ["Decreased heart rate", "Constricted pupils", "Increased stroke volume", "Decreased blood pressure"],
+                correct: 2,
+                rationale: "Physiologic indicators of acute pain include increased heart rate, blood pressure, and stroke volume due to sympathetic stimulation."
+            },
+            {
+                id: 3,
+                question: "True or False: Chronic pain is primarily associated with anxiety, whereas acute pain is typically associated with depression.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The text states the opposite: Acute pain is usually associated with anxiety, while chronic pain is associated with depression."
+            },
+            {
+                id: 4,
+                question: "A patient describes their pain as 'dull and aching.' Which nerve fibers are primarily responsible for transmitting this type of sensation?",
+                options: ["A delta fibers", "C fibers", "Beta fibers", "Motor fibers"],
+                correct: 1,
+                rationale: "C fibers are unmyelinated and smaller in diameter, transmitting dull, aching pain sensations."
+            },
+            {
+                id: 5,
+                question: "Which complication is a potential immunologic effect of untreated acute pain in a critically ill patient?",
+                options: ["Hypoglycemia", "Sepsis", "Deep vein thrombosis", "Myocardial ischemia"],
+                correct: 1,
+                rationale: "Immunologic effects of pain include increased cytokine release and immunosuppression, which can lead to sepsis."
+            },
+            {
+                id: 6,
+                question: "What is the primary function of the Gate Control Theory in the context of nursing interventions?",
+                options: ["It explains how opioids bind to receptors", "It suggests non-nociceptors can block impulse transmission", "It describes the chemical transduction of pain", "It outlines the cortical processing of emotion"],
+                correct: 1,
+                rationale: "The Gate Control Theory suggests that non-nociceptor large peripheral fibers can indirectly block further impulse transmission to the same region."
+            },
+            {
+                id: 7,
+                question: "When assessing pain using the mnemonic OLD CART, what does the 'R' stand for?",
+                options: ["Recurrence or repetition", "Radiation or extent of pain", "Reaction to treatment", "Reason for admission"],
+                correct: 1,
+                rationale: "In the OLD CART mnemonic, 'R' stands for Radiation or extent of pain."
+            },
+            {
+                id: 8,
+                question: "True or False: Sedation should be initiated in agitated critically ill patients before providing analgesia.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Consensus guidelines state that sedation of agitated patients should only be started after providing adequate analgesia."
+            },
+            {
+                id: 9,
+                question: "Which neurotransmitter is involved in carrying impulses across the synaptic cleft to dorsal horn neurons?",
+                options: ["Substance P", "Acetylcholine", "Dopamine", "GABA"],
+                correct: 0,
+                rationale: "Neurotransmitters such as substance P, glutamate, and ATP carry impulses across the synaptic cleft to dorsal horn neurons."
+            },
+            {
+                id: 10,
+                question: "A nurse is teaching a patient about guided imagery. Which condition would make this intervention inadvisable?",
+                options: ["Mild anxiety", "Post-operative discomfort", "Severe fatigue", "Chronic back pain"],
+                correct: 2,
+                rationale: "Guided imagery requires concentration and is not advisable when the patient is fatigued, sedated, or in severe pain."
+            },
+            {
+                id: 11,
+                question: "Which of the following is considered a behavioral indicator of pain?",
+                options: ["Diaphoresis", "Guarding position", "Dilated pupils", "Increased cortisol"],
+                correct: 1,
+                rationale: "Guarding position is a body movement classified as a behavioral indicator, unlike diaphoresis and dilated pupils which are physiologic."
+            },
+            {
+                id: 12,
+                question: "True or False: A delta fibers are unmyelinated and transmit slow, aching pain.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "A delta fibers are myelinated and transmit sharp pain; C fibers are unmyelinated and transmit dull pain."
+            },
+            {
+                id: 13,
+                question: "Which factor is known to increase endorphin levels?",
+                options: ["Prolonged pain", "Brief stress", "Recurrent stress", "Anxiety"],
+                correct: 1,
+                rationale: "Endorphin levels increase during brief stress, physical exercise, and placebo use."
+            },
+            {
+                id: 14,
+                question: "What is the definition of transduction in the mechanism of nociceptive pain?",
+                options: ["Nerve endings turning noxious stimuli into impulses", "Transmission of impulses to the thalamus", "Modulation of pain by opioids", "Perception of pain in the cortex"],
+                correct: 0,
+                rationale: "Transduction is the process where nerve endings turn noxious stimuli into electrical impulses."
+            },
+            {
+                id: 15,
+                question: "Which statement accurately reflects the relationship between age and pain reporting in the ICU?",
+                options: ["Older adults tend to report less pain", "Older adults report pain more frequently", "Age has no impact on pain perception", "Younger patients always have higher tolerance"],
+                correct: 0,
+                rationale: "Literature cites that older adults tend to report less pain during their ICU stay."
+            },
+            {
+                id: 16,
+                question: "True or False: The single most reliable indicator of pain is the patient's vital signs.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The single most reliable indicator of the existence and severity of acute pain is the patient's self-report."
+            },
+            {
+                id: 17,
+                question: "A patient has elevated blood sugar levels following trauma. Which pain-related physiologic effect explains this?",
+                options: ["Increased vascular resistance", "Catabolism and hyperglycemia", "Decreased colloidal pressure", "Increased platelet aggregation"],
+                correct: 1,
+                rationale: "Pain can cause catabolism and hyperglycemia as a potential morbid complication affecting wounds and metabolism."
+            },
+            {
+                id: 18,
+                question: "Which opioid is noted for potentially accumulating with prolonged infusions?",
+                options: ["Remifentanil", "Morphine", "Fentanyl", "Alfentanil"],
+                correct: 2,
+                rationale: "The text notes that Fentanyl may accumulate with prolonged infusions."
+            },
+            {
+                id: 19,
+                question: "Which intervention represents a cutaneous stimulation technique for pain relief?",
+                options: ["Guided imagery", "Abdominal breathing", "TENS application", "Distraction"],
+                correct: 2,
+                rationale: "TENS (Transcutaneous Electric Nerve Stimulation) is listed as a form of cutaneous stimulation."
+            },
+            {
+                id: 20,
+                question: "True or False: Physiologic indicators of pain such as increased heart rate may resolve long before the pain is relieved.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Physiologic indicators are often temporary and may resolve long before the pain itself is relieved."
+            },
+            {
+                id: 21,
+                question: "What is the primary purpose of acute pain?",
+                options: ["To cause depression", "To serve as a warning", "To induce sleep", "To lower metabolic rate"],
+                correct: 1,
+                rationale: "Acute pain serves the purpose of warning and indicates that organic disease or injury is present."
+            },
+            {
+                id: 22,
+                question: "Which brain structure is responsible for regulating emotions associated with pain?",
+                options: ["Thalamus", "Limbic system", "Dorsal horn", "Spinothalamic tract"],
+                correct: 1,
+                rationale: "The limbic system is the center responsible for regulating emotions such as fear and anxiety related to pain."
+            },
+            {
+                id: 23,
+                question: "True or False: Women generally report greater pain intensity than men.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Gender differences cited in the literature indicate that women tend to report greater pain than men."
+            },
+            {
+                id: 24,
+                question: "Which factor decreases endorphin levels in the body?",
+                options: ["Physical exercise", "Brief pain", "Prolonged use of morphine", "Placebo effect"],
+                correct: 2,
+                rationale: "Prolonged use of morphine, alcohol, and dexamethasone drugs leads to decreased endorphin levels."
+            },
+            {
+                id: 25,
+                question: "In the context of pain assessment, what does the 'O' in OLD CART stand for?",
+                options: ["Occurrence", "Onset", "Outcome", "Observation"],
+                correct: 1,
+                rationale: "In the OLD CART mnemonic, 'O' stands for Onset."
+            },
+            {
+                id: 26,
+                question: "Which activity is classified as a distraction technique?",
+                options: ["Applying a menthol cream", "Performing rhythmic breathing", "Brief and frequent visits", "Using a TENS unit"],
+                correct: 2,
+                rationale: "Brief and frequent visits, bringing a snack, and minimizing strange noises are examples of distraction."
+            },
+            {
+                id: 27,
+                question: "True or False: Pain is defined strictly by the extent of tissue damage observed.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Pain is defined as whatever the experiencing person says it is, not strictly by the observed tissue damage."
+            },
+            {
+                id: 28,
+                question: "Which complication is associated with the hematologic system due to pain?",
+                options: ["Hyperglycemia", "Deep vein thrombosis", "Myocardial ischemia", "Sepsis"],
+                correct: 1,
+                rationale: "Hematologic effects of pain include increased platelet aggregation and immobility, leading to Deep Vein Thrombosis (DVT)."
+            },
+            {
+                id: 29,
+                question: "A patient attempts to withdraw from social contact. This is an example of which type of pain indicator?",
+                options: ["Physiologic", "Behavioral", "Psychosocial", "Neurological"],
+                correct: 2,
+                rationale: "Withdrawal from social contact is listed as a psychosocial indicator of pain."
+            },
+            {
+                id: 30,
+                question: "Which pain scale is represented by a 10cm line with 'No pain' and 'Worst pain imaginable' at the ends?",
+                options: ["Numeric Rating Scale", "Visual Analogue Scale", "Verbal Rating Scale", "Wong-Baker Scale"],
+                correct: 1,
+                rationale: "The Visual Analogue Scale (VAS) uses a 10cm line with anchors for no pain and worst pain."
+            },
+            {
+                id: 31,
+                question: "True or False: Deep breathing exercises should be performed at a rapid pace to reduce pain.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Relaxation techniques involve abdominal breathing at a slow rhythmic rate, not a rapid pace."
+            },
+            {
+                id: 32,
+                question: "What is a potential adverse effect of the 'Anxiety-Pain Cycle'?",
+                options: ["Increased pain tolerance", "Aggravation of patient pain", "Immediate release of endorphins", "Improved sleep quality"],
+                correct: 1,
+                rationale: "The anxiety-pain cycle is a factor that negatively influences pain management and can aggravate the patient's pain."
+            },
+            {
+                id: 33,
+                question: "Which cultural difference regarding pain expression is noted in the text?",
+                options: ["Spanish culture typically demands large amounts of analgesia", "Islamic culture may prefer immediate pain relief", "Islamic culture encourages stoic inhibition", "Spanish culture expresses pain with loud emotion"],
+                correct: 1,
+                rationale: "The text notes that in Islamic culture, immediate pain relief is desired and large amounts of analgesia may be required."
+            },
+            {
+                id: 34,
+                question: "Which pathway is activated to inhibit pain transmission in the modulation phase?",
+                options: ["Ascending pathway", "Descending pathway", "Spinothalamic tract", "Afferent pathway"],
+                correct: 1,
+                rationale: "Descending pathways are activated to inhibit pain transmission during the modulation phase."
+            },
+            {
+                id: 35,
+                question: "True or False: Placebos have no effect on endorphin levels.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The text states that placebos are a condition where endorphin levels increase."
+            },
+            {
+                id: 36,
+                question: "A patient reports pain relief and is now able to cough and ambulate. Which evaluation outcome has been met?",
+                options: ["Decreased endorphin levels", "Use of coping strategies", "Increased sleep deprivation", "Engagement in daily activities"],
+                correct: 3,
+                rationale: "Being alert and pain-free enough to engage in daily activities like coughing and ambulating is a positive evaluation outcome."
+            },
+            {
+                id: 37,
+                question: "Which substance is an endogenous peptide that relieves pain similarly to morphine?",
+                options: ["Histamine", "Endorphin", "Prostaglandin", "Bradykinin"],
+                correct: 1,
+                rationale: "Endorphin is a peptide found in the CNS that relieves pain by the same mechanism as morphine."
+            },
+            {
+                id: 38,
+                question: "What is a common ICU-specific cause of pain mentioned in the text?",
+                options: ["Watching television", "Family visits", "Airway management", "Drinking fluids"],
+                correct: 2,
+                rationale: "High technology procedures such as airway management and endotracheal tubes are common causes of pain in the ICU."
+            },
+            {
+                id: 39,
+                question: "True or False: Pain perception occurs in the dorsal horn of the spinal cord.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Pain perception occurs in the cerebral cortex after impulses reach the brain."
+            },
+            {
+                id: 40,
+                question: "Which action is essential for establishing a therapeutic nurse-patient relationship for pain management?",
+                options: ["Doubting the patient's report", "Focusing only on physical tasks", "Believing what the patient says", "Limiting information given"],
+                correct: 2,
+                rationale: "Believing what the patient says and experiences is a crucial aspect of the nurse-patient relationship."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

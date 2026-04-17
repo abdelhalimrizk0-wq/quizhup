@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cerebrovascular Stroke Quiz</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the quiz */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Correct answer style */
+        .option-btn.correct {
+            background-color: #d1fae5; /* Tailwind green-100 */
+            border-color: #10b981; /* Tailwind green-500 */
+            color: #065f46; /* Tailwind green-900 */
+            font-weight: 600;
+        }
+
+        /* Incorrect answer style */
+        .option-btn.incorrect {
+            background-color: #fee2e2; /* Tailwind red-100 */
+            border-color: #ef4444; /* Tailwind red-500 */
+            color: #991b1b; /* Tailwind red-900 */
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        /* Disabled button state */
+        .option-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        /* Ensure all buttons in a disabled group look consistent */
+        .options-container.disabled .option-btn {
+            cursor: not-allowed;
+        }
+
+        .options-container.disabled .option-btn:not(.correct):not(.incorrect) {
+            opacity: 0.5;
+        }
+
+        /* Rationale box fade-in */
+        .rationale {
+            transition: all 0.3s ease-in-out;
+            max-height: 0;
+            padding: 0; /* Set all padding to 0 */
+            overflow: hidden;
+            border-width: 0;
+            margin-top: 0; /* Start with no margin */
+            opacity: 0; /* Start fully transparent */
+        }
+
+        .rationale.show {
+            max-height: 500px; /* Allow for content */
+            padding: 1rem; /* Apply p-4 */
+            border-width: 1px;
+            margin-top: 1rem;
+            opacity: 1; /* Fade in */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-teal-500 text-white p-8 md:p-12 shadow-md">
+        <div class="container mx-auto max-w-5xl">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">Cerebrovascular Stroke Quiz</h1>
+            <p class="text-xl opacity-90">تم صنع هذا الامتحان بواسطة عبدالحليم رزق</p>
+            <p class="text-sm mt-4 opacity-80">لو عندك اي اقتراح او تعديل لتحسين الكويزات دي فيما بعد ابعتلي</p>
+        </div>
+    </div>
+
+    <!-- Quiz Container -->
+    <div id="quiz-container" class="container mx-auto max-w-5xl p-4 md:p-8 space-y-6">
+
+        <!-- Question 1 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(1) Why is a stroke now referred to as a "brain attack"?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">To highlight the high cost of treatment.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">To encourage health professionals and the public to think about it with the same urgency as a "heart attack."</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Because all strokes are caused by trauma to the brain.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">To distinguish it from a Transient Ischemic Attack (TIA).</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The text states, "A stroke is now referred to as a 'brain attack' to encourage health care professionals and the public to think about stroke with the same urgency as a 'heart attack.'"
+            </div>
+        </div>
+
+        <!-- Question 2 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(2) According to the definition, a stroke is a sudden onset of acute neurologic deficit that persists for more than how long?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">2 to 3 hours</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">12 hours</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">24 hours</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">48 hours</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The document defines stroke as "the sudden onset of acute neurologic deficit persisting for more than 24 hours and caused by the interruption of blood flow to the brain."
+            </div>
+        </div>
+
+        <!-- Question 3 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(3) Which type of stroke accounts for 80% to 85% of all strokes?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Ischemic</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Hemorrhagic</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Thrombotic</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Embolic</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The text explicitly states, "Ischemic events account for 80% to 85% of all strokes."
+            </div>
+        </div>
+
+        <!-- Question 4 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(4) In the Cincinnati Prehospital Stroke Scale, what is the probability of a stroke if any one of the three signs is abnormal?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">100%</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">50%</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">72%</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">25%</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> In Table 1, the footnote clarifies: "*Probability of stroke is 72% if any one of these three signs is abnormal."
+            </div>
+        </div>
+
+        <!-- Question 5 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(5) What is the "ischemic penumbra"?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">The area of irreversible infarction.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">A surrounding area of potentially salvageable tissue.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Massive cerebral edema following a stroke.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">A type of small vessel "lacunar" stroke.</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The pathophysiology section states the ischemic cascade creates "a zone of irreversible infarction and a surrounding area of potentially salvageable tissues which is called 'ischemic penumbra'."
+            </div>
+        </div>
+
+        <!-- Question 6 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(6) Sudden onset of headache, nausea, and vomiting are most typical of which type of stroke?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Ischemic</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Thrombotic</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Embolic</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Hemorrhagic</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Under "Clinical manifestations," the text lists "Sudden onset of headache, nausea, and vomiting (most typical of hemorrhagic stroke)."
+            </div>
+        </div>
+        
+        <!-- Question 7 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(7) What is homonymous hemianopsia?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Loss of vision in the same visual field of both eyes.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Difficulty swallowing characterized by a moist voice.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Trouble speaking or expressive aphasia.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Sudden onset of vertigo and ataxia.</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> A subtle deficit listed is "Sudden visual disturbance (homonymous hemianopsia - loss of vision in the same visual field of both eyes)."
+            </div>
+        </div>
+        
+        <!-- Question 8 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(8) Which of the following is listed as a "stroke mimic" that needs to be ruled out?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Atrial fibrillation</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Hypertension</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Hypoglycemia or hyperglycemia</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Recent neck trauma</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Under "Question 1: Is This a Stroke?", the text lists "Hypoglycemia or hyperglycemia" as a potential stroke mimic.
+            </div>
+        </div>
+        
+        <!-- Question 9 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(9) What is the most validated tool for determining stroke severity, designed to be conducted in about 7 minutes?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Cincinnati Prehospital Stroke Scale</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">National Institutes of Health Stroke Scale (NIHSS)</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Glasgow Coma Scale (GCS)</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">ABCD Assessment Tool</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The text states, "The most validated tool for determining stroke severity is the National Institutes of Health Stroke Scale (NIHSS) Table 2. It is designed to be conducted quickly over 7 minutes."
+            </div>
+        </div>
+
+        <!-- Question 10 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(10) What score on the NIHSS reflects a severe stroke?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">0</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">1 to 4</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">5 to 10</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">15 to 20</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> "Patients with no deficits and normal mental status will have a score of 0, while scores of 15 to 20 reflect a severe stroke."
+            </div>
+        </div>
+
+        <!-- Question 11 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(11) According to the Brain Attack Coalition time goals, what is the target time from "ED door to needle (rt-PA started)"?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">10 minutes</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">25 minutes</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">45 minutes</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">60 minutes</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Table 3, "Time goals for stroke management," lists "ED door to needle (rt-PA started)" as "60 minutes."
+            </div>
+        </div>
+
+        <!-- Question 12 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(12) What is the only treatment approved by the U.S. for ischemic stroke, with a goal to begin within 3 hours of symptom onset?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Labetalol</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Recombinant tissue-type plasminogen activator (rt-PA)</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Aspirin</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Vitamin K infusion</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> "Recombinant tissue-type plasminogen activator (rt-PA) is the only treatment approved by the U.S. ... The goal is to begin fibrinolytic reperfusion therapy within 3 hours of onset of symptoms."
+            </div>
+        </div>
+        
+        <!-- Question 13 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(13) How is the total dose of rt-PA administered?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">100% as an IV bolus over 1 minute.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">10% as an IV bolus over 1 minute, 90% as a continuous infusion over 1 hour.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">50% as an IV bolus, 50% as an infusion over 3 hours.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">100% as a continuous infusion over 24 hours.</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The text details the administration: "Ten percent of the total dose is given as an IV bolus over 1 minute. The remaining 90% is given as a continuous infusion over 1 hour."
+            </div>
+        </div>
+
+        <!-- Question 14 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(14) Which of the following is an EXCLUSION criteria for rt-PA therapy?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Age ≥18 years</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Onset of symptoms <3 hours ago</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Serum glucose <50 mg/dL</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Stroke resulting from ischemia</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Table 4 lists "Serum glucose <50 mg/dL" as one of the "EXCLUSION CRITERIA."
+            </div>
+        </div>
+
+        <!-- Question 15 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(15) What is the target blood pressure for a patient receiving rt-PA (systolic and diastolic)?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Systolic less than 185 mm Hg and diastolic less than 110 mm Hg.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Systolic greater than 200 mm Hg.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Systolic less than 140 mm Hg and diastolic less than 90 mm Hg.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Systolic 180 mm Hg or less and diastolic 105 mm Hg or less.</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Under "Nursing intervention for patients receiving rt-PA," a pre-administration step is to "Maintain a systolic blood pressure less than 185 mm Hg and a diastolic blood pressure less than 110 mm Hg." (Note: The 180/105 goal is for *after* administration).
+            </div>
+        </div>
+        
+        <!-- Question 16 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(16) For the first 24 hours after rt-PA, which medication should NOT be administered?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Labetalol</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Normal saline</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Antipyretics</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Aspirin, heparin, or warfarin</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> "For the first 24 hours, do not administer antithrombotics such as aspirin, heparin, clopidogrel, warfarin, or nonsteroidal anti-inflammatory drugs."
+            </div>
+        </div>
+
+        <!-- Question 17 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(17) What is the first-line agent of choice for managing hypertension in stroke, described as working quickly and being short-acting?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Labetalol (Trandate)</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">rt-PA</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Prothrombin complex concentrates</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Osmotic diuretics</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> "Labetalol (Trandate) is a first-line agent of choice in stroke because it works quickly, is not too aggressive, and is short acting."
+            </div>
+        </div>
+
+        <!-- Question 18 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(18) How is a Transient Ischemic Attack (TIA) defined?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">A stroke mimic, such as hypoglycemia.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">A severe stroke with an NIHSS score of 15-20.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">A brief episode of neurologic dysfunction *not* associated with permanent cerebral infarction.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">A hemorrhagic stroke caused by an aneurysm.</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> "Transient ischemic attack (TIA) is a brief episode of neurologic dysfunction resulting from focal cerebral ischemia not associated with permanent cerebral infarction."
+            </div>
+        </div>
+
+        <!-- Question 19 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(19) Using the ABCD assessment tool, how many points is "Unilateral weakness with or without speech impairment" worth?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">0 points</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">1 point</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">2 points</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">3 points</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Table 5, "ABCD assessment tool," lists "Clinical features of TIA ... • Unilateral weakness with or without speech impairment" as being worth "2" points.
+            </div>
+        </div>
+
+        <!-- Question 20 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(20) An ABCD score of 6-7 corresponds to what 2-day stroke risk?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">1.0%</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">4.1%</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">8.1%</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">15.0%</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Table 6, "interpretation of ABCD score," shows that an "ABCD SCORE" of "6-7" has a "2-DAY STROKE RISK" of "8.1%."
+            </div>
+        </div>
+
+        <!-- Question 21 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(21) What is an Intracerebral Hemorrhage (ICH)?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Bleeding caused by an aneurysm.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Bleeding directly into cerebral tissue.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">A brief episode not associated with infarction.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">An ischemic event caused by an embolus.</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The definition given is: "Intracerebral hemorrhage (ICH) is bleeding directly into cerebral tissue."
+            </div>
+        </div>
+
+        <!-- Question 22 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(22) For a patient with ICH, which assessment tool may be more helpful than the NIHSS (which is validated for ischemic stroke only)?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Glasgow Coma Scale (GCS)</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Cincinnati Prehospital Stroke Scale</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">ABCD2 Score</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">A 12-lead electrocardiogram</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> "N.B: A standardized tool should be used... The NIHSS has been validated for ischemic stroke only. The Glasgow Coma Scale (GCS) may be more helpful in quantifying neurological deficits in the setting of ICH."
+            </div>
+        </div>
+
+        <!-- Question 23 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(23) For an ICH patient with SBP > 180 mm Hg and *no* suspicion of elevated ICP, what is the recommended modest blood pressure reduction target?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">MAP of 150 mm Hg</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Cerebral perfusion pressure > 60 to 80 mm Hg</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">MAP of 110 mm Hg or target BP of 160/90 mm Hg</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">SBP of 90 to 140 mm Hg</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Point 3 under therapeutic interventions for ICH states: "...consider a modest reduction of blood pressure (e.g., MAP of 110 mm Hg or target blood pressure of 160/90 mm Hg)..."
+            </div>
+        </div>
+
+        <!-- Question 24 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(24) Which is NOT listed as a treatment for increased ICP in an ICH patient?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Raising the head of the bed to 30 degrees</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Anticoagulation therapy</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Osmotic diuretics and hypertonic saline</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Drainage of cerebrospinal fluid</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The text lists raising HOB, analgesia, sedation, osmotic diuretics, hypertonic saline, and CSF drainage as treatments. Anticoagulation is contraindicated in hemorrhagic stroke.
+            </div>
+        </div>
+        
+        <!-- Question 25 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(25) Spontaneous subarachnoid hemorrhage (SAH) accounts for what percentage of all strokes?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">About 3%</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">About 20%</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">About 33%</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">About 50%</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> "About 3% of all strokes are spontaneous subarachnoid hemorrhage (SAH) and these account for 5% of stroke deaths."
+            </div>
+        </div>
+
+        <!-- Question 26 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(26) What is the leading cause of nontraumatic SAH?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Hypertension</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Cigarette smoking</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Cerebral aneurysms</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Illicit drug use</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> "Cerebral aneurysms are the leading cause of nontraumatic SAH."
+            </div>
+        </div>
+
+        <!-- Question 27 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(27) A patient describing a "sudden intense, unrelenting headache," often as the "worst headache of my life," is a classic sign of what?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Ischemic Stroke</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Transient Ischemic Attack (TIA)</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Intracerebral Hemorrhage (ICH)</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Subarachnoid Hemorrhage (SAH)</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Under "Signs and Symptoms" for SAH, the first item listed is "Sudden intense, unrelenting headache. Often described as the 'worst headache of my life.'"
+            </div>
+        </div>
+
+        <!-- Question 28 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(28) What is photophobia, a sign of SAH?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Nuchal rigidity</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Intolerance to light</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Altered level of consciousness</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Vomiting or nausea</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The SAH "Signs and Symptoms" list includes "Photophobia (intolerance to light)."
+            </div>
+        </div>
+
+        <!-- Question 29 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(29) What is the target systolic BP range for a patient with SAH?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">90 to 140 mm Hg</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Greater than 200 mm Hg</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Less than 185 mm Hg</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Target of 160/90 mm Hg</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Under "Therapeutic Interventions" for SAH, a directive is to "Maintain systolic BP of 90 to 140 mm Hg."
+            </div>
+        </div>
+
+        <!-- Question 30 (MCQ) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(30) What VTE prophylaxis is recommended for SAH patients?</p>
+            <div class="options-container space-y-3">
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Anticoagulants such as heparin or warfarin.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">rt-PA infusion.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">Elastic stockings or pneumatic compression devices; no anticoagulants.</button>
+                <button class="option-btn w-full text-left p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">Surgical clipping or endovascular coiling.</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The text instructs to "Initiate VTE prophylaxis with elastic stockings or pneumatic compression devices; do not give anticoagulants."
+            </div>
+        </div>
+
+        <!-- --- TRUE / FALSE QUESTIONS --- -->
+        
+        <div class="bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+             <h2 class="text-2xl md:text-3xl font-bold text-center text-blue-700 mb-6">True / False Questions</h2>
+        </div>
+
+        <!-- Question 31 (T/F) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(31) True or False: The incidence of stroke in men is less than in women.</p>
+            <div class="options-container grid grid-cols-2 gap-4">
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">True</button>
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">False</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The text states under "Epidemiology": "The incidence of stroke in men is greater than in women."
+            </div>
+        </div>
+
+        <!-- Question 32 (T/F) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(32) True or False: Ischemic brain injury occurs when arterial occlusion lasts longer than 2 to 3 hours.</p>
+            <div class="options-container grid grid-cols-2 gap-4">
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">True</button>
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">False</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The first paragraph states: "Ischemic brain injury occurs when arterial occlusion lasts longer than 2 to 3 hours."
+            </div>
+        </div>
+
+        <!-- Question 33 (T/F) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(33) True or False: Hemorrhagic strokes have a lower mortality rate compared with ischemic strokes.</p>
+            <div class="options-container grid grid-cols-2 gap-4">
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">True</button>
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">False</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The text notes: "N.B: Although less common, hemorrhagic strokes (Intracerebral (ICHs) and Subarachnoid (SAHs)) have a higher mortality rate compared with ischemic strokes."
+            </div>
+        </div>
+        
+        <!-- Question 34 (T/F) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(34) True or False: Patients with suspected stroke presenting to the ED should be assessed within 60 minutes of arrival.</p>
+            <div class="options-container grid grid-cols-2 gap-4">
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">True</button>
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">False</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The document specifies: "Patients with suspected stroke who present to the emergency department (ED) should be assessed within 10 minutes of arrival."
+            </div>
+        </div>
+        
+        <!-- Question 35 (T/F) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(35) True or False: If a lumbar puncture is suspected for SAH, it should be done *after* a CT scan is found to be negative for blood.</p>
+            <div class="options-container grid grid-cols-2 gap-4">
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">True</button>
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">False</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The diagnostic procedures list includes: "Lumbar puncture if SAH is suspected and CT is negative for blood."
+            </div>
+        </div>
+        
+        <!-- Question 36 (T/F) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(36) True or False: For ischemic stroke patients *without* increased ICP or chronic respiratory problems, the head of the bed should be elevated to 30 degrees.</p>
+            <div class="options-container grid grid-cols-2 gap-4">
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">True</button>
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">False</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The text specifies to "Maintain the head of bed flat to maximize cerebral blood flow for all other ischemic stroke patients." (The 30-degree elevation is for those *with* ICP or respiratory problems).
+            </div>
+        </div>
+
+        <!-- Question 37 (T/F) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(37) True or False: According to the text, 10% to 15% of patients experiencing a TIA have a stroke within 3 months.</p>
+            <div class="options-container grid grid-cols-2 gap-4">
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">True</button>
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">False</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Under the TIA section: "10% to 15% of patients experiencing a TIA have a stroke within 3 months, with half of these occurring within 48 hours."
+            </div>
+        </div>
+
+        <!-- Question 38 (T/F) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(38) True or False: Fibrinolytic therapy (like rt-PA) is the primary treatment for Intracerebral Hemorrhagic Stroke (ICH).</p>
+            <div class="options-container grid grid-cols-2 gap-4">
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">True</button>
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">False</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> Under "Hemorrhagic Stroke," the text clearly states: "The differentiation is important because anticoagulants and fibrinolytic therapy are contraindicated in patients with hemorrhagic stroke."
+            </div>
+        </div>
+        
+        <!-- Question 39 (T/F) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(39) True or False: For patients with ICH, serum glucose should be kept below 140 mm Hg.</p>
+            <div class="options-container grid grid-cols-2 gap-4">
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">True</button>
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">False</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> A therapeutic intervention for ICH is to "Keep serum glucose below 140 mm Hg; avoid hypoglycemia."
+            </div>
+        </div>
+
+        <!-- Question 40 (T/F) -->
+        <div class="question-card bg-white shadow-lg rounded-lg p-6 md:p-8 transition-all duration-300">
+            <p class="text-xl font-semibold mb-5">(40) True or False: The initial treatment for Subarachnoid Hemorrhage (SAH) is focused on salvaging the ischemic penumbra.</p>
+            <div class="options-container grid grid-cols-2 gap-4">
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="false">True</button>
+                <button class="option-btn w-full text-center p-4 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" data-correct="true">False</button>
+            </div>
+            <div class="rationale bg-blue-50 border-blue-200 text-blue-900 rounded-md">
+                <strong class="font-semibold">Rationale:</strong> The text states the "Initial treatment is focused on preventing rebleeding of the aneurysm." (Salvaging the penumbra is the goal for *ischemic* stroke).
+            </div>
+        </div>
+
+    </div> <!-- End Quiz Container -->
+
+    <!-- Footer -->
+    <footer class="text-center p-8 text-gray-500 text-sm">
+        Quiz content generated exclusively from the provided "Cerebrovascular Stroke.pdf" document.
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Select all option buttons in the quiz
+            const optionButtons = document.querySelectorAll('.option-btn');
+
+            // Add a click event listener to each button
+            optionButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    handleOptionClick(e.target);
+                });
+            });
+        });
+
+        function handleOptionClick(button) {
+            // Find the parent containers
+            const optionsContainer = button.closest('.options-container');
+            const questionCard = button.closest('.question-card');
+            
+            // Prevent further clicks if already answered
+            if (optionsContainer.classList.contains('disabled')) {
+                return;
+            }
+
+            // Mark the question as answered
+            optionsContainer.classList.add('disabled');
+
+            // Get data from the clicked button
+            const isCorrect = button.dataset.correct === 'true';
+
+            // Find the correct button and the rationale
+            const correctButton = optionsContainer.querySelector('[data-correct="true"]');
+            const rationale = questionCard.querySelector('.rationale');
+
+            // Apply styles
+            if (isCorrect) {
+                // User clicked the correct answer
+                button.classList.add('correct');
+            } else {
+                // User clicked the wrong answer
+                button.classList.add('incorrect');
+                // Also highlight the correct answer in green
+                correctButton.classList.add('correct');
+            }
+
+            // Disable all buttons in this question
+            optionsContainer.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+
+            // Show the rationale
+            if (rationale) {
+                rationale.classList.add('show');
+            }
+        }
+    </script>
+
+</body>
+</html>
+

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Critical Care Medicine شامل</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            { id: 1, question: "What is the normal range for arterial pH?", options: ["7.25-7.35", "7.35-7.45", "7.45-7.55", "7.15-7.25"], correct: 1, rationale: "The normal arterial pH range is 7.35 to 7.45." },
+            { id: 2, question: "Which equation relates pH, pCO2, and HCO3?", options: ["Bernoulli Equation", "Henderson Equation", "Starling Equation", "Nernst Equation"], correct: 1, rationale: "The Henderson Equation describes the relationship between pH, bicarbonate, and partial pressure of carbon dioxide." },
+            { id: 3, question: "What does the Anion Gap primarily reflect?", options: ["Unaccounted positively charged ions", "Unaccounted negatively charged species", "Total body water", "Serum osmolality"], correct: 1, rationale: "The Anion Gap reflects the unaccounted for negatively charged species in the blood." },
+            { id: 4, question: "Which condition is characterized by a pH < 7.35 and pCO2 > 45 mmHg?", options: ["Metabolic Acidosis", "Respiratory Acidosis", "Metabolic Alkalosis", "Respiratory Alkalosis"], correct: 1, rationale: "Respiratory Acidosis is defined by a low pH (acidemia) and an elevated pCO2." },
+            { id: 5, question: "What is the primary compensatory mechanism for Metabolic Acidosis?", options: ["Renal retention of bicarbonate", " renal excretion of acid", "Hyperventilation to decrease pCO2", "Hypoventilation to increase pCO2"], correct: 2, rationale: "The respiratory system compensates for metabolic acidosis by hyperventilating to lower pCO2." },
+            { id: 6, question: "The normal range for the Anion Gap is:", options: ["3-7 mmol/L", "8-12 mmol/L", "15-20 mmol/L", "20-25 mmol/L"], correct: 1, rationale: "The normal reference range for the Anion Gap is 8-12 mmol/L." },
+            { id: 7, question: "Which of the following is a cause of High Anion Gap Metabolic Acidosis?", options: ["Diarrhea", "Renal Tubular Acidosis", "Diabetic Ketoacidosis", "Fistulas"], correct: 2, rationale: "Diabetic Ketoacidosis introduces ketones, which are unmeasured anions, increasing the gap." },
+            { id: 8, question: "A Delta Delta ratio between 1 and 2 suggests:", options: ["Pure high anion gap metabolic acidosis", "Mixed metabolic alkalosis", "Pure non-gap metabolic acidosis", "Respiratory acidosis"], correct: 0, rationale: "A Delta Delta ratio of 1-2 indicates a pure high anion gap metabolic acidosis." },
+            { id: 9, question: "Which electrolyte abnormality is commonly seen in the recovery phase of DKA?", options: ["Hypernatremia", "Hyperchloremia", "Hypocalcemia", "Hypermagnesemia"], correct: 1, rationale: "Hyperchloremic metabolic acidosis often develops during the recovery phase of DKA due to fluid resuscitation and ketone loss." },
+            { id: 10, question: "Severe acidemia (pH <= 7.25) can lead to:", options: ["Increased cardiac output", "Decreased catecholamine responsiveness", "Increased insulin sensitivity", "Arteriolar constriction"], correct: 1, rationale: "Severe acidemia reduces the responsiveness of the cardiovascular system to catecholamines." },
+            { id: 11, question: "Respiratory Alkalosis is characterized by:", options: ["pH > 7.45 and pCO2 < 35 mmHg", "pH < 7.35 and pCO2 > 45 mmHg", "pH > 7.45 and HCO3 > 26 mmol/L", "pH < 7.35 and HCO3 < 22 mmol/L"], correct: 0, rationale: "Respiratory Alkalosis presents with an elevated pH and a decreased pCO2 due to hyperventilation." },
+            { id: 12, question: "Which of the following causes Metabolic Alkalosis?", options: ["Methanol ingestion", "Severe vomiting", "Diabetic Ketoacidosis", "Renal failure"], correct: 1, rationale: "Severe vomiting leads to the loss of gastric acid (HCl), resulting in Metabolic Alkalosis." },
+            { id: 13, question: "In chronic respiratory acidosis, for every 10 mmHg increase in pCO2, HCO3 increases by:", options: ["1 mmol/L", "3 mmol/L", "4 mmol/L", "5 mmol/L"], correct: 1, rationale: "In chronic respiratory acidosis, the kidneys compensate by retaining 3 mmol/L of HCO3 for every 10 mmHg rise in pCO2." },
+            { id: 14, question: "True or False: Compensation is equivalent to correction of the acid-base disorder.", options: ["True", "False"], correct: 1, rationale: "Compensation mitigates the pH change but does not correct the underlying cause." },
+            { id: 15, question: "Which formula is used to calculate the expected pCO2 in Metabolic Acidosis?", options: ["Hendersons Formula", "Winters Formula", "Starling Law", "Fick Principle"], correct: 1, rationale: "Winters Formula (1.5 x HCO3 + 8 +/- 2) estimates the expected respiratory compensation." },
+            { id: 16, question: "The predominant extracellular cation is:", options: ["Potassium", "Sodium", "Calcium", "Magnesium"], correct: 1, rationale: "Sodium is the major cation in the extracellular fluid compartment." },
+            { id: 17, question: "Hypovolemic Hypernatremia with urine Na < 20 mmol/L suggests:", options: ["Renal loss", "Extrarenal loss", "Excess sodium intake", "Diabetes Insipidus"], correct: 1, rationale: "Low urine sodium in the setting of hypovolemia indicates the kidneys are retaining sodium, suggesting extrarenal loss (e.g., sweating, diarrhea)." },
+            { id: 18, question: "Rapid correction of Hypernatremia can cause:", options: ["Central Pontine Myelinolysis", "Cerebral Edema", "Pulmonary Embolism", "Renal Failure"], correct: 1, rationale: "Reducing sodium too quickly allows water to rush into brain cells, causing cerebral edema." },
+            { id: 19, question: "Which IV fluid is hypotonic?", options: ["0.9% Normal Saline", "Lactated Ringers", "0.45% Sodium Chloride", "3% Sodium Chloride"], correct: 2, rationale: "0.45% Sodium Chloride (Half Normal Saline) has a lower osmolality than plasma." },
+            { id: 20, question: "Hyponatremia is defined as serum sodium less than:", options: ["145 mEq/L", "135 mEq/L", "125 mEq/L", "115 mEq/L"], correct: 1, rationale: "Hyponatremia is defined as a serum sodium concentration below 135 mEq/L." },
+            { id: 21, question: "SIADH typically causes which type of hyponatremia?", options: ["Hypovolemic", "Euvolemic", "Hypervolemic", "Hypertonic"], correct: 1, rationale: "SIADH leads to water retention without significant volume overload or depletion, resulting in Euvolemic Hyponatremia." },
+            { id: 22, question: "A characteristic ECG change in Hyperkalemia is:", options: ["U waves", "ST depression", "Peaked T waves", "Shortened QT interval"], correct: 2, rationale: "Tall, peaked T waves are an early sign of hyperkalemia." },
+            { id: 23, question: "Which medication is used to stabilize the cardiac membrane in severe Hyperkalemia?", options: ["Insulin", "Sodium Bicarbonate", "Calcium Gluconate", "Furosemide"], correct: 2, rationale: "Calcium Gluconate antagonizes the membrane effects of potassium, protecting the heart from arrhythmia." },
+            { id: 24, question: "Hypokalemia is defined as serum potassium less than:", options: ["4.5 mEq/L", "4.0 mEq/L", "3.5 mEq/L", "3.0 mEq/L"], correct: 2, rationale: "The lower limit of normal for serum potassium is 3.5 mEq/L." },
+            { id: 25, question: "Trousseau's sign is associated with which electrolyte imbalance?", options: ["Hypercalcemia", "Hypocalcemia", "Hyperkalemia", "Hypokalemia"], correct: 1, rationale: "Trousseau's sign (carpopedal spasm) indicates increased neuromuscular irritability due to hypocalcemia." },
+            { id: 26, question: "Which diuretic acts on the Loop of Henle?", options: ["Spironolactone", "Hydrochlorothiazide", "Furosemide", "Acetazolamide"], correct: 2, rationale: "Furosemide is a loop diuretic that inhibits sodium reabsorption in the Loop of Henle." },
+            { id: 27, question: "True or False: Albumin is a crystalloid fluid.", options: ["True", "False"], correct: 1, rationale: "Albumin is a colloid, not a crystalloid." },
+            { id: 28, question: "ARDS is characterized by which type of pulmonary edema?", options: ["Cardiogenic", "Non-cardiogenic", "Hydrostatic", "Lymphatic"], correct: 1, rationale: "ARDS causes non-cardiogenic pulmonary edema due to increased capillary permeability." },
+            { id: 29, question: "The 'Berlin Definition' classifies ARDS based on:", options: ["Chest X-ray findings alone", "Serum Lactate", "PaO2/FiO2 ratio", "Duration of symptoms only"], correct: 2, rationale: "The Berlin Definition uses the PaO2/FiO2 ratio to classify ARDS severity." },
+            { id: 30, question: "Severe ARDS is defined as a PaO2/FiO2 ratio of:", options: ["< 300", "< 200", "< 100", "> 400"], correct: 2, rationale: "Severe ARDS is defined by a P/F ratio less than 100 mmHg." },
+            { id: 31, question: "Which ventilator strategy is recommended for ARDS?", options: ["High Tidal Volume", "Low Tidal Volume (6-8 ml/kg)", "Zero PEEP", "High Peak Pressures"], correct: 1, rationale: "Low tidal volume ventilation prevents volutrauma and is a key component of lung-protective strategy." },
+            { id: 32, question: "Prone positioning in ARDS aims to:", options: ["Increase chest wall compliance", "Improve V/Q matching", "Reduce cardiac output", "Increase dead space"], correct: 1, rationale: "Prone positioning recruits dorsal lung regions and improves ventilation-perfusion matching." },
+            { id: 33, question: "VAP stands for:", options: ["Venous Arterial Pressure", "Ventilator Associated Pneumonia", "Viral Acute Pneumonia", "Ventilatory Acquired Pathology"], correct: 1, rationale: "VAP stands for Ventilator-Associated Pneumonia." },
+            { id: 34, question: "VAP is defined as pneumonia occurring how many hours after intubation?", options: ["> 12 hours", "> 24 hours", "> 48 hours", "> 72 hours"], correct: 2, rationale: "VAP is defined as pneumonia developing more than 48 hours after endotracheal intubation." },
+            { id: 35, question: "Which is a component of the VAP prevention bundle?", options: ["Supine positioning", "Deep sedation", "Head of bed elevation 30-45 degrees", "Routine antibiotic prophylaxis"], correct: 2, rationale: "Elevating the head of the bed helps prevent aspiration, a key cause of VAP." },
+            { id: 36, question: "AKI is characterized by an abrupt decline in:", options: ["Liver function", "Renal filtration function", "Cardiac output", "Respiratory drive"], correct: 1, rationale: "AKI is defined as a sudden decrease in kidney filtration function." },
+            { id: 37, question: "Prerenal AKI is primarily caused by:", options: ["Direct kidney damage", "Urinary obstruction", "Decreased renal perfusion", "Glomerulonephritis"], correct: 2, rationale: "Prerenal AKI results from reduced blood flow to the kidneys." },
+            { id: 38, question: "True or False: Dopamine is recommended for the prevention of AKI.", options: ["True", "False"], correct: 1, rationale: "Routine use of dopamine for AKI prevention is no longer justified and may be harmful." },
+            { id: 39, question: "Which is an indication for Renal Replacement Therapy (RRT)?", options: ["Mild hyponatremia", "Refractory Hyperkalemia", "Stage 1 AKI", "Controlled hypertension"], correct: 1, rationale: "Refractory hyperkalemia that does not respond to medical management is a classic indication for dialysis." },
+            { id: 40, question: "The RIFLE criteria 'Risk' category requires a creatinine increase of:", options: ["1.5 x baseline", "2 x baseline", "3 x baseline", "4 x baseline"], correct: 0, rationale: "The Risk category in RIFLE corresponds to a 1.5-fold increase in serum creatinine." },
+            { id: 41, question: "The normal range for pCO2 is:", options: ["25-35 mmHg", "35-45 mmHg", "45-55 mmHg", "55-65 mmHg"], correct: 1, rationale: "Normal arterial pCO2 is 35-45 mmHg." },
+            { id: 42, question: "Metabolic Acidosis is indicated by:", options: ["Low HCO3", "High HCO3", "Low pCO2", "High pCO2"], correct: 0, rationale: "Metabolic acidosis is primarily characterized by a decrease in bicarbonate (HCO3)." },
+            { id: 43, question: "Which of the following causes Normal Anion Gap Metabolic Acidosis?", options: ["Methanol", "Uremia", "Renal Tubular Acidosis", "Lactic Acidosis"], correct: 2, rationale: "Renal Tubular Acidosis causes acidosis by bicarbonate loss or acid retention without adding unmeasured anions." },
+            { id: 44, question: "The formula for calculated osmolarity includes Sodium, Glucose, and:", options: ["Chloride", "BUN", "Potassium", "Albumin"], correct: 1, rationale: "Serum osmolarity is calculated using Sodium, Glucose, and BUN." },
+            { id: 45, question: "Hypermagnesemia is defined as serum magnesium greater than:", options: ["1.5 mEq/L", "2.0 mEq/L", "2.5 mEq/L", "3.0 mEq/L"], correct: 2, rationale: "Hypermagnesemia occurs when serum magnesium levels exceed 2.5 mEq/L." },
+            { id: 46, question: "Chvostek's sign involves tapping the:", options: ["Brachial nerve", "Facial nerve", "Radial nerve", "Tibial nerve"], correct: 1, rationale: "Chvostek's sign is elicited by tapping the facial nerve, causing a twitch in hypocalcemia." },
+            { id: 47, question: "What is the oxygenation target (SpO2) in ARDS protective lung strategy?", options: ["100%", "98-100%", "88-95%", "80-85%"], correct: 2, rationale: "The target SpO2 in ARDS is typically 88-95% to avoid oxygen toxicity." },
+            { id: 48, question: "Which is a risk factor for MDR VAP?", options: ["No prior antibiotics", "Hospitalization < 2 days", "Septic shock at time of VAP", "Young age"], correct: 2, rationale: "Septic shock at the onset of VAP is a risk factor for multidrug-resistant pathogens." },
+            { id: 49, question: "True or False: Furosemide improves survival in AKI.", options: ["True", "False"], correct: 1, rationale: "Loop diuretics do not improve survival or renal recovery in AKI." },
+            { id: 50, question: "The exudative phase of ARDS involves:", options: ["Fibrosis", "Hyaline membrane formation", "Re-epithelialization", "Fluid resorption"], correct: 1, rationale: "The exudative phase is characterized by alveolar damage and the formation of hyaline membranes." },
+            { id: 51, question: "Normal Anion Gap Metabolic Acidosis is also known as:", options: ["Hyperchloremic Acidosis", "Hypochloremic Acidosis", "Normochloremic Acidosis", "Lactic Acidosis"], correct: 0, rationale: "Normal anion gap acidosis is associated with an increase in chloride to balance the lost bicarbonate." },
+            { id: 52, question: "Which substance ingestion causes High Anion Gap Metabolic Acidosis?", options: ["Water", "Ethanol", "Milk", "Antacids"], correct: 1, rationale: "Ethanol (and toxic alcohols like methanol) causes a high anion gap metabolic acidosis." },
+            { id: 53, question: "Respiratory compensation for metabolic acidosis begins:", options: ["Instantly", "Within minutes", "After 24 hours", "After 3 days"], correct: 1, rationale: "Respiratory compensation via hyperventilation starts within minutes of the metabolic disturbance." },
+            { id: 54, question: "Renal compensation for respiratory disorders takes:", options: ["Minutes", "Hours", "2-5 days", "2 weeks"], correct: 2, rationale: "The kidneys take 2-5 days to fully compensate for respiratory acid-base disturbances." },
+            { id: 55, question: "Hypokalemia can cause which gastrointestinal symptom?", options: ["Diarrhea", "Constipation", "Hyperactive bowel sounds", "Bloating"], correct: 1, rationale: "Hypokalemia decreases smooth muscle activity, leading to constipation or ileus." },
+            { id: 56, question: "Which finding suggests dehydration?", options: ["Distended neck veins", "Bradycardia", "Poor skin turgor", "Polyuria"], correct: 2, rationale: "Poor skin turgor is a classic physical sign of volume depletion." },
+            { id: 57, question: "Which fluid is best for fluid resuscitation in hypovolemic shock?", options: ["D5W", "0.45% Saline", "Isotonic Crystalloid", "Sterile Water"], correct: 2, rationale: "Isotonic crystalloids (like NS or LR) remain in the extracellular space and are effective for volume resuscitation." },
+            { id: 58, question: "Permissive hypercapnia is a strategy used in:", options: ["Head injury", "ARDS", "Asthma", "Sepsis"], correct: 1, rationale: "Permissive hypercapnia allows CO2 to rise to facilitate low tidal volume ventilation in ARDS." },
+            { id: 59, question: "The 'P' in the MUDPILES mnemonic stands for:", options: ["Paraldehyde", "Potassium", "Phosphate", "Penicillin"], correct: 0, rationale: "In MUDPILES, P stands for Paraldehyde." },
+            { id: 60, question: "Severe hypophosphatemia is defined as:", options: ["< 2.5 mg/dL", "< 2.0 mg/dL", "< 1.5 mg/dL", "< 1.0 mg/dL"], correct: 0, rationale: "Hypophosphatemia is generally considered significant below 2.5 mg/dL, with severe often lower." },
+            { id: 61, question: "Refeeding syndrome can precipitate:", options: ["Hyperphosphatemia", "Hypophosphatemia", "Hyperkalemia", "Hypermagnesemia"], correct: 1, rationale: "Refeeding syndrome causes a rapid intracellular shift of phosphate, leading to severe hypophosphatemia." },
+            { id: 62, question: "Which agent is used to lower potassium by shifting it into cells?", options: ["Kayexalate", "Insulin with Glucose", "Furosemide", "Dialysis"], correct: 1, rationale: "Insulin drives potassium into cells (given with glucose to prevent hypoglycemia)." },
+            { id: 63, question: "Normal serum Calcium level is approximately:", options: ["7-9 mg/dL", "9-11 mg/dL", "11-13 mg/dL", "13-15 mg/dL"], correct: 1, rationale: "The normal total serum calcium range is 9-11 mg/dL." },
+            { id: 64, question: "Post-renal AKI is caused by:", options: ["Hypotension", "Nephrotoxins", "Obstruction of urine flow", "Ischemia"], correct: 2, rationale: "Post-renal AKI is due to obstruction in the urinary tract (e.g., stones, BPH)." },
+            { id: 65, question: "A common nephrotoxin causing Intrinsic AKI is:", options: ["Penicillin", "Aminoglycosides", "Acetaminophen", "Beta-blockers"], correct: 1, rationale: "Aminoglycosides are well-known nephrotoxic antibiotics that can cause ATN." },
+            { id: 66, question: "Which gas pattern indicates Acute Respiratory Acidosis?", options: ["pH low, pCO2 high, HCO3 normal", "pH low, pCO2 low, HCO3 low", "pH high, pCO2 low, HCO3 normal", "pH normal, pCO2 high, HCO3 high"], correct: 0, rationale: "In acute respiratory acidosis, pCO2 is high and pH is low, but the kidneys haven't had time to raise HCO3 significantly." },
+            { id: 67, question: "True or False: Lactated Ringers contains Potassium.", options: ["True", "False"], correct: 0, rationale: "Lactated Ringer's solution contains a small amount of potassium (approx 4 mEq/L)." },
+            { id: 68, question: "Which is a limitation of Base Excess (BE)?", options: ["It is not calculated", "It assumes normal respiratory status", "Erroneous calculations with electrolyte imbalance", "It only measures acidosis"], correct: 2, rationale: "BE calculations can be erroneous in the presence of certain electrolyte imbalances or exogenous buffers." },
+            { id: 69, question: "The normal PaO2 on room air is:", options: ["60-80 mmHg", "70-100 mmHg", "80-120 mmHg", "90-110 mmHg"], correct: 1, rationale: "Normal arterial oxygen tension (PaO2) is 70-100 mmHg." },
+            { id: 70, question: "Which condition causes Hyperchloremic Metabolic Acidosis?", options: ["Vomiting", "Diarrhea", "COPD", "Pneumonia"], correct: 1, rationale: "Diarrhea causes loss of bicarbonate, which is compensated by chloride retention, leading to hyperchloremic acidosis." },
+            { id: 71, question: "Magnesium sulfate is the treatment of choice for:", options: ["Atrial Fibrillation", "Torsades de Pointes", "Hyperkalemia", "Hypercalcemia"], correct: 1, rationale: "IV Magnesium is the specific treatment for Torsades de Pointes." },
+            { id: 72, question: "Which sign indicates Hypocalcemia?", options: ["Grey Turner Sign", "Cullen Sign", "Chvostek Sign", "Murphy Sign"], correct: 2, rationale: "Chvostek sign is a clinical sign of hypocalcemia." },
+            { id: 73, question: "The Berlin definition for mild ARDS requires a P/F ratio of:", options: ["100-200", "200-300", "300-400", "> 400"], correct: 1, rationale: "Mild ARDS is defined as a PaO2/FiO2 ratio between 200 and 300 with PEEP >= 5." },
+            { id: 74, question: "Early-onset VAP occurs within:", options: ["First 2 days", "First 4 days", "First week", "First month"], correct: 1, rationale: "Early-onset VAP occurs within the first 4 days of hospitalization." },
+            { id: 75, question: "Which organism is more common in Late-onset VAP?", options: ["Streptococcus pneumoniae", "Haemophilus influenzae", "Pseudomonas aeruginosa", "Viral pathogens"], correct: 2, rationale: "MDR pathogens like Pseudomonas are more common in late-onset VAP." },
+            { id: 76, question: "True or False: Routine saline instillation before suctioning prevents VAP.", options: ["True", "False"], correct: 1, rationale: "Saline instillation is generally not recommended as it may dislodge bacteria into the lower airways." },
+            { id: 77, question: "Which mode of ventilation is often used in ARDS to limit pressure?", options: ["Pressure Control", "Volume Control", "CPAP", "High Frequency Ventilation"], correct: 0, rationale: "Pressure control modes allow precise limitation of peak airway pressures." },
+            { id: 78, question: "The target plateau pressure in ARDS management is:", options: ["< 20 cmH2O", "< 30 cmH2O", "< 40 cmH2O", "< 50 cmH2O"], correct: 1, rationale: "Plateau pressure should be kept below 30 cmH2O to prevent barotrauma." },
+            { id: 79, question: "Normal Urine Output is approximately:", options: ["0.1 ml/kg/hr", "0.5-1.0 ml/kg/hr", "2.0 ml/kg/hr", "5.0 ml/kg/hr"], correct: 1, rationale: "0.5 ml/kg/hr is generally considered the lower limit of normal urine output." },
+            { id: 80, question: "In AKI, metabolic acidosis is typically:", options: ["High Anion Gap", "Normal Anion Gap", "Respiratory", "Mixed"], correct: 0, rationale: "Uremia leads to the accumulation of organic acids, causing a High Anion Gap Metabolic Acidosis." },
+            { id: 81, question: "Hyperphosphatemia is commonly caused by:", options: ["Respiratory Alkalosis", "Renal Failure", "Vitamin D deficiency", "Refeeding syndrome"], correct: 1, rationale: "Renal failure reduces phosphate excretion, leading to hyperphosphatemia." },
+            { id: 82, question: "Which ECG change is seen in Hypokalemia?", options: ["Tall T waves", "Absent P waves", "U waves", "Widened QRS"], correct: 2, rationale: "U waves are a specific sign of hypokalemia." },
+            { id: 83, question: "Correction of chronic hyponatremia should not exceed:", options: ["0.5 mEq/L/hr", "1.0 mEq/L/hr", "2.0 mEq/L/hr", "3.0 mEq/L/hr"], correct: 0, rationale: "To prevent demyelination, correction should be slow (approx 0.5 mEq/L/hr) in chronic cases." },
+            { id: 84, question: "Which solution is a colloid?", options: ["Dextrose 5%", "Hetastarch", "Normal Saline", "Lactated Ringers"], correct: 1, rationale: "Hetastarch is a synthetic colloid." },
+            { id: 85, question: "Fluid overload in AKI is an indication for:", options: ["More fluids", "Dialysis", "Beta blockers", "Antibiotics"], correct: 1, rationale: "Refractory fluid overload is a standard indication for RRT." },
+            { id: 86, question: "The 'I' in RIFLE stands for:", options: ["Injury", "Infection", "Insufficiency", "Infarction"], correct: 0, rationale: "I stands for Injury to the kidney." },
+            { id: 87, question: "Normal serum Potassium is:", options: ["2.5-4.0 mEq/L", "3.5-5.0 mEq/L", "4.5-6.0 mEq/L", "5.5-7.0 mEq/L"], correct: 1, rationale: "The normal range for potassium is 3.5 to 5.0 mEq/L." },
+            { id: 88, question: "Causes of Hypercalcemia include:", options: ["Hypoparathyroidism", "Malignancy", "Renal failure", "Vitamin D deficiency"], correct: 1, rationale: "Malignancy is a major cause of hypercalcemia." },
+            { id: 89, question: "Which is a 'Chloride Responsive' Metabolic Alkalosis cause?", options: ["Hyperaldosteronism", "Vomiting", "Cushing Syndrome", "Bartter Syndrome"], correct: 1, rationale: "Vomiting causes chloride loss, which is responsive to chloride repletion." },
+            { id: 90, question: "True or False: Antibiotics are needed for Ventilator Associated Tracheobronchitis.", options: ["True", "False"], correct: 1, rationale: "Antibiotics are generally not recommended for tracheobronchitis as they don't improve outcomes." },
+            { id: 91, question: "Subglottic secretion drainage helps prevent:", options: ["ARDS", "VAP", "Pneumothorax", "Pulmonary Embolism"], correct: 1, rationale: "Drainage of secretions above the cuff reduces aspiration risk and VAP." },
+            { id: 92, question: "A Delta Gap > 2 indicates:", options: ["Pure Gap Acidosis", "Gap Acidosis + Metabolic Alkalosis", "Gap Acidosis + Non-Gap Acidosis", "Pure Respiratory Acidosis"], correct: 1, rationale: "A Delta Gap greater than 2 suggests a concurrent metabolic alkalosis." },
+            { id: 93, question: "Methanol toxicity is treated with:", options: ["Antibiotics", "Fomepizole or Ethanol", "Insulin", "Steroids"], correct: 1, rationale: "Fomepizole inhibits alcohol dehydrogenase, preventing toxic metabolite formation." },
+            { id: 94, question: "Salicylate toxicity causes primarily:", options: ["Respiratory Acidosis", "Metabolic Alkalosis", "Respiratory Alkalosis + Metabolic Acidosis", "Pure Metabolic Acidosis"], correct: 2, rationale: "Salicylates directly stimulate the respiratory center (alkalosis) and cause metabolic acidosis." },
+            { id: 95, question: "Which finding is NOT typical of ARDS?", options: ["Bilateral infiltrates", "Hypoxemia", "Left atrial hypertension", "Decreased compliance"], correct: 2, rationale: "ARDS is non-cardiogenic; elevated left atrial pressure suggests heart failure." },
+            { id: 96, question: "The fibroproliferative phase of ARDS is characterized by:", options: ["Edema", "Collagen deposition", "Resolution", "Normal compliance"], correct: 1, rationale: "This phase involves fibrosis and scarring of the lung tissue." },
+            { id: 97, question: "Which is a direct cause of lung injury in ARDS?", options: ["Sepsis", "Pneumonia", "Pancreatitis", "Trauma"], correct: 1, rationale: "Pneumonia directly injures the lung epithelium." },
+            { id: 98, question: "True or False: Prone positioning is contraindicated in unstable spine fractures.", options: ["True", "False"], correct: 0, rationale: "Unstable spine is a contraindication for prone positioning." },
+            { id: 99, question: "Which electrolyte is mainly intracellular?", options: ["Sodium", "Chloride", "Potassium", "Bicarbonate"], correct: 2, rationale: "Potassium is the primary intracellular cation." },
+            { id: 100, question: "Hypernatremia always indicates:", options: ["Total body sodium excess", "Hypertonicity", "Hypovolemia", "Hypervolemia"], correct: 1, rationale: "Hypernatremia represents a hyperosmolar state relative to water." },
+            { id: 101, question: "Diabetes Insipidus causes:", options: ["Hyponatremia", "Hypernatremia", "Hyperkalemia", "Hypokalemia"], correct: 1, rationale: "Loss of free water in DI leads to hypernatremia." },
+            { id: 102, question: "Which test differentiates renal from extrarenal sodium loss?", options: ["Serum Osmolality", "Urine Sodium", "Serum Creatinine", "Urine pH"], correct: 1, rationale: "Urine sodium concentration helps distinguish the source of loss." },
+            { id: 103, question: "Pseudohyperkalemia can be caused by:", options: ["Hemolysis of the sample", "Diuretics", "Insulin", "Alkalosis"], correct: 0, rationale: "Lysis of RBCs in the tube releases intracellular potassium, falsely elevating the result." },
+            { id: 104, question: "Bisphosphonates are used to treat:", options: ["Hypocalcemia", "Hypercalcemia", "Hyperkalemia", "Hypokalemia"], correct: 1, rationale: "Bisphosphonates inhibit bone resorption and lower calcium levels." },
+            { id: 105, question: "Hypomagnesemia can induce resistance to:", options: ["Sodium", "Potassium", "Calcium", "Parathyroid Hormone"], correct: 3, rationale: "Low magnesium impairs PTH secretion and action, causing resistant hypocalcemia." },
+            { id: 106, question: "Normal Saline contains how much Sodium?", options: ["130 mEq/L", "140 mEq/L", "154 mEq/L", "160 mEq/L"], correct: 2, rationale: "0.9% NaCl contains 154 mEq/L of Sodium and Chloride." },
+            { id: 107, question: "Lactated Ringers is contraindicated in:", options: ["Hypovolemia", "Burns", "Severe Liver Disease", "Acidosis"], correct: 2, rationale: "In severe liver failure, lactate cannot be converted to bicarbonate and may accumulate." },
+            { id: 108, question: "Which AKI stage (AKIN) implies a 2-3x creatinine increase?", options: ["Stage 1", "Stage 2", "Stage 3", "Stage 4"], correct: 1, rationale: "Stage 2 AKIN is defined by a 200-300% increase in baseline creatinine." },
+            { id: 109, question: "Anuria is defined as urine output less than:", options: ["400 ml/day", "100 ml/day", "50 ml/day", "10 ml/day"], correct: 2, rationale: "Anuria is clinically defined as urine output < 50 ml/24 hours." },
+            { id: 110, question: "Which is a potential complication of massive Normal Saline infusion?", options: ["Metabolic Alkalosis", "Hyperchloremic Metabolic Acidosis", "Respiratory Acidosis", "Hyponatremia"], correct: 1, rationale: "The high chloride content of NS can cause hyperchloremic acidosis." },
+            { id: 111, question: "CRRT stands for:", options: ["Continuous Renal Replacement Therapy", "Chronic Renal Replacement Therapy", "Critical Renal Resuscitation Therapy", "Central Renal Recovery Technique"], correct: 0, rationale: "CRRT is Continuous Renal Replacement Therapy." },
+            { id: 112, question: "SLEDD is a hybrid of:", options: ["IHD and CRRT", "PD and HD", "SCUF and CVVH", "HD and Hemoperfusion"], correct: 0, rationale: "SLEDD combines the stability of CRRT with the efficiency of intermittent dialysis." },
+            { id: 113, question: "The 'E' in AEIOU (dialysis indications) stands for:", options: ["Edema", "Electrolytes", "Encephalopathy", "Ethanol"], correct: 1, rationale: "E stands for Electrolytes (specifically hyperkalemia)." },
+            { id: 114, question: "Which antibiotic class is associated with nephrotoxicity?", options: ["Macrolides", "Aminoglycosides", "Penicillins", "Fluoroquinolones"], correct: 1, rationale: "Aminoglycosides are notoriously nephrotoxic." },
+            { id: 115, question: "Contrast-induced nephropathy prevention includes:", options: ["Furosemide", "Hydration", "Dopamine", "Mannitol"], correct: 1, rationale: "Pre-hydration is the most effective preventive measure." },
+            { id: 116, question: "True or False: Low tidal volumes reduce mortality in ARDS.", options: ["True", "False"], correct: 0, rationale: "Low tidal volume ventilation is proven to reduce mortality." },
+            { id: 117, question: "Normal HCO3 level is:", options: ["18-22", "22-26", "26-30", "30-34"], correct: 1, rationale: "Normal bicarbonate is 22-26 mEq/L." },
+            { id: 118, question: "Base Excess < -3 suggests:", options: ["Metabolic Alkalosis", "Metabolic Acidosis", "Respiratory Alkalosis", "Respiratory Acidosis"], correct: 1, rationale: "A negative base excess indicates a metabolic acidosis." },
+            { id: 119, question: "In acute respiratory alkalosis, HCO3 decreases by:", options: ["1 for every 10 pCO2", "2 for every 10 pCO2", "3 for every 10 pCO2", "4 for every 10 pCO2"], correct: 1, rationale: "Acute compensation involves a drop of 2 mEq/L HCO3 for every 10 mmHg drop in pCO2." },
+            { id: 120, question: "Kussmaul breathing is a sign of:", options: ["Respiratory Acidosis", "Metabolic Acidosis", "Respiratory Alkalosis", "Metabolic Alkalosis"], correct: 1, rationale: "Deep, rapid breathing to blow off CO2 is a sign of metabolic acidosis." },
+            { id: 121, question: "Normal Anion Gap is calculated as:", options: ["Na - (Cl + HCO3)", "Na + K - Cl", "Na - Cl", "(Na + K) - (Cl + HCO3)"], correct: 0, rationale: "The standard formula is Na - (Cl + HCO3)." },
+            { id: 122, question: "Lactic acidosis causes:", options: ["High Gap Metabolic Acidosis", "Normal Gap Metabolic Acidosis", "Respiratory Acidosis", "Metabolic Alkalosis"], correct: 0, rationale: "Lactate is an unmeasured anion, increasing the gap." },
+            { id: 123, question: "Treatment for Opioid overdose causing Respiratory Acidosis is:", options: ["Bicarbonate", "Naloxone", "Flumazenil", "Insulin"], correct: 1, rationale: "Naloxone reverses opioid-induced respiratory depression." },
+            { id: 124, question: "Chronic vomiting leads to:", options: ["Hypokalemic Metabolic Alkalosis", "Hyperkalemic Metabolic Acidosis", "Hypochloremic Metabolic Acidosis", "Hyperchloremic Metabolic Alkalosis"], correct: 0, rationale: "Vomiting loses acid and potassium, causing alkalosis and hypokalemia." },
+            { id: 125, question: "Urine Cl < 10 mmol/L in metabolic alkalosis suggests:", options: ["Mineralocorticoid excess", "Saline responsiveness", "Bartter syndrome", "Severe hypokalemia"], correct: 1, rationale: "Low urine chloride indicates the alkalosis will respond to saline (volume) replacement." },
+            { id: 126, question: "Which is a colloid?", options: ["Plasma", "Normal Saline", "D5W", "Ringer's Lactate"], correct: 0, rationale: "Plasma is a natural colloid." },
+            { id: 127, question: "Hypertonic Saline (3%) is used for:", options: ["Dehydration", "Cerebral Edema", "Hypernatremia", "Maintenance fluid"], correct: 1, rationale: "Hypertonic saline draws water out of cells, reducing cerebral edema." },
+            { id: 128, question: "Osmotic demyelination syndrome is a risk of correcting:", options: ["Hypernatremia too fast", "Hyponatremia too fast", "Hyperkalemia too fast", "Hypokalemia too fast"], correct: 1, rationale: "Rapid correction of hyponatremia damages the myelin sheath." },
+            { id: 129, question: "Which ECG change is seen in Hypercalcemia?", options: ["Prolonged QT", "Shortened QT", "Peaked T", "U wave"], correct: 1, rationale: "Hypercalcemia shortens the QT interval." },
+            { id: 130, question: "Hypocalcemia can cause:", options: ["Muscle weakness", "Tetany", "Short QT", "Polyuria"], correct: 1, rationale: "Low calcium increases neuromuscular excitability, leading to tetany." },
+            { id: 131, question: "Refractory hypokalemia may be due to:", options: ["Hypermagnesemia", "Hypomagnesemia", "Hypercalcemia", "Hypocalcemia"], correct: 1, rationale: "Magnesium is required for potassium uptake; low Mg makes K repletion difficult." },
+            { id: 132, question: "The major buffer system in the blood is:", options: ["Phosphate", "Hemoglobin", "Bicarbonate", "Protein"], correct: 2, rationale: "The Bicarbonate-Carbonic Acid system is the primary extracellular buffer." },
+            { id: 133, question: "Compensation for metabolic alkalosis involves:", options: ["Hyperventilation", "Hypoventilation", "Renal acid excretion", "Renal bicarb generation"], correct: 1, rationale: "The lungs hypoventilate to retain CO2." },
+            { id: 134, question: "Which value indicates hypoxemia?", options: ["PaO2 < 60 mmHg", "PaO2 < 80 mmHg", "SaO2 < 95%", "pCO2 > 45 mmHg"], correct: 0, rationale: "PaO2 < 60 mmHg is a standard definition for significant hypoxemia." },
+            { id: 135, question: "Which causes a shift of the Oxygen-Hemoglobin curve to the left?", options: ["Acidosis", "Fever", "Alkalosis", "High 2,3-DPG"], correct: 2, rationale: "Alkalosis increases hemoglobin's affinity for oxygen (Left Shift)." },
+            { id: 136, question: "True or False: Oxygen saturation is a calculated value in ABG.", options: ["True", "False"], correct: 0, rationale: "Saturation is often calculated from PaO2, though oximetry measures it directly." },
+            { id: 137, question: "Hypophosphatemia causes:", options: ["Increased contractility", "Diaphragmatic weakness", "Hyperreflexia", "Hypertension"], correct: 1, rationale: "Low phosphate impairs muscle ATP production, weakening the diaphragm." },
+            { id: 138, question: "Hyperkalemia is defined as K >", options: ["5.0", "5.5", "6.0", "6.5"], correct: 1, rationale: "Technically > 5.0-5.5 depending on the lab, 5.5 is often cited as the threshold for hyperkalemia." },
+            { id: 139, question: "Kayexalate works by:", options: ["Intracellular shift", "Exchanging Na for K in gut", "Renal excretion", "Stabilizing membrane"], correct: 1, rationale: "It is a cation exchange resin in the GI tract." },
+            { id: 140, question: "Clinical sign of Hypernatremia:", options: ["Seizures", "Peaked T waves", "Tetany", "Chvostek sign"], correct: 0, rationale: "Severe hypernatremia causes cellular shrinkage and CNS symptoms like seizures." },
+            { id: 141, question: "Definition of Oliguria:", options: ["< 400 ml/day", "< 800 ml/day", "< 1000 ml/day", "< 200 ml/day"], correct: 0, rationale: "Oliguria is < 400 ml/24h or < 0.5 ml/kg/h." },
+            { id: 142, question: "Which RIFLE stage implies 'Failure'?", options: ["R", "I", "F", "L"], correct: 2, rationale: "F stands for Failure." },
+            { id: 143, question: "Pre-renal AKI urine specific gravity is usually:", options: ["Low", "High (>1.020)", "Fixed (1.010)", "Variable"], correct: 1, rationale: "The kidneys concentrate urine in pre-renal states to conserve water." },
+            { id: 144, question: "ATN urine typically shows:", options: ["Hyaline casts", "Muddy brown casts", "RBC casts", "WBC casts"], correct: 1, rationale: "Granular or 'muddy brown' casts are pathognomonic for ATN." },
+            { id: 145, question: "VAP bundle includes prophylaxis for:", options: ["Seizures", "Stress Ulcers", "Arrhythmias", "Hypoglycemia"], correct: 1, rationale: "Stress ulcer prophylaxis is a standard component." },
+            { id: 146, question: "Which is an Indirect Lung Injury causing ARDS?", options: ["Pneumonia", "Aspiration", "Sepsis", "Contusion"], correct: 2, rationale: "Sepsis causes systemic inflammation leading to indirect lung injury." },
+            { id: 147, question: "Normal P/F ratio is approximately:", options: ["200", "300", "400-500", "100"], correct: 2, rationale: "Normal PaO2 (100) / FiO2 (0.21) is roughly 475." },
+            { id: 148, question: "Permissive hypercapnia is contraindicated in:", options: ["High Intracranial Pressure", "Hypoxemia", "Low compliance", "Fever"], correct: 0, rationale: "High CO2 causes cerebral vasodilation, increasing ICP further." },
+            { id: 149, question: "In ARDS, PEEP is used to:", options: ["Decrease FRC", "Recruit collapsed alveoli", "Increase tidal volume", "Decrease PaO2"], correct: 1, rationale: "PEEP keeps alveoli open and recruits collapsed units." },
+            { id: 150, question: "True or False: Steroids are routinely recommended for all ARDS phases.", options: ["True", "False"], correct: 1, rationale: "Routine steroid use in ARDS is controversial and not universally recommended, especially in late phases." },
+            { id: 151, question: "Nitric Oxide (iNO) in ARDS acts as:", options: ["Systemic vasodilator", "Pulmonary vasodilator", "Bronchodilator", "Vasopressor"], correct: 1, rationale: "iNO selectively dilates pulmonary vessels in ventilated areas." },
+            { id: 152, question: "VAP diagnosis requires:", options: ["Positive blood culture only", "New radiographic infiltrate + clinical signs", "Fever only", "Leukocytosis only"], correct: 1, rationale: "It requires a combination of imaging and clinical signs." },
+            { id: 153, question: "Chlorhexidine oral care reduces:", options: ["Mortality", "VAP incidence", "Ventilator days", "Length of stay"], correct: 1, rationale: "It significantly reduces the rate of VAP." },
+            { id: 154, question: "Fractional Excretion of Sodium (FeNa) in Prerenal AKI is:", options: ["< 1%", "> 1%", "> 2%", "> 3%"], correct: 0, rationale: "FeNa < 1% indicates tubular function is intact and reabsorbing sodium (prerenal)." },
+            { id: 155, question: "FeNa in ATN is typically:", options: ["< 1%", "> 2%", "0%", "Variable"], correct: 1, rationale: "Tubular damage prevents sodium reabsorption, so FeNa is > 2%." },
+            { id: 156, question: "The most common cause of intrinsic renal failure is:", options: ["Glomerulonephritis", "ATN", "Interstitial Nephritis", "Vasculitis"], correct: 1, rationale: "Acute Tubular Necrosis (ATN) is the most common intrinsic cause." },
+            { id: 157, question: "Renal biopsy is indicated in:", options: ["Typical ATN", "Prerenal azotemia", "Unexplained AKI", "Obstructive uropathy"], correct: 2, rationale: "Biopsy is reserved for cases where the etiology is unclear." },
+            { id: 158, question: "Dialysis disequilibrium syndrome is caused by:", options: ["Rapid urea removal", "Rapid fluid removal", "Hyperkalemia", "Hypotension"], correct: 0, rationale: "Rapid urea clearance causes cerebral edema." },
+            { id: 159, question: "Continuous Venovenous Hemofiltration (CVVH) primarily uses:", options: ["Diffusion", "Convection", "Osmosis", "Absorption"], correct: 1, rationale: "Hemofiltration relies on convection (solvent drag)." },
+            { id: 160, question: "Hemodialysis primarily uses:", options: ["Diffusion", "Convection", "Filtration", "Absorption"], correct: 0, rationale: "HD relies on diffusion down a concentration gradient." },
+            { id: 161, question: "Which electrolyte imbalance is common in Tumor Lysis Syndrome?", options: ["Hypokalemia", "Hyperkalemia", "Hypercalcemia", "Hypophosphatemia"], correct: 1, rationale: "Cell lysis releases intracellular potassium." },
+            { id: 162, question: "Normal Magnesium level is:", options: ["1.5-2.5 mEq/L", "2.5-3.5 mEq/L", "3.5-4.5 mEq/L", "0.5-1.0 mEq/L"], correct: 0, rationale: "Normal serum Mg is 1.5-2.5 mEq/L." },
+            { id: 163, question: "Severe Hypermagnesemia causes:", options: ["Hyperreflexia", "Loss of deep tendon reflexes", "Hypertension", "Tachycardia"], correct: 1, rationale: "Loss of DTRs is a classic sign of toxicity." },
+            { id: 164, question: "Calcium Gluconate is used in Hypermagnesemia to:", options: ["Lower Mg levels", "Antagonize neuromuscular effects", "Increase excretion", "Bind Mg in gut"], correct: 1, rationale: "Calcium antagonizes the effects of Magnesium." },
+            { id: 165, question: "Colloids may increase the risk of:", options: ["Renal failure", "Liver failure", "Respiratory failure", "Heart failure"], correct: 0, rationale: "Synthetic colloids like hydroxyethyl starch are associated with AKI." },
+            { id: 166, question: "Which fluid contains no electrolytes?", options: ["D5W", "Normal Saline", "Ringer's", "Plasma-Lyte"], correct: 0, rationale: "D5W is 5% dextrose in water; it becomes free water once metabolized." },
+            { id: 167, question: "Daily water requirement for adults is approx:", options: ["15 ml/kg", "35 ml/kg", "55 ml/kg", "75 ml/kg"], correct: 1, rationale: "35 ml/kg/day is a standard estimate." },
+            { id: 168, question: "Insensible water loss occurs via:", options: ["Urine", "Stool", "Skin and Lungs", "Drains"], correct: 2, rationale: "Evaporation from skin and respiration accounts for insensible loss." },
+            { id: 169, question: "Which hormone regulates Sodium reabsorption?", options: ["Aldosterone", "ADH", "PTH", "Glucagon"], correct: 0, rationale: "Aldosterone stimulates Na reabsorption in the distal tubule." },
+            { id: 170, question: "ADH (Vasopressin) primarily regulates:", options: ["Sodium", "Potassium", "Water", "Calcium"], correct: 2, rationale: "ADH controls water reabsorption in the collecting duct." },
+            { id: 171, question: "Syndrome of Inappropriate ADH (SIADH) leads to:", options: ["Polyuria", "Water retention", "Hypernatremia", "Dehydration"], correct: 1, rationale: "Excess ADH causes water retention and dilutional hyponatremia." },
+            { id: 172, question: "Diabetes Insipidus is a lack of:", options: ["Aldosterone", "ADH effect", "Insulin", "Renin"], correct: 1, rationale: "DI is a deficiency of or resistance to ADH." },
+            { id: 173, question: "Desmopressin (DDAVP) is used to treat:", options: ["SIADH", "Central Diabetes Insipidus", "Nephrogenic DI", "Psychogenic Polydipsia"], correct: 1, rationale: "It replaces the missing ADH in central DI." },
+            { id: 174, question: "Nephrogenic DI is treated with:", options: ["Desmopressin", "Thiazide diuretics", "Fluid restriction", "Vaptans"], correct: 1, rationale: "Thiazides paradoxically reduce urine output in Nephrogenic DI." },
+            { id: 175, question: "Correction of Hypokalemia should not exceed:", options: ["10 mEq/hr peripheral", "20 mEq/hr peripheral", "40 mEq/hr peripheral", "50 mEq/hr peripheral"], correct: 0, rationale: "Max peripheral rate is 10 mEq/hr to prevent phlebitis and arrhythmias." },
+            { id: 176, question: "True or False: Hypokalemia increases risk of Digoxin toxicity.", options: ["True", "False"], correct: 0, rationale: "Hypokalemia potentiates digoxin toxicity." },
+            { id: 177, question: "Spironolactone is a:", options: ["Loop diuretic", "Thiazide", "Potassium-sparing diuretic", "Osmotic diuretic"], correct: 2, rationale: "It blocks aldosterone, retaining potassium." },
+            { id: 178, question: "Hypercalcemia of malignancy is often mediated by:", options: ["PTH", "PTHrP", "Calcitonin", "Vitamin D"], correct: 1, rationale: "PTH-related peptide mimics PTH." },
+            { id: 179, question: "First line treatment for severe symptomatic Hypercalcemia is:", options: ["Bisphosphonates", "IV Fluids (Saline)", "Steroids", "Dialysis"], correct: 1, rationale: "Volume expansion with NS promotes calcium excretion." },
+            { id: 180, question: "Which sign is seen in Hypocalcemia?", options: ["Osborn wave", "Delta wave", "Prolonged QT", "Short QT"], correct: 2, rationale: "Hypocalcemia prolongs the QT interval." },
+            { id: 181, question: "Hypomagnesemia is common in:", options: ["Renal failure", "Alcoholism", "Hypothyroidism", "Addison's disease"], correct: 1, rationale: "Malnutrition and alcohol use are major causes." },
+            { id: 182, question: "Which organ regulates Phosphate excretion?", options: ["Liver", "Lung", "Kidney", "Pancreas"], correct: 2, rationale: "The kidney is the main regulator of phosphate." },
+            { id: 183, question: "ARDS mortality is approximately:", options: ["10%", "30-40%", "80%", "90%"], correct: 1, rationale: "Mortality remains high, around 30-40%." },
+            { id: 184, question: "Barotrauma in ARDS is caused by:", options: ["High Volume", "High Pressure", "Oxygen toxicity", "Infection"], correct: 1, rationale: "High airway pressures cause alveolar rupture." },
+            { id: 185, question: "Volutrauma is caused by:", options: ["High Pressure", "Overdistension", "Atelectasis", "Inflammation"], correct: 1, rationale: "Overdistension by high tidal volumes causes volutrauma." },
+            { id: 186, question: "Atelectrauma refers to injury from:", options: ["High pressure", "Cyclic opening/closing of alveoli", "Oxygen", "Fluid"], correct: 1, rationale: "Repetitive alveolar collapse and reopening causes shear stress." },
+            { id: 187, question: "Lung Protective Strategy aims to prevent:", options: ["VILI", "VAP", "Sepsis", "DVT"], correct: 0, rationale: "Ventilator Induced Lung Injury." },
+            { id: 188, question: "Which is a contraindication to Non-Invasive Ventilation?", options: ["COPD exacerbation", "Cardiogenic edema", "Respiratory Arrest", "Mild acidosis"], correct: 2, rationale: "Patients in arrest require immediate intubation." },
+            { id: 189, question: "True or False: Succinylcholine can cause Hyperkalemia.", options: ["True", "False"], correct: 0, rationale: "It causes potassium efflux and can trigger severe hyperkalemia." },
+            { id: 190, question: "Rhabdomyolysis causes AKI via:", options: ["Hypovolemia", "Myoglobin toxicity", "Obstruction", "All of the above"], correct: 3, rationale: "It involves heme toxicity, obstruction by casts, and hypovolemia." },
+            { id: 191, question: "Urine output < 0.3 ml/kg/h for 24h is RIFLE stage:", options: ["Risk", "Injury", "Failure", "Loss"], correct: 2, rationale: "This degree of oliguria defines Failure." },
+            { id: 192, question: "Which is NOT a cause of High Anion Gap Acidosis?", options: ["Salicylates", "Lactate", "Diarrhea", "Uremia"], correct: 2, rationale: "Diarrhea causes a Normal Anion Gap acidosis." },
+            { id: 193, question: "Ethylene Glycol ingestion leads to:", options: ["Oxalate crystals in urine", "Ketones", "High Osmolar Gap only", "Alkalosis"], correct: 0, rationale: "Calcium oxalate crystals are a hallmark." },
+            { id: 194, question: "Normal Chloride level is:", options: ["85-95", "96-106", "106-116", "116-126"], correct: 1, rationale: "Normal chloride is 96-106 mEq/L." },
+            { id: 195, question: "Isotonic Hyponatremia is often 'Pseudohyponatremia' due to:", options: ["Hyperglycemia", "Hyperlipidemia/Proteinemia", "Dehydration", "SIADH"], correct: 1, rationale: "High lipids or proteins displace water, lowering measured sodium." },
+            { id: 196, question: "Hypertonic Hyponatremia is caused by:", options: ["Hyperglycemia", "Lipids", "Heart Failure", "Cirrhosis"], correct: 0, rationale: "Glucose draws water into vessels, diluting sodium." },
+            { id: 197, question: "Correction factor for Sodium in Hyperglycemia is approx:", options: ["1.6 mEq per 100 glucose", "2.6 mEq per 100 glucose", "0.6 mEq per 100 glucose", "1.0 mEq per 100 glucose"], correct: 0, rationale: "Sodium drops by ~1.6 for every 100 mg/dL glucose over 100." },
+            { id: 198, question: "True or False: Hepatorenal syndrome is a functional renal failure.", options: ["True", "False"], correct: 0, rationale: "It is functional vasoconstriction without structural damage initially." },
+            { id: 199, question: "Treatment for Hepatorenal syndrome often involves:", options: ["Albumin + Vasoconstrictors", "Diuretics", "NSAIDS", "ACE inhibitors"], correct: 0, rationale: "Splanchnic vasoconstrictors (e.g., terlipressin) and albumin." },
+            { id: 200, question: "What is the primary buffer in the urine?", options: ["Bicarbonate", "Phosphate/Ammonia", "Hemoglobin", "Protein"], correct: 1, rationale: "Phosphate and Ammonia are the main urinary buffers." }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        // Seeded Random Generator (Linear Congruential Generator)
+        let seed = 12345; // Fixed seed for consistent question order
+        function seededRandom() {
+            const x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        }
+
+        // Shuffle Questions (Deterministic using seededRandom)
+        for (let i = quizData.length - 1; i > 0; i--) {
+            const j = Math.floor(seededRandom() * (i + 1));
+            [quizData[i], quizData[j]] = [quizData[j], quizData[i]];
+        }
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

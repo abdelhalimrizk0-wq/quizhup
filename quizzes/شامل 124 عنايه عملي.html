@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">شامل عنايه عملي </h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-check text-4xl text-blue-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- QUIZ DATA: Questions are now statically shuffled (fixed random order) ---
+        const quizData = [
+    {
+        "question": "What is the primary risk of using femoral vein for CVC?",
+        "options": [
+            "Infection and Hematoma",
+            "Pneumothorax",
+            "Arrhythmia",
+            "Air embolism"
+        ],
+        "correct": 0,
+        "rationale": "Femoral vein... increased risk for hematoma, bleeding and infection."
+    },
+    {
+        "question": "What is the accepted Gastric Residual Volume (GRV) range to continue feeding in critically ill patients?",
+        "options": [
+            "250 to 500 ml",
+            "Less than 50 ml",
+            "Greater than 600 ml",
+            "Zero residual volume"
+        ],
+        "correct": 0,
+        "rationale": "A GRV of (250-500) ml is accepted to optimize the delivery of enteral nutrition."
+    },
+    {
+        "question": "What is the purpose of the 'flush back' step in CVC monitoring?",
+        "options": [
+            "To ensure proper placement and patency",
+            "To measure pressure",
+            "To administer meds",
+            "To clean the skin"
+        ],
+        "correct": 0,
+        "rationale": "Perform flush back... To ensure proper placement & patency of CVC."
+    },
+    {
+        "question": "Which type of CVC is tunneled under the skin to decrease infection risk?",
+        "options": [
+            "Skin tunneled catheters",
+            "PICC line",
+            "Non-tunneled catheters",
+            "Femoral catheters"
+        ],
+        "correct": 0,
+        "rationale": "Skin tunneled catheters... advantage is to decrease the risk of infection."
+    },
+    {
+        "question": "What is the primary action if a patient coughs during suction catheter insertion?",
+        "options": [
+            "Hold catheter, pull back 1 cm, then resume",
+            "Withdraw completely and stop suctioning",
+            "Continue suctioning vigorously",
+            "Insert the catheter deeper"
+        ],
+        "correct": 0,
+        "rationale": "If patient coughs, briefly hold the catheter, pull it 1 cm back then resume suction."
+    },
+    {
+        "question": "Which oxygen device delivers 24-44% oxygen?",
+        "options": [
+            "Nasal Cannula",
+            "Simple Mask",
+            "Non-rebreather Mask",
+            "Oxygen Hood"
+        ],
+        "correct": 0,
+        "rationale": "Nasal Cannula... deliver FiO2 24%-44%."
+    },
+    {
+        "question": "What is the purpose of the one-way valve in the Non-Rebreather mask?",
+        "options": [
+            "Prevent exhaled air from entering the reservoir bag",
+            "Allow room air mixing",
+            "Increase humidity",
+            "Decrease oxygen concentration"
+        ],
+        "correct": 0,
+        "rationale": "The valve prevents entry of exhaled air into the bag."
+    },
+    {
+        "question": "What is the advantage of closed-suction technique?",
+        "options": [
+            "Maintains oxygenation and PEEP",
+            "Cheaper than open suction",
+            "Requires no sterile gloves",
+            "Allows better visualization"
+        ],
+        "correct": 0,
+        "rationale": "Allows for the maintenance of oxygenation and ventilation support... beneficial when high levels of PEEP are required."
+    },
+    {
+        "question": "What characterizes Cheyne-Stokes respiration?",
+        "options": [
+            "Gradual hyperpnoea/hypopnoea and Apnoea",
+            "Deep rapid breathing",
+            "Gasps only",
+            "Normal regular breathing"
+        ],
+        "correct": 0,
+        "rationale": "Cheyne-Stokes respiration: Periodic breathing: Gradual hyperpnoea/hypopnoea and Apnoea."
+    },
+    {
+        "question": "What is the approximate oxygen concentration delivered by a nasal cannula at 4 L/min?",
+        "options": [
+            "36 percent",
+            "24 percent",
+            "28 percent",
+            "44 percent"
+        ],
+        "correct": 0,
+        "rationale": "4 L/min = 36%."
+    },
+    {
+        "question": "What complication causes blindness in premature infants?",
+        "options": [
+            "Retinopathy of prematurity",
+            "Cataracts",
+            "Glaucoma",
+            "Corneal ulcer"
+        ],
+        "correct": 0,
+        "rationale": "Retinopathy of prematurity... Blindness due to vasoconstriction."
+    },
+    {
+        "question": "Where does the tip of a correctly placed Central Venous Catheter (CVC) lie?",
+        "options": [
+            "Within the lower third of the vena cava",
+            "Inside the right atrium of the heart",
+            "In the mid-section of the subclavian vein",
+            "At the junction of the jugular and subclavian veins"
+        ],
+        "correct": 0,
+        "rationale": "The catheter tip lies within the lower third of vena cava (superior or inferior)."
+    },
+    {
+        "question": "What is the primary purpose of Endotracheal Intubation?",
+        "options": [
+            "Establish and maintain a patent airway",
+            "Monitor central venous pressure",
+            "Administer parenteral nutrition",
+            "Measure cardiac output"
+        ],
+        "correct": 0,
+        "rationale": "Primary purpose of establishing and maintaining a patent airway and to ensure adequate exchange of oxygen and carbon dioxide."
+    },
+    {
+        "question": "What is the definition of Refeeding Syndrome?",
+        "options": [
+            "Electrolyte imbalances in malnourished patients starting feed",
+            "Vomiting after feeding",
+            "Diarrhea from cold formula",
+            "Allergic reaction to formula"
+        ],
+        "correct": 0,
+        "rationale": "Refeeding syndrome, dangerous electrolyte imbalances that may occur in people who are very malnourished."
+    },
+    {
+        "question": "What is the purpose of the 'Pilot balloon' during intubation care?",
+        "options": [
+            "To monitor cuff pressure",
+            "To inflate the lungs",
+            "To suction the mouth",
+            "To anchor the tube"
+        ],
+        "correct": 0,
+        "rationale": "Pilot balloon connected to Inflated cuff (Diagram)."
+    },
+    {
+        "question": "What is a sign of fluid volume deficit?",
+        "options": [
+            "Increased urine specific gravity",
+            "Pulmonary congestion",
+            "Dependent edema",
+            "Sudden weight gain"
+        ],
+        "correct": 0,
+        "rationale": "Signs of fluid volume deficit: Increased urine specific gravity."
+    },
+    {
+        "question": "How long should pressure be applied to the site after CVC removal?",
+        "options": [
+            "5 minutes",
+            "1 minute",
+            "15 minutes",
+            "30 seconds"
+        ],
+        "correct": 0,
+        "rationale": "Apply pressure over the puncture site with a sterile gauze 4*4 for 5 minutes till bleeding is stopped."
+    },
+    {
+        "question": "What is the term for visual inspection of the CVC site?",
+        "options": [
+            "Assessment",
+            "Palpation",
+            "Percussion",
+            "Auscultation"
+        ],
+        "correct": 0,
+        "rationale": "Assess the CVC site for presence of pain, swelling..."
+    },
+    {
+        "question": "What is the recommended position for a patient with a suspected air embolus after CVC removal?",
+        "options": [
+            "Left side in Trendelenburg position",
+            "Right side in Fowler position",
+            "Supine with legs flat",
+            "Sitting upright"
+        ],
+        "correct": 0,
+        "rationale": "Position patient on the left side & in Trendelenburg position if an embolus suspected."
+    },
+    {
+        "question": "What is a disadvantage of the Simple Face Mask?",
+        "options": [
+            "Possible aspiration of vomitus",
+            "Cannot deliver more than 20% oxygen",
+            "Cannot be used with humidity",
+            "Is very expensive"
+        ],
+        "correct": 0,
+        "rationale": "Possible aspiration of vomitus while mask in place."
+    },
+    {
+        "question": "What is the purpose of the moisture-proof pad in CVC preparation?",
+        "options": [
+            "To avoid wetting the bed",
+            "To keep the patient warm",
+            "To sterile the field",
+            "To cushion the back"
+        ],
+        "correct": 0,
+        "rationale": "Place the moisture proof under patient's back... To avoid wetting the bed."
+    },
+    {
+        "question": "How often should the nurse observe the catheter insertion site for bleeding during the first 2 hours post-insertion?",
+        "options": [
+            "Every 15 to 30 minutes",
+            "Every 45 to 60 minutes",
+            "Every 5 to 10 minutes",
+            "Continuously without interruption"
+        ],
+        "correct": 0,
+        "rationale": "Observe the catheter insertion site for bleeding or hematoma every 15-30 minutes for the first 2hrs after insertion."
+    },
+    {
+        "question": "What characterizes Kussmaul breathing?",
+        "options": [
+            "Hyperpnoea associated with metabolic acidosis",
+            "Periodic breathing with apnea",
+            "Irregular breathing pattern",
+            "Gradual hyperpnoea and hypopnoea"
+        ],
+        "correct": 0,
+        "rationale": "Kussmaul breathing: Metabolic acidosis... Hyperpnoea."
+    },
+    {
+        "question": "Where is the Phlebostatic axis located?",
+        "options": [
+            "Fifth intercostal space at the midaxillary line",
+            "Fourth intercostal space at the midclavicular line",
+            "Second intercostal space at the sternal border",
+            "Sixth intercostal space at the anterior axillary line"
+        ],
+        "correct": 0,
+        "rationale": "Locate the zero point in the patient chest (fifth intercostal space at the midaxillary line)."
+    },
+    {
+        "question": "What is the purpose of the 'flush back' step in CVC monitoring?",
+        "options": [
+            "To ensure proper placement and patency",
+            "To measure pressure",
+            "To administer meds",
+            "To clean the skin"
+        ],
+        "correct": 0,
+        "rationale": "Perform flush back... To ensure proper placement & patency of CVC."
+    },
+    {
+        "question": "What defines oxygen toxicity?",
+        "options": [
+            "Oxygen concentration > 50% over 24-28 hours",
+            "Oxygen concentration > 21% for 1 hour",
+            "PaO2 > 60 mmHg",
+            "Use of nasal cannula for 2 days"
+        ],
+        "correct": 0,
+        "rationale": "Oxygen concentration greater than 50% over 24-28 hr can cause pathological changes."
+    },
+    {
+        "question": "What is the definition of CVC?",
+        "options": [
+            "Sterile catheter inserted into a large central vein",
+            "Catheter in a peripheral arm vein",
+            "Arterial catheter",
+            "Urinary catheter"
+        ],
+        "correct": 0,
+        "rationale": "Central Venous Catheter (CVC) is a sterile catheter... inserted into a large central vein."
+    },
+    {
+        "question": "What is the standard depth of ETT insertion at the teeth for an adult male?",
+        "options": [
+            "23 cm",
+            "21 cm",
+            "18 cm",
+            "25 cm"
+        ],
+        "correct": 0,
+        "rationale": "Note position of tube at teeth (21cm for women and 23cm for men)."
+    },
+    {
+        "question": "What is the function of the Murphy eye?",
+        "options": [
+            "Provides an alternative air passage",
+            "Connects to the ventilator",
+            "Inflates the cuff",
+            "Measures pressure"
+        ],
+        "correct": 0,
+        "rationale": "Component of ETT, serves as alternate pathway if tip occluded (Standard knowledge implied by diagram)."
+    },
+    {
+        "question": "What does a Riker Sedation-Agitation Scale score of 4 indicate?",
+        "options": [
+            "Calm and Cooperative",
+            "Sedated",
+            "Agitated",
+            "Dangerous Agitation"
+        ],
+        "correct": 0,
+        "rationale": "Score 4: Calm and Cooperative - Calm, awakens easily, follows commands."
+    },
+    {
+        "question": "What does Biot's respiration indicate?",
+        "options": [
+            "Neuron damage/Poor prognosis",
+            "Diabetic Ketoacidosis",
+            "Sleep Apnea",
+            "Heart Failure"
+        ],
+        "correct": 0,
+        "rationale": "Biot's respiration... Poor prognosis, Neuron damage."
+    },
+    {
+        "question": "Why is the lumen primed with saline before CVC insertion?",
+        "options": [
+            "To prevent introduction of air into the blood stream",
+            "To numb the vessel",
+            "To test the catheter strength",
+            "To lubricate the wire"
+        ],
+        "correct": 0,
+        "rationale": "Prime the CVC lumens with saline... To prevent introduction of air into blood stream."
+    },
+    {
+        "question": "What is the advantage of a T-Piece?",
+        "options": [
+            "Precise FiO2 delivery and high humidity",
+            "Allows patient to talk",
+            "No tubing required",
+            "Used for home oxygen"
+        ],
+        "correct": 0,
+        "rationale": "High humidity prevents airway drying... Precise FiO2 can be delivered."
+    },
+    {
+        "question": "What is the score for 'Extension response to pain' in FOUR score motor?",
+        "options": [
+            "1",
+            "2",
+            "3",
+            "0"
+        ],
+        "correct": 0,
+        "rationale": "Extension response to pain: 1."
+    },
+    {
+        "question": "Which assessment finding would indicate a need to stop NG feeding?",
+        "options": [
+            "GRV greater than 500 cc",
+            "GRV of 100 cc",
+            "Active bowel sounds",
+            "Absence of nausea"
+        ],
+        "correct": 0,
+        "rationale": "If GRV more than 500cc stop feeding."
+    },
+    {
+        "question": "What is the purpose of scrubbing the hub before sampling?",
+        "options": [
+            "Prevent introduction of microorganisms",
+            "Remove blood clots",
+            "Lubricate the port",
+            "Remove air"
+        ],
+        "correct": 0,
+        "rationale": "Cleanse the access site... To prevent introduction of microorganism."
+    },
+    {
+        "question": "Which of the following indicates correct ETT placement upon auscultation?",
+        "options": [
+            "Breath sounds heard on both sides of the chest",
+            "Gurgling sounds heard over the stomach",
+            "Breath sounds heard only on the right side",
+            "No breath sounds heard anywhere"
+        ],
+        "correct": 0,
+        "rationale": "Auscultation of the chest to hear breath sounds on both sides of the chest."
+    },
+    {
+        "question": "What is a major complication of enteral feeding related to the lungs?",
+        "options": [
+            "Aspiration",
+            "Pneumothorax",
+            "Embolism",
+            "Fibrosis"
+        ],
+        "correct": 0,
+        "rationale": "Aspiration, which is food going into the lungs."
+    },
+    {
+        "question": "How often should bowel sounds be auscultated in patients with enteral feeding?",
+        "options": [
+            "Every 8 hours",
+            "Every 24 hours",
+            "Every hour",
+            "Before every bolus only"
+        ],
+        "correct": 0,
+        "rationale": "Auscultate the patient bowel sound every 8 hours."
+    },
+    {
+        "question": "What is the correct way to secure an ETT with adhesive tape?",
+        "options": [
+            "Wrap double-sided tape around head and torn edges around ETT",
+            "Tape only to the upper lip",
+            "Tape to the nose and chin",
+            "Use a single strip across the mouth"
+        ],
+        "correct": 0,
+        "rationale": "Secure tube by wrapping double-sided tape around patient's head and torn tape edges around ETT."
+    },
+    {
+        "question": "What is the CVP value in a water manometer system?",
+        "options": [
+            "5 to 10 cmH2O",
+            "2 to 6 cmH2O",
+            "10 to 20 cmH2O",
+            "0 to 5 cmH2O"
+        ],
+        "correct": 0,
+        "rationale": "Normal CVP value = (5-10) CmH20."
+    },
+    {
+        "question": "What should be done if the catheter tip is cut off during removal?",
+        "options": [
+            "Place in sterile container and send for culture",
+            "Discard in sharp bin",
+            "Wash with saline",
+            "Reinsert it"
+        ],
+        "correct": 0,
+        "rationale": "Cut off tip of the catheter into a sterile container & send it to lab for culture."
+    },
+    {
+        "question": "How often should blood glucose be monitored for patients on enteral feeding?",
+        "options": [
+            "Every 6 hours",
+            "Every 24 hours",
+            "Every hour",
+            "Only if diabetic"
+        ],
+        "correct": 0,
+        "rationale": "Monitor patient's urine & blood glucose level / 6 hours."
+    },
+    {
+        "question": "What is a key advantage of the Venturi mask?",
+        "options": [
+            "Delivery of a very predictable FiO2",
+            "It is the cheapest device available",
+            "It allows for rebreathing of carbon dioxide",
+            "It delivers 100% oxygen at all times"
+        ],
+        "correct": 0,
+        "rationale": "Advantages: Delivery of a very predictable FiO2."
+    },
+    {
+        "question": "What is the purpose of applying cricoid pressure during intubation?",
+        "options": [
+            "To push the vocal cords downward for visualization",
+            "To preventing gastric distension",
+            "To stabilize the cervical spine",
+            "To stop bleeding from the throat"
+        ],
+        "correct": 0,
+        "rationale": "Apply firm, downward pressure on the cricoid ring, pushing the vocal cords downward... To visualize vocal cords clearly."
+    },
+    {
+        "question": "How should a patient be positioned during nasogastric feeding?",
+        "options": [
+            "Fowler position with elevated head of bed",
+            "Supine position",
+            "Trendelenburg position",
+            "Prone position"
+        ],
+        "correct": 0,
+        "rationale": "Position patient (fowler /lateral with elevated HOB) to prevent aspiration."
+    },
+    {
+        "question": "How is 3+ edema described?",
+        "options": [
+            "6mm deep pit",
+            "4mm deep pit",
+            "2mm depression",
+            "8mm very deep pit"
+        ],
+        "correct": 0,
+        "rationale": "3+: 6mm deep pit. (Note: The text explicitly links 3+ to 6mm in the grading image/table)."
+    },
+    {
+        "question": "What is the specific indication for a double-lumen Endotracheal Tube?",
+        "options": [
+            "Isolation of one lung from another",
+            "Routine surgery",
+            "Upper airway obstruction",
+            "Cardiac arrest"
+        ],
+        "correct": 0,
+        "rationale": "Indications for double lumen ETT: Isolation of one lung from another due to infection and/or hemorrhage."
+    },
+    {
+        "question": "What is the oxygen flow for a Partial Rebreathing Mask?",
+        "options": [
+            "7 to 15 L/min",
+            "1 to 5 L/min",
+            "20 L/min",
+            "2 to 4 L/min"
+        ],
+        "correct": 0,
+        "rationale": "On 7-15 L/min it delivers 60% to 80%."
+    },
+    {
+        "question": "What must be done to the CVC lumens immediately before insertion?",
+        "options": [
+            "Prime with saline",
+            "Fill with heparin",
+            "Leave empty",
+            "Fill with antibiotic"
+        ],
+        "correct": 0,
+        "rationale": "Prime the CVC lumens with saline before insertion."
+    },
+    {
+        "question": "What is a sign of fluid volume excess?",
+        "options": [
+            "Jugular vein distention",
+            "Decreased skin turgor",
+            "Thirst",
+            "Postural hypotension"
+        ],
+        "correct": 0,
+        "rationale": "Signs of fluid volume excess: Jugular vein distention."
+    },
+    {
+        "question": "What action minimizes the risk of air embolism during CVC removal?",
+        "options": [
+            "Covering the site with occlusive sterile dressing",
+            "Sitting the patient upright",
+            "Asking the patient to inhale deeply",
+            "Applying ice to the site"
+        ],
+        "correct": 0,
+        "rationale": "Apply occlusive sterile dressing... To prevent air entry."
+    },
+    {
+        "question": "What is the formula for pediatric ETT size?",
+        "options": [
+            "4.5 + (age in years / 4)",
+            "Age / 2 + 10",
+            "Age + 2",
+            "Weight / 10"
+        ],
+        "correct": 0,
+        "rationale": "Pediatric size... 4.5+4age in years/4 (Note: Text formula written as 4.5+4age... likely typo in text, standard is age/4+4, but adhering to text representation)."
+    },
+    {
+        "question": "What is a 'Port' type CVC?",
+        "options": [
+            "Implanted entirely under the skin",
+            "Inserted in the arm",
+            "Exits through the chest wall",
+            "Inserted in the leg"
+        ],
+        "correct": 0,
+        "rationale": "Implanted port: A port is similar to a tunneled catheter but is left entirely under the skin."
+    },
+    {
+        "question": "In the FOUR score, what score is given for 'Eyelids open but not tracking'?",
+        "options": [
+            "3",
+            "4",
+            "2",
+            "1"
+        ],
+        "correct": 0,
+        "rationale": "Eyelids open but not tracking: Score 3."
+    },
+    {
+        "question": "What is the purpose of monitoring end-tidal CO2 during intubation?",
+        "options": [
+            "To verify tube placement",
+            "To measure oxygen saturation",
+            "To prevent aspiration",
+            "To assess consciousness"
+        ],
+        "correct": 0,
+        "rationale": "Verify tube placement... Wave form CO2 with numeric reading."
+    },
+    {
+        "question": "What is the purpose of the 'Murphy eye' in an ETT?",
+        "options": [
+            "To allow air passage if the main tip is occluded",
+            "To inflate the cuff",
+            "To connect to the ventilator",
+            "To monitor CO2 levels"
+        ],
+        "correct": 0,
+        "rationale": "Murphy eye is a component of ETT (Visual identification in text diagram)."
+    },
+    {
+        "question": "What is the 'Gold Standard' for confirming ETT placement implied by the text?",
+        "options": [
+            "Chest X-ray",
+            "Auscultation",
+            "Pulse oximetry",
+            "Observation of chest movement"
+        ],
+        "correct": 0,
+        "rationale": "Verify confirmation of correct tube position by chest x-ray (listed in Post care)."
+    },
+    {
+        "question": "What is the primary purpose of performing a 'flush back' after CVC insertion?",
+        "options": [
+            "To ensure accurate placement and patency",
+            "To administer the first dose of heparin",
+            "To clear the line of any residual air",
+            "To check for arterial pulsatile flow"
+        ],
+        "correct": 0,
+        "rationale": "Perform flush back to ensure accurate placement of CVC and maintain the patency of the catheter."
+    },
+    {
+        "question": "Before drawing a blood sample from a CVC, what must the nurse do regarding infusions?",
+        "options": [
+            "Stop solution and medications temporarily",
+            "Increase the flow rate of the infusion",
+            "Flush with heparin before stopping",
+            "Change the IV tubing immediately"
+        ],
+        "correct": 0,
+        "rationale": "Stop solution and medications before sampling to obtain accurate results."
+    },
+    {
+        "question": "Which vein is rarely used for CVC insertion due to increased risk for hematoma and infection?",
+        "options": [
+            "Femoral vein",
+            "Internal jugular vein",
+            "Subclavian vein",
+            "Basilic vein"
+        ],
+        "correct": 0,
+        "rationale": "Femoral vein is rarely used due to increased risk for hematoma, bleeding and infection."
+    },
+    {
+        "question": "Which Glasgow Coma Scale (GCS) score represents a severe head injury?",
+        "options": [
+            "3 to 8",
+            "9 to 12",
+            "13 to 15",
+            "15 only"
+        ],
+        "correct": 0,
+        "rationale": "Severe 3-8."
+    },
+    {
+        "question": "Why is the Trendelenburg position recommended during CVC insertion unless contraindicated?",
+        "options": [
+            "To reduce the risk for air embolism",
+            "To decrease intracranial pressure",
+            "To improve patient comfort",
+            "To prevent arterial puncture"
+        ],
+        "correct": 0,
+        "rationale": "Place the bed in Trendelenburg's position to reduce the risk for air embolism."
+    },
+    {
+        "question": "Why is the patient's head turned away from the site during CVC dressing change?",
+        "options": [
+            "To decrease risk of contamination",
+            "To improve comfort",
+            "To stretch the skin",
+            "To visualize the neck"
+        ],
+        "correct": 0,
+        "rationale": "Have the patient turn his head away from the catheter insertion site... To decrease the risk for contamination."
+    },
+    {
+        "question": "What is the definition of a 'bolus' feeding?",
+        "options": [
+            "Using a syringe to deliver formula by gravity",
+            "Continuous feeding via a pump",
+            "Feeding via a dropper",
+            "Intravenous nutrition"
+        ],
+        "correct": 0,
+        "rationale": "Intermittent bolus feeding... Pour feeding in syringe barrel... Allow feeding to flow in by gravity."
+    },
+    {
+        "question": "What is the purpose of the zeroing stopcock in CVP monitoring?",
+        "options": [
+            "To zero the monitoring system to atmospheric pressure",
+            "To inject medication",
+            "To draw blood",
+            "To flush the line"
+        ],
+        "correct": 0,
+        "rationale": "Zero the system by turning the stopcock off to the patient and open to air."
+    },
+    {
+        "question": "What is the 'sniffing position' used for?",
+        "options": [
+            "To align the oral, pharyngeal and laryngeal axes",
+            "To prevent aspiration during feeding",
+            "To increase intracranial pressure",
+            "To facilitate central line insertion"
+        ],
+        "correct": 0,
+        "rationale": "Extension of the head into the sniffing position serve to align the oral, pharyngeal and laryngeal axis."
+    },
+    {
+        "question": "What should the nurse do if the GRV is greater than 500 ml?",
+        "options": [
+            "Stop feeding and consider prokinetic agents",
+            "Return the aspirate and continue feeding",
+            "Increase the feeding rate",
+            "Flush with 100 ml of water"
+        ],
+        "correct": 0,
+        "rationale": "If GRV more than 500cc stop feeding, consider use of prokinetic agents."
+    },
+    {
+        "question": "What is the Behavioral Pain Scale used for?",
+        "options": [
+            "Unconscious patients",
+            "Conscious patients",
+            "Pediatric patients",
+            "Outpatients"
+        ],
+        "correct": 0,
+        "rationale": "Unconscious patients (Behavioral pain scale)."
+    },
+    {
+        "question": "When is an Oxygen Tent used?",
+        "options": [
+            "To provide higher oxygen to head/shoulders or body",
+            "For precise COPD management",
+            "For intubated patients",
+            "For adults primarily"
+        ],
+        "correct": 0,
+        "rationale": "Canopy placed over the head and shoulders or over the entire body."
+    },
+    {
+        "question": "What is the flow rate for a Non-Rebreathing Mask?",
+        "options": [
+            "10 to 15 liters per minute",
+            "5 to 10 liters per minute",
+            "1 to 6 liters per minute",
+            "2 to 4 liters per minute"
+        ],
+        "correct": 0,
+        "rationale": "Non-rebreathing mask... flow rate of 10-15 L/min."
+    },
+    {
+        "question": "Why is a rolled blanket placed between the patient's scapulae during subclavian CVC insertion?",
+        "options": [
+            "To extend the neck",
+            "To improve patient comfort",
+            "To restrain the patient",
+            "To visualize the femoral vein"
+        ],
+        "correct": 0,
+        "rationale": "For subclavian insertion: Place a rolled blanket between patient's scapulae to extend the neck."
+    },
+    {
+        "question": "What is the specific rationale for wiping the top of the lidocaine vial with alcohol before use?",
+        "options": [
+            "To decrease infection risk and facilitate aspiration",
+            "To warm the anesthetic agent",
+            "To remove the expiration date label",
+            "To check the pressure inside the vial"
+        ],
+        "correct": 0,
+        "rationale": "Wipe the top of the lidocaine vial with alcohol to decrease risk of infection and facilitate aspiration the anesthetic agent."
+    },
+    {
+        "question": "What flow rate is used for an Oxygen Hood?",
+        "options": [
+            "10 to 15 liters per minute",
+            "1 to 5 liters per minute",
+            "20 liters per minute",
+            "5 to 8 liters per minute"
+        ],
+        "correct": 0,
+        "rationale": "Oxygen concentration of 80 to 90% can be achieved with an oxygen flow rate of 10 to 15 L/min."
+    },
+    {
+        "question": "What complication can occur if the ETT is advanced too far?",
+        "options": [
+            "Endobronchial intubation",
+            "Esophageal intubation",
+            "Vocal cord paralysis",
+            "Dental trauma"
+        ],
+        "correct": 0,
+        "rationale": "Complications: Endobronchial intubation."
+    },
+    {
+        "question": "How long should the patient maintain bed rest after CVC removal?",
+        "options": [
+            "30 minutes",
+            "2 hours",
+            "10 minutes",
+            "24 hours"
+        ],
+        "correct": 0,
+        "rationale": "Maintain bed rest for 30 minutes after catheter removal."
+    },
+    {
+        "question": "How often should the enteral feeding bag and administration set be changed?",
+        "options": [
+            "Every 24 hours",
+            "Every 12 hours",
+            "Every 48 hours",
+            "Every 7 days"
+        ],
+        "correct": 0,
+        "rationale": "Change the bag and set every 24 hours."
+    },
+    {
+        "question": "What is the purpose of hyperoxygenation before suctioning?",
+        "options": [
+            "To prevent hypoxemia and atelectasis",
+            "To clean the airway",
+            "To sedate the patient",
+            "To cough reflex stimulation"
+        ],
+        "correct": 0,
+        "rationale": "To prevent mucosal trauma, hypoxemia and atelectasis."
+    },
+    {
+        "question": "Which oxygen device can cause feelings of claustrophobia?",
+        "options": [
+            "Non-rebreathing Mask",
+            "Nasal Cannula",
+            "T-piece",
+            "Tracheostomy collar"
+        ],
+        "correct": 0,
+        "rationale": "Disadvantages: Uncomfortable if tight fit, with possible feelings of claustrophobia."
+    },
+    {
+        "question": "Which condition is a contraindication for endotracheal intubation?",
+        "options": [
+            "Severe airway trauma or obstruction",
+            "Respiratory arrest",
+            "Cardiac arrest",
+            "Inability to protect the airway"
+        ],
+        "correct": 0,
+        "rationale": "Contraindications: Severe airway trauma or obstruction that does not permit safe passage of an endotracheal tube."
+    },
+    {
+        "question": "What is the normal Central Venous Pressure (CVP) range when using a hemodynamic monitoring system?",
+        "options": [
+            "2 to 6 mmHg",
+            "5 to 10 mmHg",
+            "10 to 15 mmHg",
+            "0 to 2 mmHg"
+        ],
+        "correct": 0,
+        "rationale": "Normal CVP value = (2-6) mmHg."
+    },
+    {
+        "question": "Why is routine instillation of normal saline before suctioning not recommended?",
+        "options": [
+            "It dislodges bacteria and decreases oxygenation",
+            "It causes tracheal stenosis",
+            "It increases the viscosity of secretions",
+            "It causes hypertension"
+        ],
+        "correct": 0,
+        "rationale": "May contribute to lower airway contamination secondary to the mechanical dislodgment of bacteria... decreases oxygenation."
+    },
+    {
+        "question": "How long should the patient be hyper-oxygenated with 100% oxygen before intubation?",
+        "options": [
+            "2 minutes",
+            "5 minutes",
+            "30 seconds",
+            "10 minutes"
+        ],
+        "correct": 0,
+        "rationale": "Hyper-oxygenate of the patient with 100% oxygen for 2 minutes."
+    },
+    {
+        "question": "What is a Riker score of 1?",
+        "options": [
+            "Unarousable",
+            "Very Sedated",
+            "Sedated",
+            "Calm"
+        ],
+        "correct": 0,
+        "rationale": "1: Unarousable - Minimal or no response to noxious stimuli."
+    },
+    {
+        "question": "At what point in the respiratory cycle should CVP be read?",
+        "options": [
+            "End of expiration",
+            "Peak of inspiration",
+            "Mid-inspiration",
+            "During coughing"
+        ],
+        "correct": 0,
+        "rationale": "Read the CVP at the end of expiration to minimize the effect of intrathoracic pressure."
+    },
+    {
+        "question": "How is the 'sniffing position' achieved in non-trauma patients?",
+        "options": [
+            "Elevating head 10cm with pads under occiput",
+            "Turning head to the side",
+            "Flexing chin to chest",
+            "Lying completely flat"
+        ],
+        "correct": 0,
+        "rationale": "Elevating the patient's head about 10cm with pads under the occiput."
+    },
+    {
+        "question": "Which oxygen device delivers the highest concentration of oxygen (80-95%)?",
+        "options": [
+            "Non-rebreathing mask",
+            "Partial rebreathing mask",
+            "Venturi mask",
+            "Simple face mask"
+        ],
+        "correct": 0,
+        "rationale": "Non-rebreathing mask... ensure that a high concentration of oxygen is delivered (80-95%)."
+    },
+    {
+        "question": "What is the FOUR score used for?",
+        "options": [
+            "Assessing consciousness in intubated patients",
+            "Assessing pain",
+            "Assessing sedation",
+            "Assessing urine output"
+        ],
+        "correct": 0,
+        "rationale": "Full Outline of UnResponsiveness (FOUR) score... components include Respiration (intubated logic included)."
+    },
+    {
+        "question": "What is a contraindication for using the Trendelenburg position during CVC insertion?",
+        "options": [
+            "Increased Intracranial Pressure (ICP)",
+            "Hypovolemia",
+            "Hypertension",
+            "Tachycardia"
+        ],
+        "correct": 0,
+        "rationale": "Contraindicated in cases of increased ICP."
+    },
+    {
+        "question": "Which condition causes decreased CVP?",
+        "options": [
+            "Blood loss",
+            "Cardiac tamponade",
+            "Pulmonary hypertension",
+            "Right ventricular failure"
+        ],
+        "correct": 0,
+        "rationale": "Conditions Causing Decreased CVP: Blood loss, Fluid loss."
+    },
+    {
+        "question": "Where does a PICC line terminate?",
+        "options": [
+            "Superior Vena Cava",
+            "Subclavian Vein",
+            "Brachial Vein",
+            "Right Ventricle"
+        ],
+        "correct": 0,
+        "rationale": "The tip is positioned in the superior vena cava."
+    },
+    {
+        "question": "What instructions should be given to the patient during CVC removal to prevent air embolism?",
+        "options": [
+            "Take a deep breath and hold it",
+            "Breathe rapidly and shallowly",
+            "Cough continuously",
+            "Exhale fully and hold"
+        ],
+        "correct": 0,
+        "rationale": "Instruct the patient to take a deep breath and hold it... To minimize air that may be accidentally drawn into circulation."
+    },
+    {
+        "question": "What is the correct position for the patient's head during femoral CVC insertion?",
+        "options": [
+            "Turned away from the insertion site",
+            "Neutral position",
+            "Flexed towards the chest",
+            "Extended backwards"
+        ],
+        "correct": 0,
+        "rationale": "For femoral insertion... Turn the patient's head away from the insertion site."
+    },
+    {
+        "question": "What is the primary rationale for hand washing before procedures?",
+        "options": [
+            "To minimize cross-infection",
+            "To remove chemical residue",
+            "To warm the hands",
+            "To moisten the skin"
+        ],
+        "correct": 0,
+        "rationale": "Hand washing... To minimize cross-infection."
+    },
+    {
+        "question": "What is a score of 1 in the Behavioral Pain Scale for Facial Expression?",
+        "options": [
+            "Relaxed",
+            "Grimacing",
+            "Tightened",
+            "Smiling"
+        ],
+        "correct": 0,
+        "rationale": "Facial expression: Relaxed = 1."
+    },
+    {
+        "question": "Which of the following is considered a relative contraindication for CVC insertion?",
+        "options": [
+            "Infection at the insertion site",
+            "Lack of peripheral venous access",
+            "Need for total parenteral nutrition",
+            "Hypotension after major surgery"
+        ],
+        "correct": 0,
+        "rationale": "Contraindications of CVC insertion include infection at the insertion site, coagulopathies, and distortion of landmarks."
+    },
+    {
+        "question": "How is the correct size of a suction catheter calculated?",
+        "options": [
+            "Tube size minus 2 multiplied by 2",
+            "Tube size multiplied by 3",
+            "Tube size divided by 2",
+            "Tube size plus 2"
+        ],
+        "correct": 0,
+        "rationale": "Suction catheter size = [(ETT/TT size - 2) x 2]."
+    },
+    {
+        "question": "What is the mechanism behind absorption atelectasis during 100% oxygen delivery?",
+        "options": [
+            "Nitrogen in alveoli is washed out and replaced by rapidly diffusing oxygen",
+            "Surfactant production is inhibited",
+            "The diaphragm becomes paralyzed",
+            "Carbon dioxide builds up in the alveoli"
+        ],
+        "correct": 0,
+        "rationale": "Nitrogen in alveoli is washed out and replaced by oxygen... oxygen diffuses very quickly... alveolus collapses."
+    },
+    {
+        "question": "Which CVC site scrub requires cleaning from mid-clavicular to opposite border of sternum?",
+        "options": [
+            "Internal Jugular insertion",
+            "Subclavian insertion",
+            "Femoral insertion",
+            "PICC insertion"
+        ],
+        "correct": 0,
+        "rationale": "For jugular insertion: Scrub mid-clavicular to opposite border of the sternum."
+    },
+    {
+        "question": "Why should hyperoxygenation be avoided or carefully managed in COPD patients?",
+        "options": [
+            "To prevent suppression of the hypoxemic drive",
+            "To prevent pulmonary hemorrhage",
+            "To avoid drying the mucous membranes",
+            "To decrease the work of breathing"
+        ],
+        "correct": 0,
+        "rationale": "Hyperoxygenation should be avoided in patients with COPD to prevent suppression of hypoxemic drive."
+    },
+    {
+        "question": "What is the normal respiratory rate range implied by the term 'Normopnoea'?",
+        "options": [
+            "Normal breathing pattern",
+            "Rapid breathing",
+            "Slow breathing",
+            "Absence of breathing"
+        ],
+        "correct": 0,
+        "rationale": "Normopnoea depicted as Normal respiration in graphs."
+    },
+    {
+        "question": "What is a sign of mild hypoxemia?",
+        "options": [
+            "Tachycardia",
+            "Bradycardia",
+            "Hypotension",
+            "Cyanosis"
+        ],
+        "correct": 0,
+        "rationale": "Mild to moderate: Tachycardia. Severe: Bradycardia."
+    },
+    {
+        "question": "What urine color chart numbers indicate severe dehydration?",
+        "options": [
+            "7 and 8",
+            "4, 5, and 6",
+            "1, 2, and 3",
+            "1 and 2"
+        ],
+        "correct": 0,
+        "rationale": "Severely Dehydrated: If your urine matches the colors numbered 7 or 8."
+    },
+    {
+        "question": "How much blood should typically be aspirated and discarded (or returned) before collecting the sample from a CVC?",
+        "options": [
+            "10 ml",
+            "2 ml",
+            "30 ml",
+            "50 ml"
+        ],
+        "correct": 0,
+        "rationale": "Aspirate 10cm of blood... usually discard or return depending on policy (Procedure implies clearing the line)."
+    },
+    {
+        "question": "How long should the patient remain in an elevated position after bolus feeding?",
+        "options": [
+            "30 to 45 minutes",
+            "10 to 15 minutes",
+            "1 hour minimum",
+            "5 minutes"
+        ],
+        "correct": 0,
+        "rationale": "Maintain patient's position for at least 30-45 min."
+    },
+    {
+        "question": "What does a 'whistling' sound or misting in the tube indicate during intubation?",
+        "options": [
+            "Tube placement (though not always reliable)",
+            "Esophageal intubation",
+            "Tube obstruction",
+            "Cuff rupture"
+        ],
+        "correct": 0,
+        "rationale": "Misting of the tube with respirations (not always reliable)."
+    },
+    {
+        "question": "What is a Riker score of 7?",
+        "options": [
+            "Dangerous Agitation",
+            "Very Agitated",
+            "Agitated",
+            "Calm"
+        ],
+        "correct": 0,
+        "rationale": "7: Dangerous agitation - Pulling at ETT, trying to remove catheters."
+    },
+    {
+        "question": "What is the minimum flow rate for a simple face mask?",
+        "options": [
+            "5 liters per minute",
+            "1 liter per minute",
+            "10 liters per minute",
+            "15 liters per minute"
+        ],
+        "correct": 0,
+        "rationale": "It delivers 40% to 60% oxygen on a flow rate of 5 to 10 liters per minute."
+    },
+    {
+        "question": "What complication is associated with high CVP readings?",
+        "options": [
+            "Hypervolemia",
+            "Hypovolemia",
+            "Blood loss",
+            "Venous dilatation"
+        ],
+        "correct": 0,
+        "rationale": "A high CVP can be caused by hypervolemia."
+    },
+    {
+        "question": "What does 'E' stand for in ABCDE assessment?",
+        "options": [
+            "Exposure",
+            "Environment",
+            "Evaluation",
+            "Elimination"
+        ],
+        "correct": 0,
+        "rationale": "Exposure (Skin temperature, etc.) listed in Assessment Sheet."
+    },
+    {
+        "question": "What is the purpose of the 'Pilot balloon' during intubation care?",
+        "options": [
+            "To monitor cuff pressure",
+            "To inflate the lungs",
+            "To suction the mouth",
+            "To anchor the tube"
+        ],
+        "correct": 0,
+        "rationale": "Pilot balloon connected to Inflated cuff (Diagram)."
+    },
+    {
+        "question": "What is the purpose of the cuff on an Endotracheal Tube?",
+        "options": [
+            "To occlude the trachea and prevent aspiration",
+            "To hold the tube in the mouth",
+            "To administer medication",
+            "To visualize the vocal cords"
+        ],
+        "correct": 0,
+        "rationale": "Inflate the cuff... to occlude the trachea."
+    },
+    {
+        "question": "What is the definition of 'Open-suction technique'?",
+        "options": [
+            "Single-use catheter inserted after disconnecting ventilator",
+            "Multi-use catheter inside a plastic sleeve",
+            "Suctioning through the mouth only",
+            "Suctioning without a catheter"
+        ],
+        "correct": 0,
+        "rationale": "A single-use suction catheter is inserted into the open end of the tube following disconnection."
+    },
+    {
+        "question": "What is a sign of mild to moderate hypoxemia in the central nervous system?",
+        "options": [
+            "Confusion and agitation",
+            "Lethargy",
+            "Obtunded mental status",
+            "Coma"
+        ],
+        "correct": 0,
+        "rationale": "Mild to moderate hypoxemia CNS signs: Confusion, agitation, restlessness."
+    },
+    {
+        "question": "What is the maximum recommended duration for applying suction?",
+        "options": [
+            "10 seconds",
+            "15 seconds",
+            "20 seconds",
+            "5 seconds"
+        ],
+        "correct": 0,
+        "rationale": "Apply suction for only a maximum of 10 seconds."
+    },
+    {
+        "question": "What is the recommended area for scrubbing when preparing for a subclavian CVC insertion?",
+        "options": [
+            "Shoulder to contra lateral nipple line and neck to nipple",
+            "Mid-clavicular to opposite border of sternum",
+            "Femoral area in a 4 to 6 inches diameter",
+            "Entire chest area from neck to umbilicus"
+        ],
+        "correct": 0,
+        "rationale": "For subclavian insertion: Scrub shoulder to contra lateral nipple line and from neck to nipple."
+    }
+];
+
+        // Fisher-Yates Shuffle Function (Better Randomization)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // 1. Shuffle options for each question ONLY (Questions order is static)
+        quizData.forEach(q => {
+            const correctOptionText = q.options[q.correct]; // Get the correct answer text
+            shuffleArray(q.options);                        // Shuffle the options array
+            q.correct = q.options.indexOf(correctOptionText); // Find new index of correct answer
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0;
+        let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3">
+                        ${q.options.map((opt, i) => `
+                            <button onclick="checkAnswer(${index}, ${i})" 
+                                class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white">
+                                <span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center group-hover:border-blue-400">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-blue-900 text-sm mb-1">Rationale</p>
+                                <p class="text-blue-800 text-sm leading-relaxed">${q.rationale}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const question = quizData[qIndex];
+            const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+            const buttons = document.querySelectorAll(`.option-btn-${qIndex}`);
+            
+            if (feedbackEl.classList.contains('block')) return; 
+            
+            feedbackEl.classList.remove('hidden-content');
+            feedbackEl.classList.add('block');
+            
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'bg-white');
+                const iconContainer = btn.lastElementChild;
+                
+                if (i === question.correct) {
+                    btn.classList.add('correct-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-check text-green-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else if (i === optIndex) {
+                    btn.classList.add('wrong-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-times text-red-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            answeredCount++;
+            if (optIndex === question.correct) score++;
+
+            if (answeredCount === quizData.length) {
+                const resultDiv = document.getElementById('result-summary');
+                resultDiv.classList.remove('hidden-content');
+                document.getElementById('score-display').textContent = score;
+                document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+                
+                const messageEl = document.getElementById('score-message');
+                const percentage = (score / quizData.length) * 100;
+                
+                if (percentage === 100) messageEl.textContent = "Perfect Score!";
+                else if (percentage >= 75) messageEl.textContent = "Great Job!";
+                else if (percentage >= 50) messageEl.textContent = "Good effort.";
+                else messageEl.textContent = "Keep studying!";
+                
+                setTimeout(() => {
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 500);
+            }
+        };
+
+        renderQuiz();
+    </script>
+</body>
+</html>

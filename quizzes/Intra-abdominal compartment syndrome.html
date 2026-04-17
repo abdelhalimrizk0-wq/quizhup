@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Intra-abdominal compartment syndrome</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. QUESTIONS ARRAY (GENERATE 50 QUESTIONS HERE) ---
+        const rawQuizData = [
+            {
+                id: 1,
+                question: "Which clinical parameter is essential for the definitive diagnosis of Abdominal Compartment Syndrome?",
+                options: ["Sustained intra-abdominal pressure greater than 20 mmHg with new organ dysfunction", "Intra-abdominal pressure greater than 12 mmHg measured once", "Presence of abdominal distension and pain upon palpation", "Sustained intra-abdominal pressure greater than 15 mmHg without organ failure"],
+                correct: 0,
+                rationale: "ACS is defined by sustained intra-abdominal pressure greater than 20 mmHg accompanied by new-onset organ dysfunction."
+            },
+            {
+                id: 2,
+                question: "A nurse is preparing to measure intra-abdominal pressure via a bladder catheter. What is the correct zero reference point for the transducer?",
+                options: ["Iliac crest at the level of the midaxillary line", "Symphysis pubis at the midline", "Phlebostatic axis at the fourth intercostal space", "Umbilicus at the midclavicular line"],
+                correct: 0,
+                rationale: "To ensure accuracy, the transducer must be zeroed at the iliac crest at the level of the midaxillary line."
+            },
+            {
+                id: 3,
+                question: "Which condition is classified as a cause of Secondary Abdominal Compartment Syndrome?",
+                options: ["Massive fluid resuscitation due to severe shock", "Ruptured abdominal aortic aneurysm", "Blunt trauma to the pelvic region", "Penetrating injury to the abdomen"],
+                correct: 0,
+                rationale: "Secondary ACS does not originate from the abdominopelvic region but occurs in conditions like severe shock requiring massive fluid loading."
+            },
+            {
+                id: 4,
+                question: "Abdominal Perfusion Pressure is calculated by subtracting Intra-abdominal Pressure from which value?",
+                options: ["Mean Arterial Pressure", "Systolic Blood Pressure", "Central Venous Pressure", "Diastolic Blood Pressure"],
+                correct: 0,
+                rationale: "Abdominal Perfusion Pressure (APP) is defined as the difference between the Mean Arterial Pressure (MAP) and the Intra-abdominal Pressure (IAP)."
+            },
+            {
+                id: 5,
+                question: "True or False: Physical examination alone is a sensitive and reliable method for detecting elevated intra-abdominal pressure.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "The text states that physical examination is not sensitive or reliable in detecting elevated intra-abdominal pressure."
+            },
+            {
+                id: 6,
+                question: "What is the normal physiological range for intra-abdominal pressure in healthy adults?",
+                options: ["0 to 5 mmHg", "5 to 7 mmHg", "10 to 15 mmHg", "15 to 20 mmHg"],
+                correct: 0,
+                rationale: "Intra-abdominal pressure levels of 0 to 5 mmHg are considered physiological in adults."
+            },
+            {
+                id: 7,
+                question: "A patient in the ICU has a sustained intra-abdominal pressure of 23 mmHg. How is this Intra-abdominal Hypertension graded?",
+                options: ["Grade III", "Grade I", "Grade II", "Grade IV"],
+                correct: 0,
+                rationale: "Grade III Intra-abdominal Hypertension is defined as an IAP between 21 and 25 mmHg."
+            },
+            {
+                id: 8,
+                question: "Which physiological effect on the renal system is associated with elevated intra-abdominal pressure?",
+                options: ["Increased production of antidiuretic hormone", "Increased glomerular filtration rate", "Decreased sodium retention", "Increased renal blood flow"],
+                correct: 0,
+                rationale: "Elevated IAP leads to decreased renal perfusion and increased production of antidiuretic hormone, which can cause oliguria."
+            },
+            {
+                id: 9,
+                question: "When measuring intra-abdominal pressure via the bladder, what volume of sterile saline should be instilled?",
+                options: ["25 mL", "50 mL", "100 mL", "10 mL"],
+                correct: 0,
+                rationale: "The procedure requires a maximal instillation volume of 25 mL of sterile saline to avoid over-distending the bladder."
+            },
+            {
+                id: 10,
+                question: "What is the primary impact of elevated intra-abdominal pressure on the cardiovascular system?",
+                options: ["Decreased venous return and cardiac output", "Decreased systemic vascular resistance", "Increased stroke volume", "Increased venous return from the lower extremities"],
+                correct: 0,
+                rationale: "Elevated IAP compresses the inferior vena cava, leading to decreased venous return, decreased stroke volume, and decreased cardiac output."
+            },
+            {
+                id: 11,
+                question: "True or False: A patient with obesity or a history of abdominal surgery may have a baseline intra-abdominal pressure higher than 5 mmHg without pathological significance.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "In conditions such as obesity or following abdominal surgery, IAP may range from 10 to 15 mmHg without pathological significance."
+            },
+            {
+                id: 12,
+                question: "Which intervention is considered the most effective definitive treatment for established Abdominal Compartment Syndrome?",
+                options: ["Surgical decompressive laparotomy", "Increased intravenous fluid administration", "Administration of loop diuretics", "High-pressure mechanical ventilation"],
+                correct: 0,
+                rationale: "The most effective treatment for ACS is surgical abdominal decompression (decompressive laparotomy)."
+            },
+            {
+                id: 13,
+                question: "A nurse observes a patient with ACS has cool skin, restlessness, and lactic acidosis. These findings primarily indicate which complication?",
+                options: ["Hypoperfusion", "Fluid overload", "Hyperventilation", "Hypertension"],
+                correct: 0,
+                rationale: "Evidence of hypoperfusion includes cool skin, obtundation, restlessness, and lactic acidosis."
+            },
+            {
+                id: 14,
+                question: "Which position is recommended to help improve abdominal wall compliance in the management of intra-abdominal hypertension?",
+                options: ["Reverse Trendelenburg", "High Fowler's", "Prone", "Lateral decubitus"],
+                correct: 0,
+                rationale: "Positioning the patient in reverse Trendelenburg's position is listed as a practice to manage IAH."
+            },
+            {
+                id: 15,
+                question: "What is the minimum target for Abdominal Perfusion Pressure to maintain adequate tissue perfusion?",
+                options: ["60 mmHg", "50 mmHg", "80 mmHg", "40 mmHg"],
+                correct: 0,
+                rationale: "Normal Abdominal Perfusion Pressure (APP) is greater than or equal to 60 mmHg."
+            },
+            {
+                id: 16,
+                question: "True or False: Intra-abdominal Hypertension is defined as a single IAP measurement above 12 mmHg.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "IAH is defined by IAP elevation above 12 mmHg in three consecutive measurements taken at 4-to-6-hour intervals, not a single measurement."
+            },
+            {
+                id: 17,
+                question: "Which respiratory complication is directly caused by the cephalad displacement of the diaphragm in ACS?",
+                options: ["Hypercapnia and hypoxemia", "Increased tidal volume", "Decreased intrathoracic pressure", "Increased lung compliance"],
+                correct: 0,
+                rationale: "Displacement of the diaphragm reduces intrathoracic volume and increases pressure, leading to hypercapnia and hypoxemia."
+            },
+            {
+                id: 18,
+                question: "A patient is receiving mechanical ventilation. Which adjustment is recommended to minimize intra-abdominal hypertension?",
+                options: ["Using low tidal volumes", "Using high PEEP levels", "Increasing respiratory rate significantly", "Maximizing tidal volume"],
+                correct: 0,
+                rationale: "Management practices include using low tidal volumes in mechanical ventilation to minimize IAH."
+            },
+            {
+                id: 19,
+                question: "What is a potential complication of the hepatic system due to increased intra-abdominal pressure?",
+                options: ["Coagulopathy", "Decreased liver enzymes", "Increased hepatic arterial flow", "Enhanced drug metabolism"],
+                correct: 0,
+                rationale: "Coagulopathy can occur as pressure increases and hepatic arterial flow decreases."
+            },
+            {
+                id: 20,
+                question: "Which of the following is an example of a condition causing diminished abdominal wall compliance?",
+                options: ["Major burns with eschar", "Gastric distention", "Ascites", "Retroperitoneal hemorrhage"],
+                correct: 0,
+                rationale: "Major burns are listed under the category of diminished abdominal wall compliance."
+            },
+            {
+                id: 21,
+                question: "True or False: The gold standard method for measuring IAP in critically ill patients is the direct intraperitoneal method using a dialysis catheter.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "While direct measurement is most accurate, the intravesical (bladder) method is the gold standard for critically ill patients due to practicality."
+            },
+            {
+                id: 22,
+                question: "Which central nervous system change is associated with Abdominal Compartment Syndrome?",
+                options: ["Increased intracranial pressure", "Decreased intracranial pressure", "Increased Glasgow Coma Scale score", "Reduced agitation"],
+                correct: 0,
+                rationale: "ACS affects the CNS by causing increased intracranial pressure and mental status changes."
+            },
+            {
+                id: 23,
+                question: "After a decompressive laparotomy, the abdominal fascia is often left open. What is the primary purpose of applying a negative pressure dressing?",
+                options: ["To prevent fascia retraction and decrease insensible losses", "To immediately close the fascial defect", "To increase intra-abdominal pressure", "To promote rapid skin grafting"],
+                correct: 0,
+                rationale: "Negative pressure dressings help minimize infection risk, decrease insensible losses, and prevent retraction of the fascia."
+            },
+            {
+                id: 24,
+                question: "When measuring intra-abdominal pressure via the bladder, at which point in the respiratory cycle should the measurement be taken?",
+                options: ["End-expiration", "End-inspiration", "Peak inspiration", "Mid-inspiration"],
+                correct: 0,
+                rationale: "IAP must be measured at end-expiration to minimize the effect of respiratory muscle contraction."
+            },
+            {
+                id: 25,
+                question: "Which patient scenario best describes 'Recurrent ACS'?",
+                options: ["A patient who develops ACS again after surgical treatment of the primary condition", "A patient who develops ACS due to severe sepsis", "A patient with chronic ascites who tolerates high pressure", "A patient with primary trauma to the abdomen"],
+                correct: 0,
+                rationale: "Recurrent ACS is defined as ACS that redevelops after previous medical or surgical treatment of primary or secondary ACS."
+            },
+            {
+                id: 26,
+                question: "True or False: Bacterial translocation is a potential gastrointestinal consequence of decreased abdominal perfusion.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Decreased perfusion to abdominal organs can lead to bacterial translocation."
+            },
+            {
+                id: 27,
+                question: "What is the correct definition of Intra-abdominal Hypertension Grade IV?",
+                options: ["IAP greater than 25 mmHg", "IAP between 21 and 25 mmHg", "IAP between 16 and 20 mmHg", "IAP between 12 and 15 mmHg"],
+                correct: 0,
+                rationale: "Grade IV IAH is defined as a sustained IAP greater than 25 mmHg."
+            },
+            {
+                id: 28,
+                question: "Which nursing intervention is appropriate for a patient with an open abdomen following decompressive laparotomy?",
+                options: ["Monitor the wound for signs of infection and fistula formation", "Maintain the patient in a prone position", "Encourage vigorous coughing exercises", "Limit analgesia to prevent respiratory depression"],
+                correct: 0,
+                rationale: "Nursing management involves close monitoring of the surgical wound for infection and potential complications like fistulas."
+            },
+            {
+                id: 29,
+                question: "A patient with severe burns is at risk for ACS. Which risk factor category does this patient primarily fall into?",
+                options: ["Diminished abdominal wall compliance", "Increased intra-abdominal volume", "Increased intraluminal contents", "Capillary leak syndrome only"],
+                correct: 0,
+                rationale: "Major burns are categorized primarily under diminished abdominal wall compliance (elasticity of wall)."
+            },
+            {
+                id: 30,
+                question: "True or False: Sedatives and analgesics may be used in the medical management of IAH to improve abdominal wall compliance.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Analgesics and sedatives are used to help improve abdominal wall compliance, and chemical paralytics may be needed."
+            },
+            {
+                id: 31,
+                question: "Which finding during a physical assessment is most suggestive of elevated intra-abdominal pressure?",
+                options: ["Tense, distended abdomen", "Hyperactive bowel sounds", "Bradycardia", "Polyuria"],
+                correct: 0,
+                rationale: "Physical assessment findings include a tense, distended abdomen, tachycardia, and oliguria."
+            },
+            {
+                id: 32,
+                question: "What is the expected range for Intra-abdominal pressure in a critically ill patient?",
+                options: ["5 to 7 mmHg", "0 to 5 mmHg", "12 to 15 mmHg", "20 to 25 mmHg"],
+                correct: 0,
+                rationale: "In critically ill patients, IAP values are expected to be between 5 and 7 mmHg."
+            },
+            {
+                id: 33,
+                question: "Why is a nasogastric tube often utilized in the conservative management of Intra-abdominal Hypertension?",
+                options: ["For gastric decompression", "For aggressive enteral feeding", "For administration of contrast dye", "For monitoring esophageal pH"],
+                correct: 0,
+                rationale: "Endogastric tubes are used for gastric decompression to reduce intra-abdominal volume."
+            },
+            {
+                id: 34,
+                question: "True or False: Acute pancreatitis is a risk factor associated with increased intra-abdominal volume.",
+                options: ["True", "False"],
+                correct: 0,
+                rationale: "Acute pancreatitis is listed as a cause of increased intra-abdominal volume (distended abdomen/fluid collection)."
+            },
+            {
+                id: 35,
+                question: "Which complication involves the protrusion of abdominal contents through the surgical site after decompressive laparotomy?",
+                options: ["Ventral hernia", "Fistula formation", "Protein loss", "Wound infection"],
+                correct: 0,
+                rationale: "Abdominal wall retraction with ventral hernia development is a complication of decompressive laparotomy."
+            },
+            {
+                id: 36,
+                question: "How does elevated intra-abdominal pressure affect the jugular veins?",
+                options: ["Causes jugular venous distension", "Causes jugular venous collapse", "Has no effect on jugular veins", "Decreases jugular venous pressure"],
+                correct: 0,
+                rationale: "Physical assessment findings include elevated jugular venous pressure and jugular venous distension."
+            },
+            {
+                id: 37,
+                question: "True or False: The mortality rate for Abdominal Compartment Syndrome is relatively low, ranging from 5% to 10%.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "ACS carries a high mortality rate of 40% to 100%."
+            },
+            {
+                id: 38,
+                question: "In the context of ACS pathophysiology, what determines abdominal compliance?",
+                options: ["Elasticity of the abdominal wall and diaphragm", "Volume of fluid in the peritoneal cavity", "Pressure within the intestinal lumen", "Systemic vascular resistance"],
+                correct: 0,
+                rationale: "Abdominal compliance is primarily determined by the elasticity of the abdominal wall and diaphragm."
+            },
+            {
+                id: 39,
+                question: "True or False: Patients with ACS should be encouraged to maintain a positive fluid balance to support blood pressure.",
+                options: ["True", "False"],
+                correct: 1,
+                rationale: "Management includes avoiding a significantly positive fluid balance and judicious use of IV fluids."
+            },
+            {
+                id: 40,
+                question: "Which statement correctly describes Primary Abdominal Compartment Syndrome?",
+                options: ["It results from direct injury to the abdomen or pelvic region", "It originates from systemic conditions like sepsis", "It is caused by massive fluid resuscitation", "It is exclusively seen in chronic liver disease"],
+                correct: 0,
+                rationale: "Primary ACS results from direct injury to the abdomen or pelvic region, such as trauma or aneurysm rupture."
+            }
+        ];
+
+        // --- 2. SHUFFLE & RENDER LOGIC (DO NOT EDIT) ---
+        const quizData = rawQuizData.map(q => {
+            const opts = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+            for (let i = opts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opts[i], opts[j]] = [opts[j], opts[i]];
+            }
+            return { ...q, options: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect) };
+        });
+
+        const container = document.getElementById('quiz-container');
+        let score = 0; let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                         ${q.options.length === 2 ? '<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-1 rounded-md">True/False</span>' : ''}
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3 ${q.options.length === 2 ? 'grid-cols-2' : ''}">
+                        ${q.options.map((opt, i) => `<button onclick="checkAnswer(${index}, ${i})" class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white"><span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span></button>`).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <p class="text-blue-800 text-sm leading-relaxed"><strong>Rationale:</strong> ${q.rationale}</p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const q = quizData[qIndex];
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            const btns = document.querySelectorAll(`.option-btn-${qIndex}`);
+            if (!feedback.classList.contains('hidden-content')) return;
+            feedback.classList.remove('hidden-content');
+            btns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === q.correct) { btn.classList.add('correct-answer'); btn.innerHTML += '<i class="fas fa-check float-right"></i>'; }
+                else if (i === optIndex) { btn.classList.add('wrong-answer'); btn.innerHTML += '<i class="fas fa-times float-right"></i>'; }
+                else { btn.classList.add('opacity-50'); }
+            });
+            if (optIndex === q.correct) score++;
+            answeredCount++;
+            if (answeredCount === quizData.length) {
+                document.getElementById('result-summary').classList.remove('hidden-content');
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('score-message').innerText = (score/quizData.length*100) >= 50 ? "Good Job!" : "Keep Studying";
+                setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 500);
+            }
+        };
+        renderQuiz();
+    </script>
+</body>
+</html>

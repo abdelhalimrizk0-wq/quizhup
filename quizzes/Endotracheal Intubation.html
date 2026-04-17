@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=swap');
+        body { font-family: 'Noto Sans', 'Cairo', sans-serif; background-color: #f8fafc; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1); }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .hidden-content { display: none; }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:disabled { cursor: default; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-12 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 text-center border-t-4 border-blue-600 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-user-md text-8xl text-blue-600"></i></div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 font-cairo text-center" dir="auto">Endotracheal Intubation</h1>
+            
+            <div class="flex items-center justify-center gap-2 text-green-600 font-semibold bg-green-50 w-fit mx-auto px-4 py-1 rounded-full text-sm">
+                <i class="fas fa-check-circle"></i> "تم صنع هذا الامتحان بواسطة عبدالحليم رزق"
+            </div>
+        </div>
+        <div id="quiz-container"></div>
+        <div id="result-summary" class="hidden-content bg-white rounded-2xl shadow-lg p-8 text-center mt-8 border border-gray-100">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-clipboard-check text-4xl text-blue-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Exam Completed</h2>
+            <div class="mt-4 text-4xl font-bold text-blue-600 mb-2">
+                <span id="score-display">0</span> <span class="text-xl text-gray-400" id="total-display"></span>
+            </div>
+            <p id="score-message" class="text-gray-500 mb-6"></p>
+            <button onclick="location.reload()" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition shadow-lg hover:shadow-blue-200">
+                <i class="fas fa-redo mr-2"></i> Restart Exam
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- GENERATE 40 QUESTIONS HERE BASED ON INPUT MATERIAL ---
+        const quizData = [
+            {
+                id: 1,
+                question: "What is the primary purpose of placing an endotracheal tube (ETT) into the trachea?",
+                options: ["To prevent all forms of infection", "To administer intravenous fluids", "To measure intrathoracic pressure", "To establish and maintain a patent airway"],
+                correct: 3, 
+                rationale: "The text defines the primary purpose of ETT as establishing and maintaining a patent airway and ensuring adequate exchange of oxygen and carbon dioxide."
+            },
+            {
+                id: 2,
+                question: "Which type of endotracheal tube is specifically indicated for use in neonates according to the text?",
+                options: ["Disposable cuffed tubes", "Double lumen tubes", "Uncuffed tubes", "Reusable cuffed tubes"],
+                correct: 2, 
+                rationale: "The text states that disposable cuffed tubes are used for adults and old children, while uncuffed tubes are used for neonates."
+            },
+            {
+                id: 3,
+                question: "A patient requires independent lung ventilation due to a bronchopleural fistula. Which tube type is indicated?",
+                options: ["Double lumen ETT", "Standard single lumen ETT", "Uncuffed neonatal ETT", "Nasotracheal tube"],
+                correct: 0, 
+                rationale: "Double lumen tubes are special tubes that provide selective endobronchial intubation and independent lung ventilation, indicated for controlling distribution of ventilation as in bronchopleural fistula."
+            },
+            {
+                id: 4,
+                question: "When using a double lumen tube, where is the second lumen advanced?",
+                options: ["Into the esophagus", "Into the pharynx", "Into the main stem bronchus", "Into the laryngeal ventricle"],
+                correct: 2, 
+                rationale: "One lumen remains in the trachea, while the other lumen is advanced into a main stem bronchus for selective endobronchial intubation."
+            },
+            {
+                id: 5,
+                question: "What is the appropriate ETT size range for an adult female patient?",
+                options: ["6.0-7.0 mm", "8-9.5 mm", "7.5-8 mm", "9.0-10.0 mm"],
+                correct: 2, 
+                rationale: "The text specifies the size for adult female patients is 7.5-8 mm."
+            },
+            {
+                id: 6,
+                question: "Which component of the ETT is used to monitor the pressure within the cuff?",
+                options: ["Murphy eye", "Radiopaque line", "15-mm adapter", "Pilot balloon"],
+                correct: 3, 
+                rationale: "The pilot balloon is listed as a component of the ETT and is connected to the inflating tube to indicate cuff status."
+            },
+            {
+                id: 7,
+                question: "In which clinical scenario is nasal intubation specifically preferred over oral intubation?",
+                options: ["When the patient is in cardiac arrest", "When the patient is unconscious", "When surgery is on the mandible or oral cavity", "When rapid sequence induction is needed"],
+                correct: 2, 
+                rationale: "Nasal intubation is performed when the surgery is in the oral cavity or on the mandible and when the oral route is difficult or impossible."
+            },
+            {
+                id: 8,
+                question: "Which condition is listed as an imminent airway obstruction indication for intubation?",
+                options: ["Respiratory burns or anaphylaxis", "Mild asthma exacerbation", "Sleep apnea", "Chronic bronchitis"],
+                correct: 0, 
+                rationale: "Indications include patients where complete obstruction of the airway is imminent, specifically citing respiratory burns and anaphylaxis."
+            },
+            {
+                id: 9,
+                question: "A patient has severe airway trauma that prevents safe passage of an ETT. What is the indicated emergency procedure?",
+                options: ["Forced oral intubation", "Nasal intubation", "Laryngeal mask airway insertion", "Emergency cricothyrotomy"],
+                correct: 3, 
+                rationale: "Severe airway trauma or obstruction that does not permit safe passage of an ETT is a contraindication, and emergency cricothyrotomy is indicated in such cases."
+            },
+            {
+                id: 10,
+                question: "Why is cervical spine injury considered a relative contraindication or difficulty for standard intubation?",
+                options: ["It causes airway swelling", "It prevents mouth opening", "It requires complete immobilization of the spine", "It increases bleeding risk"],
+                correct: 2, 
+                rationale: "In cervical spine injury, the need for complete immobilization of the cervical spine makes endotracheal intubation difficult."
+            },
+            {
+                id: 11,
+                question: "During assessment, why does the nurse ask about the patient's 'last meal'?",
+                options: ["To reduce risk for aspiration", "To determine blood sugar levels", "To calculate anesthesia dosage", "To assess nutritional status"],
+                correct: 0, 
+                rationale: "The rationale listed for assessing 'Last meal' is to reduce risk for aspiration."
+            },
+            {
+                id: 12,
+                question: "What is the rationale for removing the headboard from the bed during environment preparation?",
+                options: ["To improve room lighting", "To clean the bed frame", "To facilitate performance during the procedure", "To prevent patient injury"],
+                correct: 2, 
+                rationale: "Removing the head board is done to facilitate performance during the procedure."
+            },
+            {
+                id: 13,
+                question: "For most adult patients, what size laryngoscope blade is typically checked and prepared?",
+                options: ["Size 1", "Size 3", "Size 2", "Size 4"],
+                correct: 1, 
+                rationale: "The text states to check the laryngoscope size and notes that size 3 is for most patients."
+            },
+            {
+                id: 14,
+                question: "Why are gloves and PPE worn during the preparation phase?",
+                options: ["To maintain sterility", "To keep hands warm", "To improve grip on instruments", "To prevent cross infection"],
+                correct: 3, 
+                rationale: "The rationale for wearing gloves and PPE is to prevent cross infection."
+            },
+            {
+                id: 15,
+                question: "What is the correct positioning for a non-trauma patient to align the oral, pharyngeal, and laryngeal axes?",
+                options: ["Chin to chest position", "Supine with no pillow", "Sniffing position with head elevated 10cm", "Trendelenburg position"],
+                correct: 2, 
+                rationale: "For non-trauma patients, elevating the head about 10cm with pads and extension of the head into the sniffing position serves to align the axes."
+            },
+            {
+                id: 16,
+                question: "How should the head of a trauma patient be positioned during intubation?",
+                options: ["Sniffing position", "Neutral position with cervical immobilization", "Hyperextended position", "Rotated to the left"],
+                correct: 1, 
+                rationale: "For a trauma patient, place the head at a neutral position within line cervical spine immobilization during the entire process."
+            },
+            {
+                id: 17,
+                question: "What is the recommended duration and concentration for hyper-oxygenating the patient before intubation?",
+                options: ["50% oxygen for 1 minute", "100% oxygen for 5 minutes", "21% oxygen for 3 minutes", "100% oxygen for 2 minutes"],
+                correct: 3, 
+                rationale: "The text specifies to hyper-oxygenate the patient with 100% oxygen for 2 minutes using a self-inflating bag valve mask."
+            },
+            {
+                id: 18,
+                question: "What is the primary rationale for applying cricoid pressure during intubation as described in the text?",
+                options: ["To prevent vomiting", "To stop bleeding", "To visualize vocal cords clearly", "To stabilize the neck"],
+                correct: 2, 
+                rationale: "The text states the rationale for cricoid pressure (pushing vocal cords downward) is to visualize vocal cords clearly."
+            },
+            {
+                id: 19,
+                question: "How much air should be used to inflate the ETT cuff?",
+                options: ["Minimal amount required to occlude the trachea", "10 ml exactly", "Maximum capacity of the cuff", "Until the pilot balloon is hard"],
+                correct: 0, 
+                rationale: "The instruction is to inflate the cuff with the minimal amount of air required to occlude the trachea."
+            },
+            {
+                id: 20,
+                question: "When verifying tube placement by auscultation, what finding confirms correct placement?",
+                options: ["Breath sounds on the right side only", "Gurgling sounds in the epigastrium", "Breath sounds on both sides and no gurgles in the stomach", "No breath sounds but chest movement"],
+                correct: 2, 
+                rationale: "Verification includes auscultation of the chest to hear breath sounds on both sides and auscultation of the stomach where you shouldn't hear gurgles."
+            },
+            {
+                id: 21,
+                question: "Which of the following is NOT a reliable sign of correct tube placement on its own?",
+                options: ["Wave form CO2", "Misting of the tube", "Rising O2 saturation", "Visualizing tube passing cords"],
+                correct: 1, 
+                rationale: "The text notes: 'Misting of the tube with respirations (not always reliable).'"
+            },
+            {
+                id: 22,
+                question: "Why is an oropharyngeal airway inserted along with the ETT after intubation?",
+                options: ["To facilitate suctioning", "To increase air flow", "To stabilize the tongue", "To prevent the patient from biting the tube"],
+                correct: 3, 
+                rationale: "The rationale for inserting an oropharyngeal airway along ETT is to prevent the patient from biting the tube."
+            },
+            {
+                id: 23,
+                question: "What is the correct depth of the tube at the teeth for an adult male patient?",
+                options: ["21 cm", "22 cm", "24 cm", "23 cm"],
+                correct: 3, 
+                rationale: "Under Post Care, the text specifies noting the position of the tube at the teeth: 23cm for men."
+            },
+            {
+                id: 24,
+                question: "What is the correct depth of the tube at the teeth for an adult female patient?",
+                options: ["20 cm", "22 cm", "21 cm", "23 cm"],
+                correct: 2, 
+                rationale: "Under Post Care, the text specifies noting the position of the tube at the teeth: 21cm for women."
+            },
+            {
+                id: 25,
+                question: "Which imaging modality is used to verify confirmation of correct tube position in post-care?",
+                options: ["Chest X-ray", "CT scan", "Ultrasound", "MRI"],
+                correct: 0, 
+                rationale: "The text lists: 'Verify confirmation of correct tube position by chest x-ray'."
+            },
+            {
+                id: 26,
+                question: "What is a potential complication specifically related to the teeth during intubation?",
+                options: ["Gingivitis", "Cavities", "Broken teeth or dentures", "Tooth discoloration"],
+                correct: 2, 
+                rationale: "Broken teeth or dentures is listed as a complication for ETT intubation."
+            },
+            {
+                id: 27,
+                question: "If the tube is advanced too far, what complication is most likely to occur?",
+                options: ["Esophageal intubation", "Laryngeal spasm", "Vocal cord paralysis", "Endobronchial intubation"],
+                correct: 3, 
+                rationale: "Endobronchial intubation is listed as a complication, which occurs when the tube is advanced into a bronchus (usually right) rather than staying in the trachea."
+            },
+            {
+                id: 28,
+                question: "What is the purpose of the 'Murphy eye' on an endotracheal tube?",
+                options: ["To inflate the cuff", "To monitor pressure", "To connect to the ventilator", "A component of the ETT structure"],
+                correct: 3, 
+                rationale: "Murphy eye is listed simply as a 'Component of ETT' in the text structure provided."
+            },
+            {
+                id: 29,
+                question: "Which medication type is used to aid intubation in an awake patient?",
+                options: ["Long-acting antibiotic", "Diuretic", "Short-acting muscle relaxant", "Antihypertensive"],
+                correct: 2, 
+                rationale: "Medications in awake patient include: hypnotic, analgesia, and short-acting muscle relaxant (to aid intubation)."
+            },
+            {
+                id: 30,
+                question: "What is the rationale for explaining the procedure to the patient during preparation?",
+                options: ["To meet legal requirements", "To check mental status", "To decrease anxiety and gain cooperation", "To delay the procedure"],
+                correct: 2, 
+                rationale: "The rationale for explaining the procedure is to decrease anxiety & gain patient's cooperation."
+            },
+            {
+                id: 31,
+                question: "When securing the ETT with twill tape, where should the knot be tied?",
+                options: ["At the side of the patient's neck", "Behind the neck", "On the chin", "On the forehead"],
+                correct: 0, 
+                rationale: "The instructions state: 'Tie the two ends of the tape at the side of the patient's neck securely.'"
+            },
+            {
+                id: 32,
+                question: "What is the rationale for checking if the patient has a suspected spinal cord injury during assessment?",
+                options: ["To determine medication dosage", "To assess neurological status", "To select the appropriate technique to open airway", "To decide on oxygen flow rate"],
+                correct: 2, 
+                rationale: "The rationale for assessing suspected spinal cord injury is to select appropriate technique to open airway for intubation."
+            },
+            {
+                id: 33,
+                question: "Which of the following is an indication for double lumen ETT regarding lung surgery?",
+                options: ["Tonsillectomy", "Thyroidectomy", "Appendectomy", "Surgical exposure for pneumonectomy"],
+                correct: 3, 
+                rationale: "Indications for double lumen ETT include surgical exposure to perform a pneumonectomy or upper lobe resection."
+            },
+            {
+                id: 34,
+                question: "What should be documented regarding the ETT cuff in the patient record?",
+                options: ["Manufacturer name", "Cuff pressure measurement", "Color of the cuff", "Time of inflation only"],
+                correct: 1, 
+                rationale: "Documentation includes 'ETT cuff pressure measurement'."
+            },
+            {
+                id: 35,
+                question: "What is the recommended size of ETT for an adult male patient?",
+                options: ["7.0-8.0 mm", "9.5-10.5 mm", "8.0-9.5 mm", "6.5-7.5 mm"],
+                correct: 2, 
+                rationale: "The text specifies: '8-9.5 for adult male patients.'"
+            },
+            {
+                id: 36,
+                question: "During post-care, what action is taken regarding the ETT and pharynx?",
+                options: ["Lavage with saline", "Remove and replace", "Hyperoxygenate and suction as needed", "Deflate cuff periodically"],
+                correct: 2, 
+                rationale: "Post care steps include: 'Hyperoxygenate & suction ETT and pharynx as needed'."
+            },
+            {
+                id: 37,
+                question: "Which complication involves the voice box following intubation?",
+                options: ["Tracheal stenosis", "Hoarseness of voice or granuloma of the Larynx", "Esophageal perforation", "Bronchospasm"],
+                correct: 1, 
+                rationale: "Complications listed include 'Hoarseness of voice, sore throat, granuloma of the Larynx'."
+            },
+            {
+                id: 38,
+                question: "Why is 'Presence of enlarged thyroid' assessed before intubation?",
+                options: ["To check thyroid function", "To assess metabolic rate", "To check for goiter only", "To identify patients who have difficult intubation"],
+                correct: 3, 
+                rationale: "The rationale for assessing enlarged thyroid or short neck is to identify patient who have difficult intubation."
+            },
+            {
+                id: 39,
+                question: "What is the rationale for inserting an IV access before intubation?",
+                options: ["For hydration", "For blood sampling", "For administration of medication", "For central venous pressure monitoring"],
+                correct: 2, 
+                rationale: "The rationale for checking/initiating vascular access is 'For administration of medication'."
+            },
+            {
+                id: 40,
+                question: "Which type of intubation is described as the 'usual method'?",
+                options: ["Nasal intubation", "Tracheostomy", "Cricothyrotomy", "Oral tracheal intubation"],
+                correct: 3, 
+                rationale: "The text states: 'Oral tracheal intubation is the usual method.'"
+            }
+        ];
+
+        const container = document.getElementById('quiz-container');
+        let score = 0;
+        let answeredCount = 0;
+
+        function renderQuiz() {
+            document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+            container.innerHTML = quizData.map((q, index) => {
+                return `
+                <div class="card bg-white rounded-xl p-6 mb-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-4 border-b border-gray-50 pb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Question ${index + 1}</span>
+                    </div>
+                    <h3 class="text-gray-800 font-bold mb-6 text-lg leading-relaxed font-cairo" style="direction: ltr; text-align: left;">${q.question}</h3>
+                    <div class="grid gap-3">
+                        ${q.options.map((opt, i) => `
+                            <button onclick="checkAnswer(${index}, ${i})" 
+                                class="option-btn option-btn-${index} w-full text-left px-5 py-4 rounded-xl border border-gray-200 hover:bg-blue-50 hover:border-blue-300 focus:outline-none flex items-center justify-between group bg-white">
+                                <span class="font-medium text-gray-700 group-hover:text-blue-700 font-sans">${opt}</span>
+                                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center group-hover:border-blue-400">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition"></div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="feedback-${index}" class="hidden-content mt-6 bg-blue-50 rounded-xl p-5 border border-blue-100 animate-fade-in text-left">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-blue-900 text-sm mb-1">Rationale</p>
+                                <p class="text-blue-800 text-sm leading-relaxed">${q.rationale}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        window.checkAnswer = function(qIndex, optIndex) {
+            const question = quizData[qIndex];
+            const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+            const buttons = document.querySelectorAll(`.option-btn-${qIndex}`);
+            
+            if (feedbackEl.classList.contains('block')) return; 
+            
+            feedbackEl.classList.remove('hidden-content');
+            feedbackEl.classList.add('block');
+            
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300', 'bg-white');
+                const iconContainer = btn.lastElementChild;
+                
+                if (i === question.correct) {
+                    btn.classList.add('correct-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-check text-green-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else if (i === optIndex) {
+                    btn.classList.add('wrong-answer');
+                    iconContainer.innerHTML = '<i class="fas fa-times text-red-600"></i>';
+                    iconContainer.classList.remove('border-2', 'border-gray-300');
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+            
+            answeredCount++;
+            if (optIndex === question.correct) score++;
+            
+            if (answeredCount === quizData.length) {
+                const resultDiv = document.getElementById('result-summary');
+                resultDiv.classList.remove('hidden-content');
+                document.getElementById('score-display').textContent = score;
+                document.getElementById('total-display').innerText = `/ ${quizData.length}`;
+                
+                const messageEl = document.getElementById('score-message');
+                const percentage = (score / quizData.length) * 100;
+                
+                if (percentage === 100) messageEl.textContent = "Perfect Score!";
+                else if (percentage >= 75) messageEl.textContent = "Great Job!";
+                else if (percentage >= 50) messageEl.textContent = "Good effort.";
+                else messageEl.textContent = "Keep studying!";
+                
+                setTimeout(() => {
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 500);
+            }
+        };
+
+        renderQuiz();
+    </script>
+</body>
+</html>
