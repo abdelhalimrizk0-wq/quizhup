@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acute Gastrointestinal Bleeding Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .question-container {
+            transition: all 0.3s ease-in-out;
+        }
+        .option {
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .option.correct {
+            background-color: #16a34a !important; /* Green 600 */
+            border-color: #15803d !important; /* Green 700 */
+            color: white !important;
+        }
+        .option.incorrect {
+            background-color: #dc2626 !important; /* Red 600 */
+            border-color: #b91c1c !important; /* Red 700 */
+            color: white !important;
+        }
+        .option:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .rationale {
+            display: none;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            background-color: #f3f4f6; /* Gray 100 */
+            border: 1px solid #e5e7eb; /* Gray 200 */
+        }
+        .rationale.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-red-950 text-gray-100 min-h-screen p-4 md:p-8">
+
+    <header class="max-w-4xl mx-auto text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Acute GI Bleeding Quiz</h1>
+        <p class="text-lg text-red-200">تم صنع هذا الامتحان بواسطة عبدالحليم رزق 
+</p>
+    </header>
+
+    <main class="max-w-4xl mx-auto" id="quiz-container">
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">1. A patient with hepatic cirrhosis presents with hematemesis. What is the most likely *underlying* cause of the bleeding?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    A. Portal hypertension leading to esophagogastric varices
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Helicobacter pylori infection
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. Chronic use of non-steroidal anti-inflammatory drugs (NSAIDs)
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. A Mallory-Weiss tear from forceful vomiting
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Esophagogastric varices are engorged blood vessels that develop as a result of portal hypertension, which is secondary to hepatic cirrhosis[cite: 62]. While the other options are causes of UGI bleeding, varices are directly linked to the pathophysiology of cirrhosis.
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">2. Why are hemoglobin and hematocrit considered poor indicators of *acute* blood loss severity?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. They only decrease if the bleeding is arterial.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    B. They may be normal initially, as plasma and RBCs are lost equally.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. They are only reliable for lower GI bleeding, not upper.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. These values increase due to stress, masking the loss.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Hemoglobin and hematocrit are poor indicators if the bleeding is acute[cite: 109]. The initial values may be normal because the loss of plasma and RBCs is equal. It can take 4 to 6 hours after fluid replacement (or up to 72 hours) for the values to reflect the actual blood loss[cite: 109, 110].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">3. True or False: Hematochezia (bright red stools) definitively indicates a lower GI bleed.</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. True
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    B. False
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> False. While hematochezia most often signifies lower GI bleeding [cite: 34], it can also be due to a brisk upper GI bleed with a rapid transit time through the bowel in 10 to 15% of patients[cite: 35].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">4. A patient presents with acute hematemesis, a BP of 85/50 mmHg, and a heart rate of 125 bpm. What is the *first* management priority?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Administer an IV proton pump inhibitor (PPI).
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Perform an endoscopic procedure to find the source.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. Obtain a detailed medical history from the family.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    D. Establish IV access with two large-bore catheters and start fluids.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> The patient is showing signs of hypovolemic shock (hypotension, tachycardia)[cite: 94, 96]. The initial management priority is resuscitation. This includes establishing IV access with at least two large-bore peripheral IVs (18 gauge or larger) and starting fluid replacement therapy with an isotonic crystalloid solution[cite: 124, 125].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">5. What is the anatomic landmark that differentiates upper GI bleeding from lower GI bleeding?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. The pyloric sphincter
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. The ileocecal valve
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. The ligament of Treitz
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. The gastroesophageal junction
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> The ligament of Treitz is the anatomic division used to differentiate between the two areas[cite: 25]. Bleeding proximal (above) this ligament is upper GI, and bleeding distal (below) it is lower GI[cite: 26, 27].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">6. A patient describes their emesis as looking like "coffee grounds." This sign (hematemesis) indicates that the blood has...</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Come from a lower GI source.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Not been in contact with gastric acid.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. Been in the stomach for some time.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Originated from an arterial source.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Hematemesis appearing as brown "coffee grounds" means that the blood has been in the stomach for some time [cite: 33] and has been altered by gastric HCl acid. In contrast, bright red arterial blood has *not* been in contact with gastric acid[cite: 30].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">7. Which patient is at the *highest* risk for developing Stress-Related Erosive Syndrome (SRES)?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    A. A 60-year-old patient on mechanical ventilation in the ICU.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. A 45-year-old patient with chronic *H. pylori* infection.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. A 30-year-old patient with a history of heavy alcohol use.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. A 50-year-old patient taking chronic NSAIDs for arthritis.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> SRES, or stress ulcers, are abnormalities found in critically ill patients[cite: 49]. All critically ill patients are at risk [cite: 52], but those at greatest risk include patients in high physiologic stress situations, such as mechanical ventilation[cite: 55, 56].
+            </div>
+        </div>
+        
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">8. What is the primary therapeutic goal of gastric fluid pH monitoring for a patient at risk for SRES?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. To keep the pH less than 2
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. To keep the pH between 2 and 3
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. To keep the pH greater than 4
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. To keep the pH neutral at 7
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> For patients at risk for SRES, routine assessments should include gastric fluid pH monitoring with a goal of keeping the pH greater than 4[cite: 54]. This is often achieved with IV proton pump inhibitors[cite: 132].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">9. True or False: Melena (black, tarry stools) is indicative of upper GI bleeding in 90% of cases.</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    A. True
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. False
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> True. Melena, which is a foul-smelling, black, tarry stool, occurs with slow bleeding from an upper GI source [cite: 36] and is indicative of UGI bleeding in 90% of cases[cite: 37].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">10. A Mallory-Weiss tear, a cause of UGI bleeding, is most often associated with...</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. *H. pylori* infection.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Portal hypertension.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. Heavy alcohol use and forceful vomiting.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Diverticulosis.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Mallory-Weiss tears are lacerations of the distal esophagus at the gastroesophageal junction[cite: 64]. They are often associated with heavy alcohol use and a history of forceful vomiting, retching, or violent coughing[cite: 64].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">11. What is the *leading* cause of upper GI hemorrhage?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Esophagogastric varices
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    B. The bacterial action of Helicobacter pylori
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. Chronic use of NSAIDs
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Stress-related erosive syndrome (SRES)
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> While peptic ulcer disease is the most common cause of UGI bleeding [cite: 43], the *leading* cause contributing to these ulcers is the bacterial action of *H. pylori*, which is responsible for 50-70% of cases[cite: 45].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">12. A patient's stool is black and tarry. Why does this (melena) occur?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. The blood is arterial and has not mixed with acid.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. The blood is from a lower GI source and moves quickly.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. It is a sign of occult bleeding detectable only by guaiac.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    D. The blood has passed slowly through the intestines, allowing hemoglobin breakdown.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Melena occurs with slow bleeding from an upper GI source[cite: 36]. The longer the blood passes through the intestines, the darker the stool color becomes due to the breakdown of hemoglobin and the release of iron[cite: 39].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">13. Which of the following defines a "massive" upper GI hemorrhage?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    A. Loss of more than 1500 mL of blood or 25% of intravascular volume
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Any bleed that requires a blood transfusion
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. A loss of 500 mL of blood within 4 hours
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Any bleed that results in "coffee grounds" emesis
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> A massive UGI hemorrhage is defined as a loss of more than 1500 mL of blood or 25% of intravascular blood volume[cite: 68]. This life-threatening condition results in hypovolemic shock[cite: 67, 71].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">14. True or False: Occult bleeding is a type of obvious bleeding, characterized by melena.</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. True
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    B. False
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> False. Bleeding is categorized as obvious (hematemesis or melena) or occult[cite: 70]. Occult bleeding involves small amounts of blood in secretions or stools that are *not* apparent by appearance and are detectable only by a guaiac test[cite: 70].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">15. A patient with a GI bleed has a urine output of 20 mL in the last hour. The patient weighs 70 kg. How should the nurse interpret this finding?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. This is a normal urine output, indicating adequate perfusion.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    B. This is low and indicates impaired vital organ perfusion (shock).
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. This indicates the patient is experiencing fluid volume overload.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. This is an expected finding and does not require intervention.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> A sign of hypovolemic shock is urine output less than 0.5 mL/kg/hr[cite: 99]. For a 70 kg patient, the minimum acceptable output is 35 mL/hr (70 * 0.5). An output of 20 mL/hr is below this threshold and indicates poor vital organ perfusion, which is why an indwelling catheter is inserted for accurate hourly assessment[cite: 130, 131].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">16. What is the *primary* diagnostic and first-line *management* tool for UGI bleeding?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Angiography
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. CBC and coagulation studies
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. Sengstaken-Blakemore tube
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    D. Endoscopy
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Endoscopy is the primary tool for diagnosing the source of UGI bleeding [cite: 113] and is also the first-line management[cite: 138]. It is used for diagnosis, determining the need for surgery, and providing treatment (hemostasis)[cite: 138].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">17. When is angiography used in the management of GI bleeding?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. As the initial diagnostic test for all GI bleeds.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    B. When endoscopy cannot be done or bleeding persists after it.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. To place a Sengstaken-Blakemore tube.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. To diagnose peptic ulcer disease caused by *H. pylori*.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Angiography is used when endoscopy cannot be done or when bleeding persists after endoscopic therapy[cite: 115]. It involves inserting a catheter into the femoral artery to find the bleeding site[cite: 116].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">18. True or False: All critically ill patients in the ICU should be considered at risk for stress ulcers (SRES).</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    A. True
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. False
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> True. Stress-related erosive syndrome (SRES) abnormalities can develop rapidly within hours of ICU admission[cite: 50]. The lecture states, "All critically ill patients should be considered at risk for stress ulcers and therefore GI hemorrhage"[cite: 52].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">19. Which medication class, such as Omeprazole, is given via IV to decrease acid secretion during an acute bleed?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Antacids
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Histamine-2 antagonists (e.g., ranitidine)
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. Proton pump inhibitors (PPIs)
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Cytoprotective agents (e.g., gastrofit)
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> In the emergency management phase, IV proton pump inhibitors (PPIs) like Omeprazole and pantoprazole are given to decrease acid secretion[cite: 132].
+            </div>
+        </div>
+        
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">20. What is the goal of a Transjugular Intrahepatic Portosystemic Shunting (TIPS) procedure?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. To remove the acid-producing cells from the stomach.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. To suture the bleeding ulcer closed.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. To create a conduit between the hepatic and portal vein to decrease portal pressure.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. To infuse vasopressin directly into the gastric artery.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> TIPS is a radiologic procedure where a stent is placed to create a conduit between the hepatic and portal vein[cite: 144]. The purpose is to decrease portal pressure, which is the cause of esophagogastric varices. It's considered if endoscopic management of varices fails[cite: 144, 145].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">21. A nurse is assessing a patient with a known GI bleed. Which finding is *most* indicative of a gastric perforation?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Agitation and restlessness
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Coffee-grounds emesis
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. A tense, rigid, board-like abdomen
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Hyperactive bowel sounds
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> One of the major complications to monitor for is gastric perforation. The key signs are a tense, rigid, board-like abdomen and the presence or absence of bowel sounds[cite: 213]. Agitation and restlessness are more classic signs of hypovolemic shock[cite: 197, 218].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">22. True or False: A Sengstaken-Blakemore tube should only be placed *after* the patient's airway is secured.</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    A. True
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. False
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> True. Placement of a Sengstaken-Blakemore or Minnesota tube is considered for patients with hemodynamic instability from known varices, but it "should be done only once the airway is secured"[cite: 142]. This procedure carries significant complication risks, including perforation[cite: 143].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">23. A surgeon performs a "highly selective vagotomy." What is the physiological goal of this procedure?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. To remove the lower portion of the stomach.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    B. To decrease gastric acid secretions.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. To create a bypass to divert blood from the portal vein.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. To suture the bleeding ulcer directly.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> A highly selective vagotomy involves severing the section of the vagus nerve that innervates the parietal glands[cite: 149]. The goal is to decrease gastric acid secretions[cite: 149], which contribute to peptic ulcer disease.
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">24. Which is *not* considered an indication for surgical intervention for acute UGI bleeding?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    A. A positive diagnosis of *H. pylori*
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Massive bleeding that is immediately life-threatening
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. Failed endoscopic therapy
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Perforation
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Indications for surgery include massive life-threatening bleeding, failed endoscopic therapy, and perforation[cite: 157, 158, 159]. A diagnosis of *H. pylori* is the *cause* of many ulcers [cite: 45] but is treated medically, not surgically.
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">25. A surgical procedure to remove the lower portion of the stomach, which contains the most acid-producing cells, is called...</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Highly selective vagotomy
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Segmental bowel resection
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. Antrectomy
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Surgical decompression
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> An antrectomy is the removal of the lower portion of the stomach (the antrum), which contains the most acid-producing cells[cite: 150].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">26. True or False: A patient with acute GI bleeding should be encouraged to drink clear fluids to maintain hydration.</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. True
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    B. False
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> False. In the ongoing monitoring and management phase, the patient should be kept NPO (nothing by mouth)[cite: 165]. Hydration and volume replacement are managed intravenously[cite: 125, 223].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">27. Which physical exam finding would suggest a history of liver disease (and thus risk for varices)?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Tense, rigid abdomen
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Clammy, cool, pale skin
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. Spider angiomas and jaundice
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Rapid, shallow respirations
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Spider angiomas, jaundice, and peripheral edema are physical exam findings associated with liver disease [cite: 202], which causes portal hypertension and esophagogastric varices[cite: 62]. Cool, clammy skin and rapid respirations are signs of hypovolemic shock[cite: 201, 202]. A rigid abdomen suggests perforation[cite: 213].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">28. What is the priority nursing intervention to prevent aspiration in a patient with massive vomiting of blood?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Administer an IV antiemetic.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Insert a nasogastric tube for lavage.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. Maintain a patent airway, elevate HOB, and have suction available.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Place the patient in a supine position.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> The priority nursing intervention for the "Risk for Aspiration" diagnosis [cite: 170] is to maintain a patent airway, elevate the head of the bed, and have suction available at the bedside to prevent aspiration of emesis or blood[cite: 216].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">29. True or False: A patient's stool may remain Hemoccult positive (positive for occult blood) for 1 to 2 weeks *after* a bleeding episode has stopped.</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    A. True
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. False
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> True. It may take several days after bleeding stops for melenic stools to clear, and the stools may remain Hemoccult positive for 1 to 2 weeks[cite: 38].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">30. Besides vital signs, what is one of the *best* measures of vital organ perfusion in a patient with acute GI bleeding?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Bowel sounds
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Skin turgor
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. Level of consciousness
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    D. Urine output
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Urine output is one of the best measures of vital organ perfusion[cite: 130]. A decrease in urine output (specifically < 0.5 mL/kg/hr) is a key sign of hypovolemic shock[cite: 99].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">31. A patient with a GI bleed suddenly becomes agitated, restless, and has a decreasing level of consciousness. The nurse recognizes these as primary signs of...</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    A. Hypovolemic shock.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Gastric perforation.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. A reaction to vasopressin.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Pulmonary aspiration.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Neurologic changes, including agitation, restlessness, and a decreasing level of consciousness, are key physical exam findings associated with hypovolemic shock[cite: 97, 197, 198, 218].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">32. Which two factors are the *main* causes of peptic ulcer disease?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Alcohol abuse and smoking
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Portal hypertension and stress
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. Inflammatory bowel disease and trauma
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    D. *H. pylori* infection and NSAID use
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> The lecture states that two main causes contribute to the formation of peptic ulcers and UGI bleeding: the bacterial action of *H. pylori* (the leading cause) and the use of non-steroidal anti-inflammatory drugs (NSAIDs)[cite: 44, 45, 46].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">33. True or False: The severity of GI bleeding depends on whether the origin is venous, capillary, or arterial, with arterial bleeding being the most profuse.</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    A. True
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. False
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> True. The severity of bleeding depends on whether the origin is venous, capillary, or arterial[cite: 29]. Bleeding from an arterial source is profuse and the blood is bright red[cite: 30].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">34. Which of these is a common cause of *lower* GI hemorrhage?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Esophagogastric varices
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Mallory-Weiss tear
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. Diverticulosis
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Peptic ulcer disease
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> According to the etiology table, Diverticulosis is a cause of lower GI bleeding[cite: 41]. The other three options (varices, Mallory-Weiss, PUD) are all listed as causes of upper GI bleeding[cite: 41].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">35. What is the goal of endoscopic hemostasis techniques like thermal therapy or injection therapy?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. To diagnose the source of the bleeding.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    B. To coagulate or thrombose the bleeding vessel.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. To decrease gastric acid secretion.
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. To prepare the bowel for surgical resection.
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Endoscopy is used for both diagnosis *and* treatment[cite: 138]. The specific goal of endoscopic hemostasis (which includes techniques like thermal therapy and injection therapy [cite: 140]) is to coagulate or thrombose the bleeding vessel[cite: 139].
+            </div>
+        </div>
+        
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">36. A nurse is monitoring a patient post-endoscopy. Which potential complication requires immediate attention?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Nausea and vomiting
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Mild abdominal cramping
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. Perforation or sepsis
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Thirst
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Nursing interventions include monitoring the patient for potential complications of endoscopy or colonoscopy, which include perforation, sepsis, pulmonary aspiration, and induced bleeding[cite: 233]. These are severe complications requiring immediate intervention.
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">37. True or False: The Ligament of Treitz separates the esophagus from the stomach.</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. True
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    B. False
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> False. The Ligament of Treitz is the anatomic division that separates the upper GI tract (esophagus, stomach, or duodenum) from the lower GI tract (jejunum, ileum, colon, or rectum)[cite: 22, 23, 25]. It specifically marks the division between the duodenum and the jejunum.
+            </div>
+        </div>
+        
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">38. Which finding is *not* a characteristic sign of hypovolemic shock?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Cool, clammy skin
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    B. Increased urine output
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    C. Increased heart rate (tachycardia)
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Decreased level of consciousness
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Signs of hypovolemic shock include cool, clammy skin [cite: 95], increased heart rate (tachycardia) [cite: 96], decreased level of consciousness [cite: 97], and *decreased* urine output (less than 0.5 mL/kg/hr)[cite: 99]. Increased urine output would indicate adequate perfusion, not shock.
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">39. A patient is being discharged after a GI bleed. Which lifestyle modification is a key component of patient education?</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Starting a high-impact exercise routine
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Taking daily aspirin to prevent clots
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. Alcohol and smoking cessation
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Increasing intake of acidic foods
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> Patient education focuses on modifying precipitating factors[cite: 238]. This includes lifestyle changes such as stress management, diet modifications, alcohol cessation, and smoking cessation[cite: 241]. Aspirin and NSAIDs are precipitating factors and should be avoided[cite: 177].
+            </div>
+        </div>
+
+        <div class="question-container bg-red-900 p-6 rounded-lg shadow-lg mb-6 border border-red-700">
+            <h2 class="text-xl font-semibold mb-4">40. The priority nursing diagnosis "Decreased Cardiac Output" in a patient with GI bleeding is related to...</h2>
+            <div class="space-y-3">
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    A. Increased metabolic demand
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    B. Massive vomiting
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" data-answer="correct" onclick="checkAnswer(this)">
+                    C. Alterations in preload
+                </button>
+                <button class="option w-full text-left p-3 bg-red-800 border-2 border-red-700 rounded-lg hover:bg-red-700" onclick="checkAnswer(this)">
+                    D. Lack of exogenous nutrients
+                </button>
+            </div>
+            <div class="rationale text-gray-900">
+                <strong>Rationale:</strong> The nursing diagnosis "Decreased Cardiac Output" is listed as being "related to alterations in preload"[cite: 169]. The "absolute loss" of blood volume (deficient fluid volume) [cite: 168] reduces the amount of blood returning to the heart (preload), which in turn decreases cardiac output.
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="max-w-4xl mx-auto text-center mt-8 pt-4 border-t border-red-700">
+        <p class="text-sm text-red-300">تم صنع هذا الامتحان بواسطة عبدالحليم رزق 
+</p>
+    </footer>
+
+    <script>
+        function checkAnswer(button) {
+            const questionContainer = button.closest('.question-container');
+            const rationale = questionContainer.querySelector('.rationale');
+            const options = questionContainer.querySelectorAll('.option');
+            const isCorrect = button.getAttribute('data-answer') === 'correct';
+
+            // Disable all options in this question
+            options.forEach(option => {
+                option.disabled = true;
+            });
+
+            // Apply styles
+            if (isCorrect) {
+                button.classList.add('correct');
+            } else {
+                button.classList.add('incorrect');
+                // Find and show the correct answer
+                const correctOption = questionContainer.querySelector('[data-answer="correct"]');
+                if (correctOption) {
+                    correctOption.classList.add('correct');
+                }
+            }
+
+            // Show rationale
+            if (rationale) {
+                rationale.classList.add('show');
+            }
+        }
+    </script>
+
+</body>
+</html>
