@@ -455,7 +455,63 @@
     "color": "#ec4899",
     "department": "emergency",
     "lectures": [
-      { "name": "كويز 1", "file": "#", "questions": 20 }
+
+  {
+    "name": "Introduction to First Aid",
+    "file": "quizzes/Introduction to First Aid.html",
+    "questions": 0
+  },
+  {
+    "name": "First Aid in Wounds & Bleeding",
+    "file": "quizzes/First Aid in Wounds & Bleeding.html",
+    "questions": 0
+  },
+  {
+    "name": "First Aid in Seizures",
+    "file": "quizzes/First Aid in Seizures.html",
+    "questions": 0
+  },
+  {
+    "name": "First Aid in Poisoning",
+    "file": "quizzes/First Aid in Poisoning.html",
+    "questions": 0
+  },
+  {
+    "name": "First Aid in Fractures",
+    "file": "quizzes/First Aid in Fractures.html",
+    "questions": 0
+  },
+  {
+    "name": "First aid in Eye injury",
+    "file": "quizzes/First aid in Eye injury.html",
+    "questions": 0
+  },
+  {
+    "name": "First Aid in Drowning",
+    "file": "quizzes/First Aid in Drowning.html",
+    "questions": 0
+  },
+  {
+    "name": "First Aid in Breathing Emergencies",
+    "file": "quizzes/First Aid in Breathing Emergencies.html",
+    "questions": 0
+  },
+  {
+    "name": "First Aid in Burns",
+    "file": "quizzes/First Aid in Burns.html",
+    "questions": 0
+  },
+  {
+    "name": "First Aid in Cardiac Emergencies",
+    "file": "quizzes/First Aid in Cardiac Emergencies.html",
+    "questions": 0
+  },
+  {
+    "name": "شامل 120 اسعاف طوارئ",
+    "file": "quizzes/شامل 120 اسعاف طوارئ.html",
+    "questions": 0
+  {
+      
     ]
   },
   {
