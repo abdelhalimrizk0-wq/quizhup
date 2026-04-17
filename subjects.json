@@ -395,7 +395,56 @@
     "color": "#8b5cf6",
     "department": "emergency",
     "lectures": [
-      { "name": "كويز 1", "file": "#", "questions": 20 }
+       {
+    "name": "cvc insertion",
+    "file": "quizzes/cvc insertion.html",
+    "questions": 0
+  },
+  {
+    "name": "Endotracheal Intubation",
+    "file": "quizzes/Endotracheal Intubation.html",
+    "questions": 0
+  },
+  {
+    "name": "cvc Drawing ",
+    "file": "quizzes/cvc Drawing .html",
+    "questions": 0
+  },
+  {
+    "name": "cvc Dressing ",
+    "file": "quizzes/cvc Dressing .html",
+    "questions": 0
+  },
+  {
+    "name": "cvc Removal",
+    "file": "quizzes/cvc Removal.html",
+    "questions": 0
+  },
+  {
+    "name": "o2 therapy",
+    "file": "quizzes/o2 therapy.html",
+    "questions": 0
+  },
+  {
+    "name": "suction",
+    "file": "quizzes/suction.html",
+    "questions": 0
+  },
+  {
+    "name": "cvp measure ",
+    "file": "quizzes/cvp measure .html",
+    "questions": 0
+  },
+  {
+    "name": "NGF",
+    "file": "quizzes/NGF.html",
+    "questions": 0
+  },
+  {
+    "name": "شامل 124 عنايه عملي",
+    "file": "quizzes/شامل 124 عنايه عملي.html",
+    "questions": 0
+  }
     ]
   },
   {
