@@ -320,7 +320,71 @@
     "color": "#f59e0b",
     "department": "emergency",
     "lectures": [
-      { "name": "كويز 1", "file": "#", "questions": 20 }
+       {
+    "name": "cardic monitoring",
+    "file": "quizzes/cardic monitoring.html",
+    "questions": 0
+  },
+  {
+    "name": "crash cart",
+    "file": "quizzes/crash cart.html",
+    "questions": 0
+  },
+  {
+    "name": "Emergency OSCE",
+    "file": "quizzes/Emergency OSCE.html",
+    "questions": 0
+  },
+  {
+    "name": "ميد طوارئ عملي",
+    "file": "quizzes/ميد طوارئ عملي.html",
+    "questions": 0
+  },
+  {
+    "name": "cervical coller",
+    "file": "quizzes/cervical coller.html",
+    "questions": 0
+  },
+  {
+    "name": "chest tube",
+    "file": "quizzes/chest tube.html",
+    "questions": 0
+  },
+  {
+    "name": "dc",
+    "file": "quizzes/dc.html",
+    "questions": 0
+  },
+  {
+    "name": "ECG",
+    "file": "quizzes/ECG.html",
+    "questions": 0
+  },
+  {
+    "name": "Emergency Drug",
+    "file": "quizzes/Emergency Drug.html",
+    "questions": 0
+  },
+  {
+    "name": "inhalition therapy",
+    "file": "quizzes/inhalition therapy.html",
+    "questions": 0
+  },
+  {
+    "name": "log rolling",
+    "file": "quizzes/log rolling.html",
+    "questions": 0
+  },
+  {
+    "name": "شامل طوارئ عملي 120",
+    "file": "quizzes/شامل طوارئ عملي 120.html",
+    "questions": 0
+  },
+  {
+    "name": "فاينال طوارئ 2024",
+    "file": "quizzes/فاينال طوارئ 2024.html",
+    "questions": 0
+  }
     ]
   },
   {
