@@ -218,7 +218,76 @@
     "color": "#f43f5e",
     "department": "emergency",
     "lectures": [
-      { "name": "كويز 1", "file": "#", "questions": 20 }
+       {
+    "name": "Acute Kidney Injury",
+    "file": "quizzes/Acute Kidney Injury.html",
+    "questions": 0
+  },
+  {
+    "name": "Delirium in ICU",
+    "file": "quizzes/Delirium in ICU.html",
+    "questions": 0
+  },
+  {
+    "name": "Acute Respiratory Failure",
+    "file": "quizzes/Acute Respiratory Failure.html",
+    "questions": 0
+  },
+  {
+    "name": "Family's Experience with Critical Illness",
+    "file": "quizzes/Family's Experience with Critical Illness.html",
+    "questions": 0
+  },
+  {
+    "name": "Fluids and Electrolytes Lecture",
+    "file": "quizzes/Fluids and Electrolytes Lecture.html",
+    "questions": 0
+  },
+  {
+    "name": "Intensive Care Unit Acquired Weakness (ICUAW)",
+    "file": "quizzes/Intensive Care Unit Acquired Weakness (ICUAW).html",
+    "questions": 0
+  },
+  {
+    "name": "Mechanical Ventilation & Nursing Care",
+    "file": "quizzes/Mechanical Ventilation & Nursing Care.html",
+    "questions": 0
+  },
+  {
+    "name": "Intra-abdominal compartment syndrome",
+    "file": "quizzes/Intra-abdominal compartment syndrome.html",
+    "questions": 0
+  },
+  {
+    "name": "Pain in Critical Care",
+    "file": "quizzes/Pain in Critical Care.html",
+    "questions": 0
+  },
+  {
+    "name": "Sleep Disorder in ICU",
+    "file": "quizzes/Sleep Disorder in ICU.html",
+    "questions": 0
+  },
+  {
+    "name": "ميد تيرم عناية نظري",
+    "file": "quizzes/ميد تيرم عناية نظري.html",
+    "questions": 0
+  },
+  {
+    "name": "شامل 200 عنايه",
+    "file": "quizzes/شامل 200 عنايه.html",
+    "questions": 0
+  },
+  {
+    "name": "شامل 120 عنايه",
+    "file": "quizzes/شامل 120 عنايه.html",
+    "questions": 0
+  },
+  {
+    "name": "فاينال عناية 2024",
+    "file": "quizzes/فاينال عناية 2024.html",
+    "questions": 0
+  }
     ]
   },
   {
